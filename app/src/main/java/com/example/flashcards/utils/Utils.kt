@@ -2,6 +2,9 @@ package com.example.flashcards.utils
 
 import android.app.AlertDialog
 import android.content.Context
+import android.media.MediaPlayer
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import android.widget.Toast
 import androidx.core.content.ContextCompat
@@ -13,14 +16,23 @@ import java.io.IOException
 
 object MyUtils {
 
-    fun createFolder(context: Context, location:String, folderName: String): Boolean{
+    fun createShortToast(context: Context, message: String) {
+        val toast = Toast.makeText(context, message, Toast.LENGTH_SHORT)
+        toast.show()
+
+        Handler(Looper.getMainLooper()).postDelayed({
+            toast.cancel()
+        }, 500)
+    }
+
+    fun createFolder(context: Context, location:String, folderName: String, toastMessage:String): Boolean{
         val newFolder = File(location, folderName)
         Log.e("folder", location)
 
         if (!newFolder.exists()) {
             val wasCreated = newFolder.mkdirs() // Creates the folder
             if (wasCreated) {
-                Toast.makeText(context, "Folder created successfully", Toast.LENGTH_SHORT).show()
+                createShortToast(context, toastMessage)
                 return true
             } else {
                 Toast.makeText(context, "Failed to create folder", Toast.LENGTH_SHORT).show()
@@ -32,18 +44,33 @@ object MyUtils {
         }
     }
 
-    fun deleteFolder(context: Context, location:String, folderName: String) {
-        val folderToDelete = File(location, folderName)
+    fun deleteFolder(context: Context, folderLocation:String, toastMessage: String) {
+        val folderToDelete = File(folderLocation)
 
         if (folderToDelete.exists()) {
             val wasDeleted = folderToDelete.deleteRecursively() // Deletes the folder and its contents
             if (wasDeleted) {
-                Toast.makeText(context, "Folder deleted successfully", Toast.LENGTH_SHORT).show()
+                createShortToast(context, toastMessage)
             } else {
                 Toast.makeText(context, "Failed to delete folder", Toast.LENGTH_SHORT).show()
             }
         } else {
             Toast.makeText(context, "Folder does not exist", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    fun deleteFile(context: Context, fileLocation: String, toastMessage: String) {
+        val fileToDelete = File(fileLocation)
+
+        if (fileToDelete.exists()) {
+            val wasDeleted = fileToDelete.delete() // Deletes the file
+            if (wasDeleted) {
+                createShortToast(context, toastMessage)
+            } else {
+                Toast.makeText(context, "Failed to delete file", Toast.LENGTH_SHORT).show()
+            }
+        } else {
+            Toast.makeText(context, "File does not exist", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -132,6 +159,28 @@ object MyUtils {
         } catch (e: IOException) {
             Log.e("writeTextFile", "Error writing to file: ${e.message}")
             e.printStackTrace()
+        }
+    }
+
+    fun playAudio(filePath: String) {
+        val mediaPlayer = MediaPlayer()
+
+        try {
+            mediaPlayer.setDataSource(filePath)
+            mediaPlayer.setOnPreparedListener {
+                mediaPlayer.start()
+            }
+            mediaPlayer.setOnCompletionListener {
+                mediaPlayer.release()
+            }
+            mediaPlayer.setOnErrorListener { _, _, _ ->
+                mediaPlayer.release()
+                false
+            }
+            mediaPlayer.prepareAsync()
+        } catch (e: IOException) {
+            e.printStackTrace()
+            mediaPlayer.release()
         }
     }
 

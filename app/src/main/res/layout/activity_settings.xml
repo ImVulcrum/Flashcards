@@ -29,7 +29,10 @@
                 android:layout_gravity="center|end"
                 android:layout_marginStart="8dp"
                 android:clickable="true"
+                android:src="@drawable/back"
+                app:tint="@color/white"
                 app:backgroundTint="@color/highlight"
+                app:fabCustomSize="40dp"
                 tools:ignore="ContentDescription,SpeakableTextPresentCheck" />
 
             <View

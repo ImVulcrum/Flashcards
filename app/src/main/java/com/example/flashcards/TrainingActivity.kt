@@ -19,6 +19,7 @@ class TrainingActivity: AppCompatActivity() {
     private lateinit var baseToForeignButton: Button
     private lateinit var foreignToBaseButton: Button
     private lateinit var addCardButton: FloatingActionButton
+    private lateinit var editCardButton: FloatingActionButton
 
     @SuppressLint("SetTextI18n")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -32,10 +33,11 @@ class TrainingActivity: AppCompatActivity() {
         baseToForeignButton = findViewById(R.id.base_to_foreign)
         foreignToBaseButton = findViewById(R.id.foreign_to_base)
         addCardButton = findViewById(R.id.b_add_card_flashcards)
+        editCardButton = findViewById(R.id.b_edit_flashcards)
 
         var firstClick = false
         val b = intent.extras
-        val v:Int? = b?.getInt("key")
+        val v:Int? = b?.getInt("collectionId")
         val collectionNumber:Int = v ?:0
 
         val collectionPath = getExternalFilesDir(null).toString() + "/Collection_$collectionNumber"
@@ -67,9 +69,26 @@ class TrainingActivity: AppCompatActivity() {
             startActivity(intent)
         }
 
+        editCardButton.setOnClickListener {
+            intent = Intent(this, AddCardActivity::class.java)
+            val b = Bundle()
+            b.putString("collectionPath", collectionPath)
+            b.putInt("collectionId", collectionNumber)
+            b.putBoolean("calledFromAddCard", false)
+            intent.putExtras(b)
+            startActivity(intent)
+            finish()
+        }
+
         addCardButton.setOnClickListener {
             intent = Intent(this, AddCardActivity::class.java)
+            val b = Bundle()
+            b.putString("collectionPath", collectionPath)
+            b.putInt("collectionId", collectionNumber)
+            b.putBoolean("calledFromAddCard", true)
+            intent.putExtras(b)
             startActivity(intent)
+            finish()
         }
 
 

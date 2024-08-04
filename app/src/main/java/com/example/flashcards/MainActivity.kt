@@ -68,7 +68,7 @@ class MainActivity : AppCompatActivity() {
         val folderPath = appPath + "/" + folderName
         val fileName = "Properties.txt"
 
-        if (MyUtils.createFolder(this, appPath, folderName)) { //only do something if the folder does not exist
+        if (MyUtils.createFolder(this, appPath, folderName, "Collection created successfully")) { //only do something if the folder does not exist
             MyUtils.createTextFile(folderPath, fileName)
             MyUtils.writeTextFile(folderPath + "/" + fileName, 0, "Collectionnnn_$collectionCount")
             MyUtils.writeTextFile(folderPath + "/" + fileName, 1, "German")
@@ -77,6 +77,8 @@ class MainActivity : AppCompatActivity() {
 
             addCollectionButtons(collectionCount, true)
         }
+
+        editor.putInt(folderPath, 0)
 
         editor.putInt("collection_count", collectionCount)
         editor.apply()
@@ -116,7 +118,7 @@ class MainActivity : AppCompatActivity() {
             setOnClickListener {
                 intent = Intent(this@MainActivity, TrainingActivity::class.java)
                 val b = Bundle()
-                b.putInt("key", collectionId)
+                b.putInt("collectionId", collectionId)
                 intent.putExtras(b)
                 startActivity(intent)
                 finish()
@@ -138,7 +140,7 @@ class MainActivity : AppCompatActivity() {
                 MyUtils.showConfirmationDialog(this@MainActivity,"Delete Collection", "Are you sure you want to delete this collection?") {userChoice ->
                     if (userChoice) {
                         container.removeView(rowLayout)
-                        MyUtils.deleteFolder(this@MainActivity, getExternalFilesDir(null).toString(), button.contentDescription.toString())
+                        MyUtils.deleteFolder(this@MainActivity, getExternalFilesDir(null).toString() + "/" + button.contentDescription.toString(), "Collection deleted successfully")
                     }
                 }
             }

@@ -56,9 +56,11 @@
                 android:layout_gravity="start"
                 android:layout_marginStart="10dp"
                 android:clickable="true"
+                android:src="@drawable/back"
+                app:tint="@color/white"
                 app:backgroundTint="@color/highlight"
                 app:elevation="0dp"
-                app:maxImageSize="55dp"
+                app:maxImageSize="35dp"
                 app:shapeAppearance="@style/Widget.Material3.CircularProgressIndicator.Small"
                 tools:ignore="ContentDescription,SpeakableTextPresentCheck" />
 
@@ -74,7 +76,9 @@
                 android:layout_gravity="end"
                 android:layout_marginEnd="10dp"
                 android:clickable="true"
+                android:src="@drawable/settings"
                 app:backgroundTint="@color/highlight"
+                app:tint="@color/white"
                 app:elevation="0dp"
                 app:maxImageSize="55dp"
                 app:shapeAppearance="@style/Widget.Material3.CircularProgressIndicator.Small"
@@ -125,9 +129,11 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:clickable="true"
+                android:src="@drawable/unmuted"
                 app:backgroundTint="@color/highlight"
                 app:elevation="0dp"
-                app:maxImageSize="55dp"
+                app:tint="@color/white"
+                app:maxImageSize="40dp"
                 app:shapeAppearance="@style/Widget.Material3.CircularProgressIndicator.Small"
                 tools:ignore="ContentDescription,SpeakableTextPresentCheck" />
 
@@ -137,9 +143,11 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="40dp"
                 android:clickable="true"
+                android:src="@drawable/shuffle"
                 app:backgroundTint="@color/highlight"
                 app:elevation="0dp"
-                app:maxImageSize="55dp"
+                app:tint="@color/white"
+                app:maxImageSize="45dp"
                 app:shapeAppearance="@style/Widget.Material3.CircularProgressIndicator.Small"
                 tools:ignore="ContentDescription,SpeakableTextPresentCheck" />
 
@@ -149,10 +157,12 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="40dp"
                 android:clickable="true"
+                android:src="@drawable/edit"
                 app:backgroundTint="@color/highlight"
                 app:elevation="0dp"
-                app:maxImageSize="55dp"
+                app:maxImageSize="35dp"
                 app:shapeAppearance="@style/Widget.Material3.CircularProgressIndicator.Small"
+                app:tint="@color/white"
                 tools:ignore="ContentDescription,SpeakableTextPresentCheck" />
 
             <com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -161,9 +171,11 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="40dp"
                 android:clickable="true"
+                android:src="@android:drawable/ic_input_add"
                 app:backgroundTint="@color/highlight"
                 app:elevation="0dp"
                 app:maxImageSize="55dp"
+                app:tint="@color/white"
                 app:shapeAppearance="@style/Widget.Material3.CircularProgressIndicator.Small"
                 tools:ignore="ContentDescription,SpeakableTextPresentCheck" />
 

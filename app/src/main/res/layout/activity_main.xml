@@ -36,7 +36,7 @@
             <View
                 android:layout_width="0dp"
                 android:layout_height="0dp"
-                android:layout_weight="1"/>
+                android:layout_weight="1" />
 
             <com.google.android.material.floatingactionbutton.FloatingActionButton
                 android:id="@+id/b_settings"
@@ -45,7 +45,12 @@
                 android:layout_gravity="center|end"
                 android:layout_marginEnd="8dp"
                 android:clickable="true"
+                android:src="@drawable/settings"
                 app:backgroundTint="@color/highlight"
+                app:elevation="0dp"
+                app:fabCustomSize="40dp"
+                app:maxImageSize="35dp"
+                app:tint="@color/white"
                 tools:ignore="ContentDescription,SpeakableTextPresentCheck" />
         </LinearLayout>
 

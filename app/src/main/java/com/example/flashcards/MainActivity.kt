@@ -73,8 +73,7 @@ class MainActivity : AppCompatActivity() {
             MyUtils.writeTextFile(folderPath + "/" + fileName, 0, "Collectionnnn_$collectionCount")
             MyUtils.writeTextFile(folderPath + "/" + fileName, 1, "German")
             MyUtils.writeTextFile(folderPath + "/" + fileName, 2, "Spanish")
-            MyUtils.writeTextFile(folderPath + "/" + fileName, 3, "#e5e5e5")
-            MyUtils.writeTextFile(folderPath + "/" + fileName, 4, "#e64f4f")
+            MyUtils.writeTextFile(folderPath + "/" + fileName, 3, "-")
 
             addCollectionButtons(collectionCount, true)
         }

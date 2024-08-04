@@ -25,7 +25,7 @@
             android:layout_height="wrap_content"
             android:gravity="center"
             android:text="Collection Name"
-            android:textAppearance="@style/SpaceGrotesk"
+            android:textAppearance="@style/SpaceGroteskLarge"
             android:textColor="@color/white" />
 
         <View
@@ -60,7 +60,6 @@
                 app:elevation="0dp"
                 app:maxImageSize="55dp"
                 app:shapeAppearance="@style/Widget.Material3.CircularProgressIndicator.Small"
-                app:tint="@color/button_color"
                 tools:ignore="ContentDescription,SpeakableTextPresentCheck" />
 
             <View
@@ -79,7 +78,6 @@
                 app:elevation="0dp"
                 app:maxImageSize="55dp"
                 app:shapeAppearance="@style/Widget.Material3.CircularProgressIndicator.Small"
-                app:tint="@color/button_color"
                 tools:ignore="ContentDescription,SpeakableTextPresentCheck" />
         </LinearLayout>
 
@@ -88,19 +86,27 @@
             android:id="@+id/flashcard_counter"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="60dp"
+            android:layout_marginTop="30dp"
             android:gravity="center_horizontal"
             android:text="0"
             android:textAppearance="@style/SpaceGroteskMain"
             android:textColor="@color/strong_highlight" />
 
+        <TextView
+            android:id="@+id/textView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="40dp"
+            android:gravity="center_horizontal"
+            android:text="card id" />
+
         <Button
             android:id="@+id/b_flashcard"
             android:layout_width="@dimen/flashcard_width"
             android:layout_height="@dimen/flashcard_height"
-            android:layout_marginTop="40dp"
+            android:layout_marginTop="4dp"
             android:text="Start"
-            android:textAppearance="@style/SpaceGrotesk"
+            android:textAppearance="@style/SpaceGroteskLarge"
             android:textColor="@color/white"
             app:backgroundTint="@color/primary"
             app:cornerRadius="10dp"
@@ -110,7 +116,7 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="50dp"
+            android:layout_marginTop="20dp"
             android:gravity="center"
             android:orientation="horizontal">
 
@@ -123,7 +129,6 @@
                 app:elevation="0dp"
                 app:maxImageSize="55dp"
                 app:shapeAppearance="@style/Widget.Material3.CircularProgressIndicator.Small"
-                app:tint="@color/button_color"
                 tools:ignore="ContentDescription,SpeakableTextPresentCheck" />
 
             <com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -136,7 +141,6 @@
                 app:elevation="0dp"
                 app:maxImageSize="55dp"
                 app:shapeAppearance="@style/Widget.Material3.CircularProgressIndicator.Small"
-                app:tint="@color/button_color"
                 tools:ignore="ContentDescription,SpeakableTextPresentCheck" />
 
             <com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -149,7 +153,6 @@
                 app:elevation="0dp"
                 app:maxImageSize="55dp"
                 app:shapeAppearance="@style/Widget.Material3.CircularProgressIndicator.Small"
-                app:tint="@color/button_color"
                 tools:ignore="ContentDescription,SpeakableTextPresentCheck" />
 
             <com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -162,15 +165,33 @@
                 app:elevation="0dp"
                 app:maxImageSize="55dp"
                 app:shapeAppearance="@style/Widget.Material3.CircularProgressIndicator.Small"
-                app:tint="@color/button_color"
                 tools:ignore="ContentDescription,SpeakableTextPresentCheck" />
 
         </LinearLayout>
 
+        <TextView
+            android:id="@+id/textView2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="60dp"
+            android:gravity="center_horizontal"
+            android:text="only applies on next shuffle"
+            android:textAppearance="@style/SpaceGroteskSmall"
+            android:textColor="@color/white" />
+
+        <View
+            android:id="@+id/divider3"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginTop="4dp"
+            android:background="?android:attr/listDivider"
+            android:backgroundTint="@color/white"
+            android:backgroundTintMode="add" />
+
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="60dp"
+            android:layout_marginTop="10dp"
             android:gravity="center_horizontal"
             android:orientation="horizontal">
 
@@ -193,6 +214,15 @@
                 app:backgroundTint="@color/primary"
                 app:cornerRadius="0dp" />
         </LinearLayout>
+
+        <CheckBox
+            android:id="@+id/auto_shuffle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="auto shuffle"
+            android:textAppearance="@style/SpaceGroteskVerySmall"
+            app:buttonTint="@color/strong_highlight"
+            android:textColor="@color/white" />
 
     </LinearLayout>
 

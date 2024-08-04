@@ -18,6 +18,7 @@ class TrainingActivity: AppCompatActivity() {
     private lateinit var collectionIndex: TextView
     private lateinit var baseToForeignButton: Button
     private lateinit var foreignToBaseButton: Button
+    private lateinit var addCardButton: FloatingActionButton
 
     @SuppressLint("SetTextI18n")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -30,6 +31,7 @@ class TrainingActivity: AppCompatActivity() {
         collectionIndex = findViewById(R.id.collection_index_name)
         baseToForeignButton = findViewById(R.id.base_to_foreign)
         foreignToBaseButton = findViewById(R.id.foreign_to_base)
+        addCardButton = findViewById(R.id.b_add_card_flashcards)
 
         var firstClick = false
         val b = intent.extras
@@ -64,6 +66,12 @@ class TrainingActivity: AppCompatActivity() {
             intent = Intent(this, MainActivity::class.java)
             startActivity(intent)
         }
+
+        addCardButton.setOnClickListener {
+            intent = Intent(this, AddCardActivity::class.java)
+            startActivity(intent)
+        }
+
 
     }
 }

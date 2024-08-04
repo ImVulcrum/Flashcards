@@ -8,7 +8,7 @@
     android:fitsSystemWindows="true"
     android:foregroundTintMode="add"
     android:visibility="visible"
-    tools:context=".MainActivity">
+    tools:context=".AddCardActivity">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -24,12 +24,12 @@
             android:orientation="horizontal">
 
             <TextView
-                android:id="@+id/header"
+                android:id="@+id/add_card_header"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="start"
                 android:layout_marginStart="40dp"
-                android:text="Flashcards"
+                android:text="Add Card"
                 android:textAppearance="@style/SpaceGroteskLarge"
                 android:textColor="#FFFFFF" />
 
@@ -39,7 +39,7 @@
                 android:layout_weight="1"/>
 
             <com.google.android.material.floatingactionbutton.FloatingActionButton
-                android:id="@+id/b_settings"
+                android:id="@+id/b_close_add_card"
                 android:layout_width="40dp"
                 android:layout_height="40dp"
                 android:layout_gravity="center|end"
@@ -58,23 +58,6 @@
             android:backgroundTint="#FFFFFF"
             android:backgroundTintMode="add" />
 
-        <ScrollView
-            android:id="@+id/scrollView2"
-            android:layout_width="wrap_content"
-            android:layout_height="@dimen/collection_display_area_height"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginTop="50dp"
-            android:fadeScrollbars="false"
-            android:fillViewport="true"
-            android:scrollbarThumbVertical="@color/highlight">
-
-            <LinearLayout
-                android:id="@+id/container"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical" />
-
-        </ScrollView>
 
     </LinearLayout>
 

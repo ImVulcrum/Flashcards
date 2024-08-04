@@ -30,7 +30,6 @@
                 android:layout_marginStart="8dp"
                 android:clickable="true"
                 app:backgroundTint="@color/highlight"
-                app:tint="@color/button_color"
                 tools:ignore="ContentDescription,SpeakableTextPresentCheck" />
 
             <View
@@ -45,7 +44,7 @@
                 android:layout_gravity="start"
                 android:layout_marginEnd="110dp"
                 android:text="Settings"
-                android:textAppearance="@style/SpaceGrotesk"
+                android:textAppearance="@style/SpaceGroteskLarge"
                 android:textColor="#FFFFFF" />
 
         </LinearLayout>

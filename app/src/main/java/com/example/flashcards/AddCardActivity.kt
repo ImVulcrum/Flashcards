@@ -18,6 +18,7 @@ import android.content.Intent
 import android.util.AttributeSet
 import android.util.Log
 import android.view.View
+import android.widget.LinearLayout
 import android.widget.TextView
 
 class MyFloatingActionButton(context: Context, attrs: AttributeSet) : FloatingActionButton(context, attrs) {
@@ -36,13 +37,16 @@ class AddCardActivity<IOException> : AppCompatActivity() {
     private lateinit var foreignLanguageTextbox: EditText
     private lateinit var nativeRecordButton: MyFloatingActionButton
     private lateinit var nativePlayButton: FloatingActionButton
+    private lateinit var nativeDeleteButton: FloatingActionButton
     private lateinit var foreignRecordButton: MyFloatingActionButton
     private lateinit var foreignPlayButton: FloatingActionButton
+    private lateinit var foreignDeleteButton: FloatingActionButton
     private lateinit var closeButton: FloatingActionButton
     private lateinit var addAnotherCardButton: FloatingActionButton
     private lateinit var deleteButton: FloatingActionButton
     private lateinit var header: TextView
-    private lateinit var card_id: TextView
+    private lateinit var cardId: TextView
+    private lateinit var actionBar: LinearLayout
 
     private var mediaRecorder: MediaRecorder? = null
     private var recordFile: File? = null
@@ -60,13 +64,16 @@ class AddCardActivity<IOException> : AppCompatActivity() {
         foreignLanguageTextbox = findViewById(R.id.enter_foreign)
         nativeRecordButton = findViewById(R.id.b_record_native_audio)
         nativePlayButton = findViewById(R.id.b_play_native_audio)
+        nativeDeleteButton = findViewById(R.id.b_delete_native_audio)
         foreignRecordButton = findViewById(R.id.b_record_foreign_audio)
         foreignPlayButton = findViewById(R.id.b_play_foreign_audio)
+        foreignDeleteButton = findViewById(R.id.b_delete_foreign_audio)
         closeButton = findViewById(R.id.b_close_add_card)
         addAnotherCardButton = findViewById(R.id.button_add_card)
         deleteButton = findViewById(R.id.button_delete_card)
         header = findViewById(R.id.add_card_header)
-        card_id = findViewById(R.id.card_id)
+        cardId = findViewById(R.id.card_id)
+        actionBar = findViewById(R.id.button_area)
 
         // Request necessary permissions
         if (!hasPermissions()) {
@@ -88,17 +95,24 @@ class AddCardActivity<IOException> : AppCompatActivity() {
         val calledFromAddCard:Boolean = a ?:false
 
         if (calledFromAddCard) {
-            deleteButton.visibility = View.INVISIBLE
-            deleteButton.isClickable = false
+//            deleteButton.visibility = View.INVISIBLE
+//            deleteButton.isClickable = false
+            actionBar.removeView(deleteButton)
         }   else {
-            addAnotherCardButton.visibility = View.INVISIBLE
-            addAnotherCardButton.isClickable = false
+//            addAnotherCardButton.visibility = View.INVISIBLE
+//            addAnotherCardButton.isClickable = false
+            actionBar.removeView(addAnotherCardButton)
+
             closeButton.visibility = View.INVISIBLE
             closeButton.isClickable = false
             header.text = "Edit Card"
         }
 
         flashcardPath = createCard(collectionPath)
+
+        //grey out audio buttons
+        nativePlayButton.backgroundTintList = (ContextCompat.getColorStateList(this@AddCardActivity, R.color.button_color))
+        foreignPlayButton.backgroundTintList = (ContextCompat.getColorStateList(this@AddCardActivity, R.color.button_color))
 
         closeButton.setOnClickListener {
             abortCard(flashcardPath)
@@ -111,22 +125,27 @@ class AddCardActivity<IOException> : AppCompatActivity() {
         }
 
         confirmCardButton.setOnClickListener {
-            confirmCard(flashcardPath, nativeLanguageTexbox.text.toString(), foreignLanguageTextbox.text.toString())
-            intent = Intent(this, TrainingActivity::class.java)
-            val b = Bundle()
-            b.putInt("collectionId", collectionNumber)
-            intent.putExtras(b)
-            startActivity(intent)
-            finish()
+            if (confirmCard(collectionPath,flashcardPath, nativeLanguageTexbox.text.toString(), foreignLanguageTextbox.text.toString()))   {
+                intent = Intent(this, TrainingActivity::class.java)
+                val b = Bundle()
+                b.putInt("collectionId", collectionNumber)
+                intent.putExtras(b)
+                startActivity(intent)
+                finish()
+            }   else {
+                MyUtils.createShortToast(this,"native or foreign language cannot be empty")
+            }
         }
 
         addAnotherCardButton.setOnClickListener {
-            Log.e("§", nativeLanguageTexbox.text.toString())
-            if (confirmCard(flashcardPath, nativeLanguageTexbox.text.toString(), foreignLanguageTextbox.text.toString()))   {
+            if (confirmCard(collectionPath, flashcardPath, nativeLanguageTexbox.text.toString(), foreignLanguageTextbox.text.toString()))   {
                 nativeLanguageTexbox.text.clear()
                 foreignLanguageTextbox.text.clear()
 
                 flashcardPath = createCard(collectionPath)
+
+                nativePlayButton.backgroundTintList = (ContextCompat.getColorStateList(this@AddCardActivity, R.color.button_color))
+                foreignPlayButton.backgroundTintList = (ContextCompat.getColorStateList(this@AddCardActivity, R.color.button_color))
             }   else {
                 MyUtils.createShortToast(this,"native or foreign language cannot be empty")
             }
@@ -140,6 +159,7 @@ class AddCardActivity<IOException> : AppCompatActivity() {
                 }
                 MotionEvent.ACTION_UP -> {
                     stopRecording(nativeRecordButton)
+                    nativePlayButton.backgroundTintList = (ContextCompat.getColorStateList(this@AddCardActivity, R.color.primary))
                     view.performClick()
                 }
             }
@@ -153,6 +173,7 @@ class AddCardActivity<IOException> : AppCompatActivity() {
                 }
                 MotionEvent.ACTION_UP -> {
                     stopRecording(foreignRecordButton)
+                    foreignPlayButton.backgroundTintList = (ContextCompat.getColorStateList(this@AddCardActivity, R.color.primary))
                     view.performClick()
                 }
             }
@@ -160,26 +181,40 @@ class AddCardActivity<IOException> : AppCompatActivity() {
         }
 
         nativePlayButton.setOnClickListener {
-            MyUtils.playAudio("$flashcardPath/native.mp3")
+            if (!MyUtils.playAudio("$flashcardPath/native.mp3")) {
+                MyUtils.createShortToast(this, "Native audio does not exist")
+            }
         }
 
         foreignPlayButton.setOnClickListener {
-            MyUtils.playAudio("$flashcardPath/foreign.mp3")
+            if (!MyUtils.playAudio("$flashcardPath/foreign.mp3")) {
+                MyUtils.createShortToast(this, "Foreign audio does not exist")
+            }
+        }
+
+        nativeDeleteButton.setOnClickListener {
+            MyUtils.deleteFile(this, "$flashcardPath/native.mp3", "Audio deleted successfully")
+            nativePlayButton.backgroundTintList = (ContextCompat.getColorStateList(this@AddCardActivity, R.color.button_color))
+        }
+
+        foreignDeleteButton.setOnClickListener {
+            MyUtils.deleteFile(this, "$flashcardPath/foreign.mp3", "Audio deleted successfully")
+            foreignPlayButton.backgroundTintList = (ContextCompat.getColorStateList(this@AddCardActivity, R.color.button_color))
         }
     }
 
-    private fun createCard(collectionPath: String):String{
+    private fun createCard(collectionPath: String, showMessage:Boolean =false):String{
         val sharedPref = getSharedPreferences("pref", MODE_PRIVATE)
         val editor = sharedPref.edit()
 
         var flashcardCount = sharedPref.getInt(collectionPath, 0)
-        card_id.text = "Card #$flashcardCount"
+        cardId.text = "Card_#$flashcardCount"
 
 
 
         val flashcardPath = "$collectionPath/Flashcard_$flashcardCount"
 
-        MyUtils.createFolder(this, collectionPath, "Flashcard_$flashcardCount", "Flashcard created successfully")
+        MyUtils.createFolder(this, collectionPath, "Flashcard_$flashcardCount", "Flashcard created successfully", showMessage)
         MyUtils.createTextFile(flashcardPath, "Content.txt")
 
         flashcardCount++
@@ -189,18 +224,33 @@ class AddCardActivity<IOException> : AppCompatActivity() {
         return flashcardPath
     }
 
-    private fun confirmCard(flashcardPath: String, nativeLanguagePrompt: String, foreignLanguagePrompt: String):Boolean {
+    private fun confirmCard(collectionPath: String, flashcardPath: String, nativeLanguagePrompt: String, foreignLanguagePrompt: String):Boolean {
         if (nativeLanguagePrompt.isNullOrEmpty() || foreignLanguagePrompt.isNullOrEmpty()) {
             return false
         } else {
+            val flashcardId = flashcardPath.removePrefix(collectionPath+"/")
+
             MyUtils.writeTextFile(flashcardPath + "/Content.txt", 0, nativeLanguagePrompt)
             MyUtils.writeTextFile(flashcardPath + "/Content.txt", 1, foreignLanguagePrompt)
+
+            val cardOrder = MyUtils.readLineFromFile(collectionPath + "/Properties.txt", 3)
+            if (cardOrder == "-") {
+                //do nothing
+            }   else {
+                if (cardOrder != null) {
+                    MyUtils.writeTextFile(collectionPath + "/Properties.txt", 3, cardOrder + " n_" + flashcardId)
+                }   else {
+                    Log.e("HUGE ERROR", "orderLine is null")
+                }
+            }
+
+            MyUtils.createShortToast(this, "Card saved successfully")
             return true
         }
     }
 
     private fun abortCard(flashcardPath: String) {
-        MyUtils.deleteFolder(this, flashcardPath, "Flashcard deleted successfully")
+        MyUtils.deleteFolder(this, flashcardPath, "Flashcard aborted successfully")
     }
 
     private fun hasPermissions(): Boolean {
@@ -222,6 +272,8 @@ class AddCardActivity<IOException> : AppCompatActivity() {
             setAudioSource(MediaRecorder.AudioSource.MIC)
             setOutputFormat(MediaRecorder.OutputFormat.MPEG_4)
             setAudioEncoder(MediaRecorder.AudioEncoder.AAC)
+            setAudioSamplingRate(44100)  // Set high-quality sampling rate
+            setAudioEncodingBitRate(128000)  // Set high-quality encoding bit rate
             setOutputFile(recordFile!!.absolutePath)
 
             try {

@@ -25,14 +25,16 @@ object MyUtils {
         }, 500)
     }
 
-    fun createFolder(context: Context, location:String, folderName: String, toastMessage:String): Boolean{
+    fun createFolder(context: Context, location:String, folderName: String, toastMessage:String, showMessage:Boolean = true): Boolean{
         val newFolder = File(location, folderName)
         Log.e("folder", location)
 
         if (!newFolder.exists()) {
             val wasCreated = newFolder.mkdirs() // Creates the folder
             if (wasCreated) {
-                createShortToast(context, toastMessage)
+                if (showMessage) {
+                    createShortToast(context, toastMessage)
+                }
                 return true
             } else {
                 Toast.makeText(context, "Failed to create folder", Toast.LENGTH_SHORT).show()
@@ -162,32 +164,55 @@ object MyUtils {
         }
     }
 
-    fun playAudio(filePath: String) {
-        val mediaPlayer = MediaPlayer()
+    private var mediaPlayer: MediaPlayer? = null
+
+    fun playAudio(filePath: String): Boolean {
+        val file = File(filePath)
+
+        if (!file.exists()) {
+            return false
+        }
+
+        mediaPlayer = MediaPlayer()
 
         try {
-            mediaPlayer.setDataSource(filePath)
-            mediaPlayer.setOnPreparedListener {
-                mediaPlayer.start()
+            mediaPlayer?.setDataSource(filePath)
+            mediaPlayer?.setOnPreparedListener {
+                it.start()
             }
-            mediaPlayer.setOnCompletionListener {
-                mediaPlayer.release()
+            mediaPlayer?.setOnCompletionListener {
+                it.release()
+                mediaPlayer = null
             }
-            mediaPlayer.setOnErrorListener { _, _, _ ->
-                mediaPlayer.release()
+            mediaPlayer?.setOnErrorListener { _, _, _ ->
+                mediaPlayer?.release()
+                mediaPlayer = null
                 false
             }
-            mediaPlayer.prepareAsync()
+            mediaPlayer?.prepareAsync()
         } catch (e: IOException) {
             e.printStackTrace()
-            mediaPlayer.release()
+            mediaPlayer?.release()
+            mediaPlayer = null
+            return false
+        }
+        return true
+    }
+
+    fun stopAudio() {
+        mediaPlayer?.let {
+            if (it.isPlaying) {
+                it.stop()
+            }
+            it.release()
+            mediaPlayer = null
         }
     }
 
     fun readLineFromFile(fileLocation: String, lineToBeReadFrom: Int): String? {
         val file = File(fileLocation)
         if (!file.exists()) {
-            return "Error:File does not exist"
+            return "Error: File does not exist"
         }
 
         var line: String?
@@ -200,7 +225,7 @@ object MyUtils {
                 currentLine++
             }
         }
-        return "Error: Line not found"
+        return ""
     }
 
     fun getCollections(appPath: String): List<String> {

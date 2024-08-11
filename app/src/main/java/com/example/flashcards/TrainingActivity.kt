@@ -4,22 +4,31 @@ import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.res.ColorStateList
 import android.os.Bundle
+import android.util.Log
 import android.widget.Button
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.example.flashcards.utils.MyUtils
+import java.io.File
 
 class TrainingActivity: AppCompatActivity() {
     private lateinit var backButton: FloatingActionButton
     private lateinit var flashcardButton: Button
     private lateinit var collectionTitle: TextView
     private lateinit var collectionIndex: TextView
-    private lateinit var baseToForeignButton: Button
-    private lateinit var foreignToBaseButton: Button
+    private lateinit var nativeToForeignButton: Button
+    private lateinit var foreignToNativeButton: Button
     private lateinit var addCardButton: FloatingActionButton
     private lateinit var editCardButton: FloatingActionButton
+    private lateinit var shuffleButton: FloatingActionButton
+    private lateinit var flashcardCounter: TextView
+    private lateinit var flashcardId: TextView
+    private lateinit var muteAudioButton: FloatingActionButton
+
+    var cardOrder = listOf<String>()
+    var cardIndex: Int = 0
 
     @SuppressLint("SetTextI18n")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -30,12 +39,21 @@ class TrainingActivity: AppCompatActivity() {
         flashcardButton = findViewById(R.id.b_flashcard)
         collectionTitle = findViewById(R.id.collection_title)
         collectionIndex = findViewById(R.id.collection_index_name)
-        baseToForeignButton = findViewById(R.id.base_to_foreign)
-        foreignToBaseButton = findViewById(R.id.foreign_to_base)
+        nativeToForeignButton = findViewById(R.id.native_to_foreign)
+        foreignToNativeButton = findViewById(R.id.foreign_to_native)
         addCardButton = findViewById(R.id.b_add_card_flashcards)
         editCardButton = findViewById(R.id.b_edit_flashcards)
+        shuffleButton = findViewById(R.id.b_shuffle_flashcards)
+        flashcardCounter = findViewById(R.id.flashcard_counter)
+        flashcardId = findViewById(R.id.flashcard_id)
+        muteAudioButton = findViewById(R.id.b_mute_flashcards)
 
-        var firstClick = false
+        var nativeToForeignActive = true
+        var foreignToNativeActive = false
+
+        var flashcardShowsQuestion = false
+        var audioMuted = false
+
         val b = intent.extras
         val v:Int? = b?.getInt("collectionId")
         val collectionNumber:Int = v ?:0
@@ -43,23 +61,124 @@ class TrainingActivity: AppCompatActivity() {
         val collectionPath = getExternalFilesDir(null).toString() + "/Collection_$collectionNumber"
         val propertiesPath = collectionPath + "/Properties.txt"
 
+        if (MyUtils.readLineFromFile(propertiesPath, 4) != "") {
+            cardIndex = MyUtils.readLineFromFile(propertiesPath, 4)!!.toInt()
+        }
+
+        //read card order from file if exists, otherwise shuffle
+        val orderLine = MyUtils.readLineFromFile(propertiesPath, 3)
+        if (orderLine == "-") {
+            cardOrder = shuffleCards(collectionPath, nativeToForeignActive, foreignToNativeActive)
+        }   else {
+            if (orderLine != null) {
+                cardOrder = orderLine.split(" ")
+            }   else {
+                Log.e("HUGE ERROR", "orderLine is null")
+            }
+        }
+        flashcardCounter.text = cardOrder.size.toString() + " Cards"
+
+        if (cardOrder.isEmpty()) {
+            flashcardButton.isEnabled = false
+            flashcardButton.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.button_color))
+            editCardButton.isEnabled = false
+            editCardButton.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.button_color))
+            shuffleButton.isEnabled = false
+            shuffleButton.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.button_color))
+        }
+
+
         collectionTitle.text = MyUtils.readLineFromFile(propertiesPath, 0)
         collectionIndex.text = "Collection_$collectionNumber"
 
-        baseToForeignButton.text = MyUtils.readLineFromFile(propertiesPath, 1) + " - " + MyUtils.readLineFromFile(propertiesPath, 2)
-        foreignToBaseButton.text = MyUtils.readLineFromFile(propertiesPath, 2) + " - " + MyUtils.readLineFromFile(propertiesPath, 1)
+        nativeToForeignButton.text = MyUtils.readLineFromFile(propertiesPath, 1) + " - " + MyUtils.readLineFromFile(propertiesPath, 2)
+        foreignToNativeButton.text = MyUtils.readLineFromFile(propertiesPath, 2) + " - " + MyUtils.readLineFromFile(propertiesPath, 1)
+        foreignToNativeButton.setBackgroundColor(ContextCompat.getColor(this, R.color.button_color))
 
-        flashcardButton.setOnClickListener{
-            if (firstClick) {
-                firstClick = false
+        flashcardButton.setOnClickListener{ //die reihenfolge kann nicht verändert werden während man in dieser activity ist!!!
+            if (flashcardShowsQuestion) {
+                flashcardShowsQuestion = false
 
                 flashcardButton.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.highlight))
-                flashcardButton.text = "backside"
+                //flashcardButton.text = "backside"
+
+                var line = 0
+                var audioFile = "/native.mp3"
+                if (cardOrder[cardIndex].first() == 'n') {
+                    line = 1
+                    audioFile = "/foreign.mp3"
+                }
+
+                MyUtils.stopAudio()
+                MyUtils.playAudio(collectionPath + "/" + cardOrder[cardIndex].substring(2) + audioFile)
+
+                flashcardButton.text = MyUtils.readLineFromFile(collectionPath + "/" + cardOrder[cardIndex].substring(2) + "/Content.txt", line)
+                flashcardId.text = cardOrder[cardIndex].substring(2)
+
+                if (cardIndex+1 == cardOrder.size) {
+                    cardIndex = 0
+                }   else {
+                    cardIndex++
+                }
+
+                MyUtils.writeTextFile(propertiesPath, 4, cardIndex.toString())
 
             } else{
-                firstClick = true
+                flashcardShowsQuestion = true
 
                 flashcardButton.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.primary))
+                //flashcardButton.text = "frontside"
+
+                var line = 1
+                var audioFile = "/foreign.mp3"
+                if (cardOrder[cardIndex].first() == 'n') {
+                    line = 0
+                    audioFile = "/native.mp3"
+                }
+
+                MyUtils.stopAudio()
+                MyUtils.playAudio(collectionPath + "/" + cardOrder[cardIndex].substring(2) + audioFile)
+
+                flashcardButton.text = MyUtils.readLineFromFile(collectionPath + "/" + cardOrder[cardIndex].substring(2) + "/Content.txt", line)
+                flashcardId.text = cardOrder[cardIndex].substring(2)
+            }
+        }
+
+        muteAudioButton.setOnClickListener {
+            if (audioMuted) {
+                audioMuted = false
+                muteAudioButton.setImageResource(R.drawable.unmuted)
+            } else {
+                audioMuted = true
+                muteAudioButton.setImageResource(R.drawable.muted)
+            }
+        }
+
+        nativeToForeignButton.setOnClickListener {
+            if (nativeToForeignActive) { //deactivate button
+                nativeToForeignActive = false
+                nativeToForeignButton.setBackgroundColor(ContextCompat.getColor(this, R.color.button_color))
+                if (!foreignToNativeActive) {
+                    foreignToNativeActive = true
+                    foreignToNativeButton.setBackgroundColor(ContextCompat.getColor(this, R.color.primary))
+                }
+            }   else {
+                nativeToForeignActive = true
+                nativeToForeignButton.setBackgroundColor(ContextCompat.getColor(this, R.color.primary))
+            }
+        }
+
+        foreignToNativeButton.setOnClickListener {
+            if (foreignToNativeActive) { //deactivate button
+                foreignToNativeActive = false
+                foreignToNativeButton.setBackgroundColor(ContextCompat.getColor(this, R.color.button_color))
+                if (!nativeToForeignActive) {
+                    nativeToForeignActive = true
+                    nativeToForeignButton.setBackgroundColor(ContextCompat.getColor(this, R.color.primary))
+                }
+            }   else {
+                foreignToNativeActive = true
+                foreignToNativeButton.setBackgroundColor(ContextCompat.getColor(this, R.color.primary))
             }
         }
 
@@ -91,6 +210,54 @@ class TrainingActivity: AppCompatActivity() {
             finish()
         }
 
+        shuffleButton.setOnClickListener {
+            cardOrder = shuffleCards(collectionPath, nativeToForeignActive, foreignToNativeActive)
+            cardIndex = 0
+            MyUtils.writeTextFile(propertiesPath, 4, "0")
+            flashcardButton.text = "Start"
+            flashcardShowsQuestion = false
+            flashcardButton.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.primary))
+        }
+    }
 
+    private fun shuffleCards(collectionPath: String, nativeToForeign: Boolean, foreignToNative: Boolean): List<String> {
+        val cards = getCardFolderNames(collectionPath)
+        val prefixes = listOf("n_", "f_")
+        var shuffledCards = mutableListOf<String>()
+
+        if (nativeToForeign && !foreignToNative) {
+            val prefix = prefixes[0]
+            for (card in cards) {
+                shuffledCards.add("$prefix$card")
+            }
+        }  else if (foreignToNative && !nativeToForeign) {
+            val prefix = prefixes[1]
+            for (card in cards) {
+                shuffledCards.add("$prefix$card")
+            }
+        }   else {
+            for (card in cards) {
+                val prefix = prefixes.random()
+                shuffledCards.add("$prefix$card")
+            }
+        }
+
+        shuffledCards.shuffle()
+
+        if (shuffledCards.isNotEmpty()) {
+            MyUtils.writeTextFile(collectionPath + "/Properties.txt", 3, shuffledCards.joinToString(" "))
+        }   else {
+            MyUtils.writeTextFile(collectionPath + "/Properties.txt", 3, "-")
+        }
+
+        //set the index
+        MyUtils.writeTextFile(collectionPath + "/Properties.txt", 4, "0")
+
+        return shuffledCards
+    }
+
+    private fun getCardFolderNames(folderPath: String): List<String> {
+        val folder = File(folderPath)
+        return folder.listFiles { file -> file.isDirectory }?.map { it.name } ?: emptyList()
     }
 }

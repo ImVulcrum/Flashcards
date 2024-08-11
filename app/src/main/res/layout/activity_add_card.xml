@@ -241,6 +241,7 @@
             tools:ignore="TouchTargetSizeCheck" />
 
         <LinearLayout
+            android:id="@+id/button_area"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="100dp"
@@ -252,6 +253,7 @@
                 android:layout_width="64dp"
                 android:layout_height="64dp"
                 android:layout_marginStart="10dp"
+                android:layout_marginEnd="100dp"
                 android:clickable="true"
                 android:src="@drawable/delete"
                 app:backgroundTint="@color/delete_highlight"
@@ -266,7 +268,6 @@
                 android:id="@+id/button_finish_card"
                 android:layout_width="64dp"
                 android:layout_height="64dp"
-                android:layout_marginStart="100dp"
                 android:clickable="true"
                 android:src="@drawable/finish"
                 app:backgroundTint="@color/primary"

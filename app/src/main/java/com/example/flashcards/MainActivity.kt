@@ -70,7 +70,7 @@ class MainActivity : AppCompatActivity() {
 
         if (MyUtils.createFolder(this, appPath, folderName, "Collection created successfully")) { //only do something if the folder does not exist
             MyUtils.createTextFile(folderPath, fileName)
-            MyUtils.writeTextFile(folderPath + "/" + fileName, 0, "Collectionnnn_$collectionCount")
+            MyUtils.writeTextFile(folderPath + "/" + fileName, 0, "Collection_$collectionCount")
             MyUtils.writeTextFile(folderPath + "/" + fileName, 1, "German")
             MyUtils.writeTextFile(folderPath + "/" + fileName, 2, "Spanish")
             MyUtils.writeTextFile(folderPath + "/" + fileName, 3, "-")

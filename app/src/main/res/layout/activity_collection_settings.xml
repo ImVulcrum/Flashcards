@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/background"
+    android:visibility="visible"
+    tools:context=".CollectionSettingsActivity">
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
+                android:id="@+id/settings_back_button"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_gravity="center|end"
+                android:layout_marginStart="8dp"
+                android:clickable="true"
+                android:src="@drawable/back"
+                app:tint="@color/white"
+                app:backgroundTint="@color/highlight"
+                app:fabCustomSize="40dp"
+                tools:ignore="ContentDescription,SpeakableTextPresentCheck" />
+
+            <View
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_weight="1" />
+
+            <TextView
+                android:id="@+id/settings_header"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="start"
+                android:layout_marginEnd="20dp"
+                android:text="Collection Settings"
+                android:textAppearance="@style/SpaceGroteskLarge"
+                android:textColor="#FFFFFF" />
+
+        </LinearLayout>
+
+        <View
+            android:id="@+id/settings_divider"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginTop="5dp"
+            android:background="?android:attr/listDivider"
+            android:backgroundTint="#FFFFFF"
+            android:backgroundTintMode="add" />
+
+        <TextView
+            android:id="@+id/textView1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="20dp"
+            android:text="Collection Name"
+            android:textAppearance="@style/SpaceGroteskSmall"
+            android:textColor="@color/white" />
+
+        <View
+            android:id="@+id/divider1"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginTop="5dp"
+            android:background="?android:attr/listDivider"
+            android:backgroundTint="#FFFFFF"
+            android:backgroundTintMode="add" />
+
+        <EditText
+            android:id="@+id/enter_collection_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="5dp"
+            android:ems="12"
+            android:hint="enter collection name"
+            android:inputType="text"
+            android:singleLine="true"
+            android:textColor="@color/white"
+            tools:ignore="TouchTargetSizeCheck" />
+
+        <TextView
+            android:id="@+id/textView2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="30dp"
+            android:text="Native Language Name"
+            android:textAppearance="@style/SpaceGroteskSmall"
+            android:textColor="@color/white" />
+
+        <View
+            android:id="@+id/divider2"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginTop="5dp"
+            android:background="?android:attr/listDivider"
+            android:backgroundTint="#FFFFFF"
+            android:backgroundTintMode="add" />
+
+        <EditText
+            android:id="@+id/enter_native_language_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="5dp"
+            android:ems="12"
+            android:hint="enter native language name"
+            android:inputType="text"
+            android:singleLine="true"
+            android:textColor="@color/white"
+            tools:ignore="TouchTargetSizeCheck" />
+
+        <TextView
+            android:id="@+id/textView3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="30dp"
+            android:text="Foreign Language Name"
+            android:textAppearance="@style/SpaceGroteskSmall"
+            android:textColor="@color/white" />
+
+        <View
+            android:id="@+id/divider3"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginTop="5dp"
+            android:background="?android:attr/listDivider"
+            android:backgroundTint="#FFFFFF"
+            android:backgroundTintMode="add" />
+
+        <EditText
+            android:id="@+id/enter_foreign_language_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="5dp"
+            android:ems="12"
+            android:hint="enter foreign language name"
+            android:inputType="text"
+            android:singleLine="true"
+            android:textColor="@color/white"
+            tools:ignore="TouchTargetSizeCheck" />
+
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -9,28 +9,39 @@ import android.widget.LinearLayout
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import com.example.flashcards.databinding.ActivityMainBinding
-import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.example.flashcards.utils.MyUtils
+import com.google.android.material.floatingactionbutton.FloatingActionButton
+
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
     private lateinit var settingsButton: FloatingActionButton
     private lateinit var buttonAdd: Button
-
     private lateinit var container: ViewGroup
     private var collectionDisplayWidth = 320
     private var collectionDisplayHeight = 40
+    lateinit var appPath: String
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
         settingsButton = findViewById(R.id.b_settings)
         container = findViewById(R.id.container)
         buttonAdd = findViewById(R.id.button_add)
+
+        appPath = getExternalFilesDir(null).toString()
+
+        //scan for collections
+        val collections = MyUtils.getCollections(appPath)
+
+        for (collection in collections) {
+            addCollectionButtons(collection.removePrefix("Collection_").toInt(), false)
+        }
+
+        MyUtils.createFolder(this,"/storage/emulated/0/DCIM/", "Flashcards", "", false)
 
         buttonAdd.setOnClickListener {
             addCollection()
@@ -40,14 +51,6 @@ class MainActivity : AppCompatActivity() {
             intent = Intent(this, SettingsActivity::class.java)
             startActivity(intent)
         }
-
-        //scan for collections
-        val collections = MyUtils.getCollections(getExternalFilesDir(null).toString())
-
-        for (collection in collections) {
-            addCollectionButtons(collection.removePrefix("Collection_").toInt(), false)
-        }
-
     }
 
     // Function to convert dp to pixels
@@ -63,7 +66,6 @@ class MainActivity : AppCompatActivity() {
         var collectionCount = sharedPref.getInt("collection_count", 0)
 
         collectionCount++
-        val appPath = getExternalFilesDir(null).toString()
         val folderName = "Collection_$collectionCount"
         val folderPath = appPath + "/" + folderName
         val fileName = "Properties.txt"
@@ -103,8 +105,10 @@ class MainActivity : AppCompatActivity() {
             if (isNewCreated) {
                 text = "Collection_$collectionId"
             }   else {
-                text = MyUtils.readLineFromFile(getExternalFilesDir(null).toString() + "/Collection_$collectionId/Properties.txt", 0)
+                text = MyUtils.readLineFromFile(appPath + "/Collection_$collectionId/Properties.txt", 0)
             }
+
+            isAllCaps = false
 
             setTextColor(ContextCompat.getColor(this@MainActivity, R.color.white))
             maxLines = 1
@@ -140,7 +144,7 @@ class MainActivity : AppCompatActivity() {
                 MyUtils.showConfirmationDialog(this@MainActivity,"Delete Collection", "Are you sure you want to delete this collection?") {userChoice ->
                     if (userChoice) {
                         container.removeView(rowLayout)
-                        MyUtils.deleteFolder(this@MainActivity, getExternalFilesDir(null).toString() + "/" + button.contentDescription.toString(), "Collection deleted successfully")
+                        MyUtils.deleteFolder(this@MainActivity, appPath + "/" + button.contentDescription.toString(), "Collection deleted successfully")
                     }
                 }
             }
@@ -154,4 +158,3 @@ class MainActivity : AppCompatActivity() {
         container.addView(rowLayout)
     }
 }
-

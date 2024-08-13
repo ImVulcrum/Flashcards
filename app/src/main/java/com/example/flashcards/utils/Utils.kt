@@ -41,7 +41,7 @@ object MyUtils {
                 return false
             }
         } else {
-            Toast.makeText(context, "Folder already exists", Toast.LENGTH_SHORT).show()
+            //Toast.makeText(context, "Folder already exists", Toast.LENGTH_SHORT).show()
             return false
         }
     }
@@ -248,5 +248,10 @@ object MyUtils {
         }
 
         return folderNames
+    }
+
+    fun fileExists(filePath: String): Boolean {
+        val file = File(filePath)
+        return file.exists() && file.isFile
     }
 }

@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">Flashcards</string>
+    <string name="app_path">/storage/emulated/0/DCIM/Flashcards</string>
 </resources>

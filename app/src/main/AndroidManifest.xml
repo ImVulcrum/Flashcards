@@ -20,6 +20,9 @@
             android:name=".AddCardActivity"
             android:exported="false" />
         <activity
+            android:name=".CollectionSettingsActivity"
+            android:exported="false" />
+        <activity
             android:name=".SettingsActivity"
             android:exported="false" />
         <activity

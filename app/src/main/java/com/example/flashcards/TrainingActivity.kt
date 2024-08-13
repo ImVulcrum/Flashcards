@@ -26,6 +26,8 @@ class TrainingActivity: AppCompatActivity() {
     private lateinit var flashcardCounter: TextView
     private lateinit var flashcardId: TextView
     private lateinit var muteAudioButton: FloatingActionButton
+    private lateinit var collectionSettingButton: FloatingActionButton
+    private lateinit var appPath:String
 
     var cardOrder = listOf<String>()
     var cardIndex: Int = 0
@@ -47,6 +49,9 @@ class TrainingActivity: AppCompatActivity() {
         flashcardCounter = findViewById(R.id.flashcard_counter)
         flashcardId = findViewById(R.id.flashcard_id)
         muteAudioButton = findViewById(R.id.b_mute_flashcards)
+        collectionSettingButton = findViewById(R.id.b_settings_flashcards)
+
+        appPath = getExternalFilesDir(null).toString()
 
         var nativeToForeignActive = true
         var foreignToNativeActive = false
@@ -58,7 +63,7 @@ class TrainingActivity: AppCompatActivity() {
         val v:Int? = b?.getInt("collectionId")
         val collectionNumber:Int = v ?:0
 
-        val collectionPath = getExternalFilesDir(null).toString() + "/Collection_$collectionNumber"
+        val collectionPath = appPath + "/Collection_$collectionNumber"
         val propertiesPath = collectionPath + "/Properties.txt"
 
         if (MyUtils.readLineFromFile(propertiesPath, 4) != "") {
@@ -69,6 +74,7 @@ class TrainingActivity: AppCompatActivity() {
         val orderLine = MyUtils.readLineFromFile(propertiesPath, 3)
         if (orderLine == "-") {
             cardOrder = shuffleCards(collectionPath, nativeToForeignActive, foreignToNativeActive)
+            cardIndex = 0
         }   else {
             if (orderLine != null) {
                 cardOrder = orderLine.split(" ")
@@ -76,6 +82,8 @@ class TrainingActivity: AppCompatActivity() {
                 Log.e("HUGE ERROR", "orderLine is null")
             }
         }
+        editCardButton.isEnabled = false
+        editCardButton.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.button_color))
         flashcardCounter.text = cardOrder.size.toString() + " Cards"
 
         if (cardOrder.isEmpty()) {
@@ -109,8 +117,10 @@ class TrainingActivity: AppCompatActivity() {
                     audioFile = "/foreign.mp3"
                 }
 
-                MyUtils.stopAudio()
-                MyUtils.playAudio(collectionPath + "/" + cardOrder[cardIndex].substring(2) + audioFile)
+                if (!audioMuted) {
+                    MyUtils.stopAudio()
+                    MyUtils.playAudio(collectionPath + "/" + cardOrder[cardIndex].substring(2) + audioFile)
+                }
 
                 flashcardButton.text = MyUtils.readLineFromFile(collectionPath + "/" + cardOrder[cardIndex].substring(2) + "/Content.txt", line)
                 flashcardId.text = cardOrder[cardIndex].substring(2)
@@ -128,6 +138,10 @@ class TrainingActivity: AppCompatActivity() {
 
                 flashcardButton.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.primary))
                 //flashcardButton.text = "frontside"
+                if (!editCardButton.isEnabled) {
+                    editCardButton.isEnabled = true
+                    editCardButton.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.highlight))
+                }
 
                 var line = 1
                 var audioFile = "/foreign.mp3"
@@ -136,8 +150,10 @@ class TrainingActivity: AppCompatActivity() {
                     audioFile = "/native.mp3"
                 }
 
-                MyUtils.stopAudio()
-                MyUtils.playAudio(collectionPath + "/" + cardOrder[cardIndex].substring(2) + audioFile)
+                if (!audioMuted) {
+                    MyUtils.stopAudio()
+                    MyUtils.playAudio(collectionPath + "/" + cardOrder[cardIndex].substring(2) + audioFile)
+                }
 
                 flashcardButton.text = MyUtils.readLineFromFile(collectionPath + "/" + cardOrder[cardIndex].substring(2) + "/Content.txt", line)
                 flashcardId.text = cardOrder[cardIndex].substring(2)
@@ -189,14 +205,25 @@ class TrainingActivity: AppCompatActivity() {
         }
 
         editCardButton.setOnClickListener {
+            var currentCard = ""
+            if (!flashcardShowsQuestion && cardIndex != 0) {
+                currentCard = cardOrder[cardIndex-1]
+            }   else if (!flashcardShowsQuestion && cardIndex == 0) {
+                currentCard = cardOrder[cardOrder.size-1]
+            }   else if (flashcardShowsQuestion) {
+                currentCard = cardOrder[cardIndex]
+            }
+
             intent = Intent(this, AddCardActivity::class.java)
             val b = Bundle()
             b.putString("collectionPath", collectionPath)
             b.putInt("collectionId", collectionNumber)
             b.putBoolean("calledFromAddCard", false)
+            b.putString("cardName", currentCard.substring(2))
             intent.putExtras(b)
             startActivity(intent)
             finish()
+
         }
 
         addCardButton.setOnClickListener {
@@ -211,12 +238,28 @@ class TrainingActivity: AppCompatActivity() {
         }
 
         shuffleButton.setOnClickListener {
-            cardOrder = shuffleCards(collectionPath, nativeToForeignActive, foreignToNativeActive)
-            cardIndex = 0
-            MyUtils.writeTextFile(propertiesPath, 4, "0")
-            flashcardButton.text = "Start"
-            flashcardShowsQuestion = false
-            flashcardButton.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.primary))
+            MyUtils.showConfirmationDialog(this,"Shuffle Cards", "Are you sure you want to shuffle?") {userChoice ->
+                if (userChoice) {
+                    cardOrder = shuffleCards(collectionPath, nativeToForeignActive, foreignToNativeActive)
+                    cardIndex = 0
+                    MyUtils.writeTextFile(propertiesPath, 4, "0")
+                    flashcardButton.text = "Start"
+                    flashcardShowsQuestion = false
+                    flashcardButton.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.primary))
+                    editCardButton.isEnabled = false
+                    editCardButton.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.button_color))
+                }
+            }
+        }
+
+        collectionSettingButton.setOnClickListener {
+            intent = Intent(this, CollectionSettingsActivity::class.java)
+            val b = Bundle()
+            b.putString("collectionPath", collectionPath)
+            b.putInt("collectionId", collectionNumber)
+            intent.putExtras(b)
+            startActivity(intent)
+            finish()
         }
     }
 

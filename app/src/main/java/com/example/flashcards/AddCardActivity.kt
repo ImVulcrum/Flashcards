@@ -47,6 +47,8 @@ class AddCardActivity<IOException> : AppCompatActivity() {
     private lateinit var header: TextView
     private lateinit var cardId: TextView
     private lateinit var actionBar: LinearLayout
+    private lateinit var nativeLanguageText: TextView
+    private lateinit var foreignLanguageText: TextView
 
     private var mediaRecorder: MediaRecorder? = null
     private var recordFile: File? = null
@@ -79,6 +81,8 @@ class AddCardActivity<IOException> : AppCompatActivity() {
         header = findViewById(R.id.add_card_header)
         cardId = findViewById(R.id.card_id)
         actionBar = findViewById(R.id.button_area)
+        nativeLanguageText = findViewById(R.id.native_language)
+        foreignLanguageText = findViewById(R.id.foreign_language)
 
         // Request necessary permissions
         if (!hasPermissions()) {
@@ -100,15 +104,23 @@ class AddCardActivity<IOException> : AppCompatActivity() {
         val calledFromAddCard:Boolean = a ?:false
 
         var cardName:String = ""
+        val propertiesPath = collectionPath + "/Properties.txt"
 
+        //set the language labels
+        nativeLanguageText.text = MyUtils.readLineFromFile(propertiesPath, 1)
+        foreignLanguageText.text = MyUtils.readLineFromFile(propertiesPath, 2)
+
+        //prepare the page for adding a new card
         if (calledFromAddCard) {
             actionBar.removeView(deleteButton)
 
-            flashcardPath = createCard(collectionPath)
+            flashcardPath = createCard(collectionPath, collectionNumber=collectionNumber)
 
             //grey out audio buttons
             nativePlayButton.backgroundTintList = (ContextCompat.getColorStateList(this@AddCardActivity, R.color.button_color))
             foreignPlayButton.backgroundTintList = (ContextCompat.getColorStateList(this@AddCardActivity, R.color.button_color))
+
+        //prepare the page for editing an existing card
         }   else {
             actionBar.removeView(addAnotherCardButton)
 
@@ -118,6 +130,9 @@ class AddCardActivity<IOException> : AppCompatActivity() {
 
             val c:String? = b?.getString("cardName")
             cardName = c ?:""
+
+            //set card id text
+            cardId.text = "Collection_" + collectionNumber.toString() + " (" + '"' + MyUtils.readLineFromFile(collectionPath + "/Properties.txt", 0) +'"'+ ")" + " - Card_#" + cardName.substring(10)
 
             flashcardPath = "$collectionPath/$cardName"
 
@@ -206,7 +221,7 @@ class AddCardActivity<IOException> : AppCompatActivity() {
                 nativeLanguageTexbox.text.clear()
                 foreignLanguageTextbox.text.clear()
 
-                flashcardPath = createCard(collectionPath)
+                flashcardPath = createCard(collectionPath, collectionNumber=collectionNumber)
 
                 nativePlayButton.backgroundTintList = (ContextCompat.getColorStateList(this@AddCardActivity, R.color.button_color))
                 foreignPlayButton.backgroundTintList = (ContextCompat.getColorStateList(this@AddCardActivity, R.color.button_color))
@@ -267,12 +282,12 @@ class AddCardActivity<IOException> : AppCompatActivity() {
         }
     }
 
-    private fun createCard(collectionPath: String, showMessage:Boolean =false):String{
+    private fun createCard(collectionPath: String, showMessage:Boolean =false, collectionNumber:Int):String{
         val sharedPref = getSharedPreferences("pref", MODE_PRIVATE)
         val editor = sharedPref.edit()
 
         var flashcardCount = sharedPref.getInt(collectionPath, 0)
-        cardId.text = "Card_#$flashcardCount"
+        cardId.text = "Collection_" + collectionNumber.toString() + " (" + '"' + MyUtils.readLineFromFile(collectionPath + "/Properties.txt", 0) +'"'+ ")" + " - Card_#$flashcardCount"
 
 
 

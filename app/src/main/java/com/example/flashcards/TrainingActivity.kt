@@ -27,6 +27,7 @@ class TrainingActivity: AppCompatActivity() {
     private lateinit var flashcardId: TextView
     private lateinit var muteAudioButton: FloatingActionButton
     private lateinit var collectionSettingButton: FloatingActionButton
+    private lateinit var showAllCardsButton: FloatingActionButton
     private lateinit var appPath:String
 
     var cardOrder = listOf<String>()
@@ -50,14 +51,18 @@ class TrainingActivity: AppCompatActivity() {
         flashcardId = findViewById(R.id.flashcard_id)
         muteAudioButton = findViewById(R.id.b_mute_flashcards)
         collectionSettingButton = findViewById(R.id.b_settings_flashcards)
+        showAllCardsButton = findViewById(R.id.b_show_flashcards)
 
         appPath = getExternalFilesDir(null).toString()
+
+        val sharedPref = getSharedPreferences("pref", MODE_PRIVATE)
+        val editor = sharedPref.edit()
 
         var nativeToForeignActive = true
         var foreignToNativeActive = false
 
         var flashcardShowsQuestion = false
-        var audioMuted = false
+        var audioMuted = sharedPref.getBoolean("audio_muted", false)
 
         val b = intent.extras
         val v:Int? = b?.getInt("collectionId")
@@ -68,6 +73,13 @@ class TrainingActivity: AppCompatActivity() {
 
         if (MyUtils.readLineFromFile(propertiesPath, 4) != "") {
             cardIndex = MyUtils.readLineFromFile(propertiesPath, 4)!!.toInt()
+        }
+
+        //setup mute button
+        if (audioMuted) {
+            muteAudioButton.setImageResource(R.drawable.muted)
+        } else {
+            muteAudioButton.setImageResource(R.drawable.unmuted)
         }
 
         //read card order from file if exists, otherwise shuffle
@@ -94,7 +106,6 @@ class TrainingActivity: AppCompatActivity() {
             shuffleButton.isEnabled = false
             shuffleButton.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.button_color))
         }
-
 
         collectionTitle.text = MyUtils.readLineFromFile(propertiesPath, 0)
         collectionIndex.text = "Collection_$collectionNumber"
@@ -163,11 +174,15 @@ class TrainingActivity: AppCompatActivity() {
         muteAudioButton.setOnClickListener {
             if (audioMuted) {
                 audioMuted = false
+                editor.putBoolean("audio_muted", false)
                 muteAudioButton.setImageResource(R.drawable.unmuted)
             } else {
                 audioMuted = true
+                editor.putBoolean("audio_muted", true)
+                MyUtils.stopAudio()
                 muteAudioButton.setImageResource(R.drawable.muted)
             }
+            editor.apply()
         }
 
         nativeToForeignButton.setOnClickListener {
@@ -200,6 +215,7 @@ class TrainingActivity: AppCompatActivity() {
 
         //back button
         backButton.setOnClickListener {
+            MyUtils.stopAudio()
             intent = Intent(this, MainActivity::class.java)
             startActivity(intent)
         }
@@ -208,8 +224,10 @@ class TrainingActivity: AppCompatActivity() {
             var currentCard = ""
             if (!flashcardShowsQuestion && cardIndex != 0) {
                 currentCard = cardOrder[cardIndex-1]
+                MyUtils.writeTextFile(propertiesPath, 4, (cardIndex-1).toString())
             }   else if (!flashcardShowsQuestion && cardIndex == 0) {
                 currentCard = cardOrder[cardOrder.size-1]
+                MyUtils.writeTextFile(propertiesPath, 4, (cardOrder.size-1).toString())
             }   else if (flashcardShowsQuestion) {
                 currentCard = cardOrder[cardIndex]
             }
@@ -223,7 +241,16 @@ class TrainingActivity: AppCompatActivity() {
             intent.putExtras(b)
             startActivity(intent)
             finish()
+        }
 
+        showAllCardsButton.setOnClickListener {
+            intent = Intent(this, FlashcardListActivity::class.java)
+            val b = Bundle()
+            b.putString("collectionPath", collectionPath)
+            b.putInt("collectionId", collectionNumber)
+            intent.putExtras(b)
+            startActivity(intent)
+            finish()
         }
 
         addCardButton.setOnClickListener {

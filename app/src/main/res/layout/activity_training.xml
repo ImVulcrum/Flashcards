@@ -70,6 +70,25 @@
                 android:layout_weight="1"/>
 
             <com.google.android.material.floatingactionbutton.FloatingActionButton
+                android:id="@+id/b_show_flashcards"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="start"
+                android:clickable="true"
+                android:src="@drawable/list"
+                app:backgroundTint="@color/highlight"
+                app:elevation="0dp"
+                app:maxImageSize="45dp"
+                app:shapeAppearance="@style/Widget.Material3.CircularProgressIndicator.Small"
+                app:tint="@color/white"
+                tools:ignore="ContentDescription,SpeakableTextPresentCheck" />
+
+            <View
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_weight="1"/>
+
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
                 android:id="@+id/b_settings_flashcards"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -110,7 +129,7 @@
             android:layout_height="@dimen/flashcard_height"
             android:layout_marginTop="4dp"
             android:text="Start"
-            android:textAppearance="@style/SpaceGroteskLarge"
+            android:textAppearance="@style/SpaceGroteskMain"
             android:textColor="@color/white"
             app:backgroundTint="@color/primary"
             app:cornerRadius="10dp"
@@ -171,12 +190,12 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="40dp"
                 android:clickable="true"
-                android:src="@android:drawable/ic_input_add"
+                android:src="@drawable/plus"
                 app:backgroundTint="@color/highlight"
                 app:elevation="0dp"
-                app:maxImageSize="55dp"
-                app:tint="@color/white"
+                app:maxImageSize="40dp"
                 app:shapeAppearance="@style/Widget.Material3.CircularProgressIndicator.Small"
+                app:tint="@color/white"
                 tools:ignore="ContentDescription,SpeakableTextPresentCheck" />
 
         </LinearLayout>

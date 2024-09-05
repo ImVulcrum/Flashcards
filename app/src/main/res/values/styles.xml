@@ -8,6 +8,10 @@
         <item name="android:fontFamily">@font/spacegrotesk</item>
         <item name="android:textSize">35sp</item>
     </style>
+    <style name="SpaceGroteskBig">
+        <item name="android:fontFamily">@font/spacegrotesk</item>
+        <item name="android:textSize">30sp</item>
+    </style>
     <style name="SpaceGroteskSmall">
         <item name="android:fontFamily">@font/spacegrotesk</item>
         <item name="android:textSize">20sp</item>

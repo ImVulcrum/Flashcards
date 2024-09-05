@@ -5,6 +5,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.CheckBox
 import android.widget.LinearLayout
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
@@ -19,6 +20,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var settingsButton: FloatingActionButton
     private lateinit var buttonAdd: Button
     private lateinit var container: ViewGroup
+    private lateinit var showArchivedCollections: CheckBox
     private var collectionDisplayWidth = 320
     private var collectionDisplayHeight = 40
     lateinit var appPath: String
@@ -31,14 +33,17 @@ class MainActivity : AppCompatActivity() {
         settingsButton = findViewById(R.id.b_settings)
         container = findViewById(R.id.container)
         buttonAdd = findViewById(R.id.button_add)
+        showArchivedCollections = findViewById(R.id.show_archived_collections)
 
         appPath = getExternalFilesDir(null).toString()
 
         //scan for collections
-        val collections = MyUtils.getCollections(appPath)
+        val collections = MyUtils.getFoldersInDirectory(appPath)
 
         for (collection in collections) {
-            addCollectionButtons(collection.removePrefix("Collection_").toInt(), false)
+            if (MyUtils.readLineFromFile(appPath + "/" + collection + "/Properties.txt", 5) == "false" || MyUtils.readLineFromFile(appPath + "/" + collection + "/Properties.txt", 5) == "") {
+                addCollectionButtons(collection.removePrefix("Collection_").toInt(), false)
+            }
         }
 
         MyUtils.createFolder(this,"/storage/emulated/0/DCIM/", "Flashcards", "", false)
@@ -50,6 +55,24 @@ class MainActivity : AppCompatActivity() {
         settingsButton.setOnClickListener {
             intent = Intent(this, SettingsActivity::class.java)
             startActivity(intent)
+        }
+
+        showArchivedCollections.setOnCheckedChangeListener { _, isChecked ->
+            if (isChecked) {
+                for (collection in collections) {
+                    if (MyUtils.readLineFromFile(appPath + "/" + collection + "/Properties.txt", 5) == "true") {
+                        addCollectionButtons(collection.removePrefix("Collection_").toInt(), false, R.color.button_color)
+                    }
+                }
+            }   else {
+                container.removeAllViews()
+                for (collection in collections) {
+                    if (MyUtils.readLineFromFile(appPath + "/" + collection + "/Properties.txt", 5) == "false" || MyUtils.readLineFromFile(appPath + "/" + collection + "/Properties.txt", 5) == "") {
+                        addCollectionButtons(collection.removePrefix("Collection_").toInt(), false)
+                    }
+                }
+
+            }
         }
     }
 
@@ -64,6 +87,8 @@ class MainActivity : AppCompatActivity() {
         val editor = sharedPref.edit()
 
         var collectionCount = sharedPref.getInt("collection_count", 0)
+        val nativeLanguage = sharedPref.getString("native_language", "German").toString()
+        val foreignLanguage = sharedPref.getString("foreign_language", "Spanish").toString()
 
         collectionCount++
         val folderName = "Collection_$collectionCount"
@@ -73,9 +98,10 @@ class MainActivity : AppCompatActivity() {
         if (MyUtils.createFolder(this, appPath, folderName, "Collection created successfully")) { //only do something if the folder does not exist
             MyUtils.createTextFile(folderPath, fileName)
             MyUtils.writeTextFile(folderPath + "/" + fileName, 0, "Collection_$collectionCount")
-            MyUtils.writeTextFile(folderPath + "/" + fileName, 1, "German")
-            MyUtils.writeTextFile(folderPath + "/" + fileName, 2, "Spanish")
+            MyUtils.writeTextFile(folderPath + "/" + fileName, 1, nativeLanguage)
+            MyUtils.writeTextFile(folderPath + "/" + fileName, 2, foreignLanguage)
             MyUtils.writeTextFile(folderPath + "/" + fileName, 3, "-")
+            MyUtils.writeTextFile(folderPath + "/" + fileName, 5, "false")
 
             addCollectionButtons(collectionCount, true)
         }
@@ -86,7 +112,7 @@ class MainActivity : AppCompatActivity() {
         editor.apply()
     }
 
-    private fun addCollectionButtons(collectionId:Int, isNewCreated:Boolean) {
+    private fun addCollectionButtons(collectionId:Int, isNewCreated:Boolean, collectionButtonColor:Int = R.color.primary) {
 
         // Create a horizontal LinearLayout to hold the two buttons
         val rowLayout = LinearLayout(this).apply {
@@ -118,7 +144,7 @@ class MainActivity : AppCompatActivity() {
             ).apply {
                 setMargins(20, 0, 0, 4)
             }
-            setBackgroundColor(ContextCompat.getColor(this@MainActivity, R.color.primary))
+            setBackgroundColor(ContextCompat.getColor(this@MainActivity, collectionButtonColor))
             setOnClickListener {
                 intent = Intent(this@MainActivity, TrainingActivity::class.java)
                 val b = Bundle()

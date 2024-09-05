@@ -15,6 +15,7 @@ class CollectionSettingsActivity : AppCompatActivity() {
     private lateinit var nativeLanguageName: EditText
     private lateinit var foreignLanguageName: EditText
     private lateinit var collectionName: EditText
+    private lateinit var archiveButton: Button
 
     override fun onCreate(savedInstanceState: Bundle?) {
         //boilerplate
@@ -25,6 +26,7 @@ class CollectionSettingsActivity : AppCompatActivity() {
         nativeLanguageName = findViewById(R.id.enter_native_language_name)
         foreignLanguageName = findViewById(R.id.enter_foreign_language_name)
         collectionName = findViewById(R.id.enter_collection_name)
+        archiveButton = findViewById(R.id.archive_collection)
 
         val b = intent.extras
         val v: String? = b?.getString("collectionPath")
@@ -35,6 +37,23 @@ class CollectionSettingsActivity : AppCompatActivity() {
         collectionName.setText(MyUtils.readLineFromFile(collectionPath + "/Properties.txt", 0))
         nativeLanguageName.setText(MyUtils.readLineFromFile(collectionPath + "/Properties.txt", 1))
         foreignLanguageName.setText(MyUtils.readLineFromFile(collectionPath + "/Properties.txt", 2))
+
+        if (MyUtils.readLineFromFile(collectionPath + "/Properties.txt", 5) == "true") {
+            archiveButton.text = "unarchive collection"
+        } else {
+            archiveButton.text = "archive collection"
+        }
+
+        //archive button
+        archiveButton.setOnClickListener {
+            if (MyUtils.readLineFromFile(collectionPath + "/Properties.txt", 5) == "true") {
+                MyUtils.writeTextFile(collectionPath + "/Properties.txt", 5, "false")
+                archiveButton.text = "archive collection"
+            } else {
+                MyUtils.writeTextFile(collectionPath + "/Properties.txt", 5, "true")
+                archiveButton.text = "unarchive collection"
+            }
+        }
 
         //back button
         backButton.setOnClickListener {

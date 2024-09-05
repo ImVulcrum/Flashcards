@@ -47,7 +47,7 @@
                 android:layout_gravity="start"
                 android:layout_marginEnd="20dp"
                 android:text="Collection Settings"
-                android:textAppearance="@style/SpaceGroteskLarge"
+                android:textAppearance="@style/SpaceGroteskBig"
                 android:textColor="#FFFFFF" />
 
         </LinearLayout>
@@ -62,7 +62,7 @@
             android:backgroundTintMode="add" />
 
         <TextView
-            android:id="@+id/textView1"
+            android:id="@+id/foreign_language"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
@@ -89,6 +89,7 @@
             android:ems="12"
             android:hint="enter collection name"
             android:inputType="text"
+            android:maxLength="15"
             android:singleLine="true"
             android:textColor="@color/white"
             tools:ignore="TouchTargetSizeCheck" />
@@ -121,6 +122,7 @@
             android:ems="12"
             android:hint="enter native language name"
             android:inputType="text"
+            android:maxLength="10"
             android:singleLine="true"
             android:textColor="@color/white"
             tools:ignore="TouchTargetSizeCheck" />
@@ -153,9 +155,20 @@
             android:ems="12"
             android:hint="enter foreign language name"
             android:inputType="text"
+            android:maxLength="10"
             android:singleLine="true"
             android:textColor="@color/white"
             tools:ignore="TouchTargetSizeCheck" />
+
+        <Button
+            android:id="@+id/archive_collection"
+            android:layout_width="200dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="60dp"
+            android:backgroundTint="@color/primary"
+            android:text="archive collection"
+            app:cornerRadius="10dp" />
 
     </LinearLayout>
 

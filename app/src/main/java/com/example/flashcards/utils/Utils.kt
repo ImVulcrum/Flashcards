@@ -228,8 +228,8 @@ object MyUtils {
         return ""
     }
 
-    fun getCollections(appPath: String): List<String> {
-        val directory = File(appPath)
+    fun getFoldersInDirectory (directoryToSearchIn: String): List<String> {
+        val directory = File(directoryToSearchIn)
         val folderNames = mutableListOf<String>()
 
         if (directory.exists() && directory.isDirectory) {
@@ -243,8 +243,7 @@ object MyUtils {
             }
         } else {
             // Handle case where directory does not exist or is not a directory
-            // You can log an error or return an empty list depending on your application's logic
-            println("Directory does not exist or is not a directory: $appPath")
+            Log.e("getFoldersInDirectory", "Directory does not exist or is not a directory: $directoryToSearchIn")
         }
 
         return folderNames

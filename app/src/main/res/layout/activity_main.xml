@@ -11,6 +11,7 @@
     tools:context=".MainActivity">
 
     <LinearLayout
+        android:id="@+id/linearLayout2"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
@@ -98,5 +99,21 @@
         android:textAppearance="@style/SpaceGroteskSmall"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
+
+    <CheckBox
+        android:id="@+id/show_archived_collections"
+        android:layout_width="250dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="32dp"
+        android:layout_marginBottom="26dp"
+        android:background="@drawable/checkbox"
+        android:paddingLeft="5dp"
+        android:paddingBottom="1dp"
+        android:text="show archived collections"
+        android:textAppearance="@style/SpaceGroteskVerySmall"
+        android:textColor="@color/white"
+        app:buttonTint="@color/strong_highlight"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="@+id/linearLayout2" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

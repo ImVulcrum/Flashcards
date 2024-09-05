@@ -61,15 +61,107 @@
             android:backgroundTint="#FFFFFF"
             android:backgroundTintMode="add" />
 
-        <Button
-            android:id="@+id/button_reset_collection_count"
+        <TextView
+            android:id="@+id/textView2"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:layout_marginTop="60dp"
-            android:backgroundTint="@color/primary"
-            android:text="reset collection count"
-            app:cornerRadius="10dp" />
+            android:text="Default Native Language Name"
+            android:textAppearance="@style/SpaceGroteskSmall"
+            android:textColor="@color/white" />
+
+        <View
+            android:id="@+id/divider2"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginTop="5dp"
+            android:background="?android:attr/listDivider"
+            android:backgroundTint="#FFFFFF"
+            android:backgroundTintMode="add" />
+
+        <EditText
+            android:id="@+id/enter_native_language_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="5dp"
+            android:ems="12"
+            android:hint="enter default native language"
+            android:inputType="text"
+            android:maxLength="10"
+            android:singleLine="true"
+            android:textColor="@color/white"
+            tools:ignore="TouchTargetSizeCheck" />
+
+        <TextView
+            android:id="@+id/textView3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="30dp"
+            android:text="Default Foreign Language Name"
+            android:textAppearance="@style/SpaceGroteskSmall"
+            android:textColor="@color/white" />
+
+        <View
+            android:id="@+id/divider3"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginTop="5dp"
+            android:background="?android:attr/listDivider"
+            android:backgroundTint="#FFFFFF"
+            android:backgroundTintMode="add" />
+
+        <EditText
+            android:id="@+id/enter_foreign_language_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="5dp"
+            android:ems="12"
+            android:hint="enter default foreign language"
+            android:inputType="text"
+            android:maxLength="10"
+            android:singleLine="true"
+            android:textColor="@color/white"
+            tools:ignore="TouchTargetSizeCheck" />
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="60dp"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/textView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Collection Index"
+                android:textAppearance="@style/SpaceGroteskSmall"
+                android:textColor="@color/white" />
+
+            <EditText
+                android:id="@+id/collection_index"
+                android:layout_width="40dp"
+                android:layout_height="wrap_content"
+                android:ems="10"
+                android:gravity="center_horizontal"
+                android:inputType="number"
+                android:text="0" />
+        </LinearLayout>
+
+        <View
+            android:id="@+id/div"
+            android:layout_width="220dp"
+            android:layout_height="1dp"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="-9dp"
+            android:background="?android:attr/listDivider"
+            android:backgroundTint="#FFFFFF"
+            android:backgroundTintMode="add" />
 
     </LinearLayout>
 

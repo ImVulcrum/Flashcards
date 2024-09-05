@@ -1,0 +1,3 @@
+Shared Preferences:
+"collection_count" --> The index of the next collection to be created, not really a counter despite the name
+each collection path as string --> The index of the next flashcard to be created in this collection, not really a counter

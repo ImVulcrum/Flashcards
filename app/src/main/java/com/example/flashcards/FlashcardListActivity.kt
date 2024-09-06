@@ -2,6 +2,7 @@ package com.example.flashcards
 
 import android.annotation.SuppressLint
 import android.content.Intent
+import android.content.res.ColorStateList
 import android.graphics.drawable.GradientDrawable
 import android.graphics.drawable.LayerDrawable
 import android.os.Bundle
@@ -28,6 +29,10 @@ class FlashcardListActivity : AppCompatActivity() {
 
     private var collectionDisplayHeight = 40
 
+    var currentCard:String = ""
+    lateinit var currentButtonPair:LinearLayout
+
+    @SuppressLint("SetTextI18n")
     override fun onCreate(savedInstanceState: Bundle?) {
         //boilerplate
         super.onCreate(savedInstanceState)
@@ -48,6 +53,12 @@ class FlashcardListActivity : AppCompatActivity() {
         val i:Int? = b?.getInt("collectionId")
         val collectionNumber:Int = i ?:0
 
+        //set title and index hint
+        collectionNameHeader.text = MyUtils.readLineFromFile(collectionPath + "/Properties.txt", 0)
+        collectionIndexHeader.text = "Collection_$collectionNumber"
+
+        //deactivate the edit and move buttons cuz nothing can be selected yet
+        deactivateEditAndMoveButtons()
 
         //scan for flashcards and add them to the list view
         val cards = MyUtils.getFoldersInDirectory(collectionPath)
@@ -55,9 +66,7 @@ class FlashcardListActivity : AppCompatActivity() {
         for (card in cards) {
             val frontSide:String = MyUtils.readLineFromFile(collectionPath + "/" + card + "/Content.txt", 0).toString()
             val backSide:String = MyUtils.readLineFromFile(collectionPath + "/" + card + "/Content.txt", 1).toString()
-            addFlashcardButton(frontSide, backSide)
-
-
+            addFlashcardButton(frontSide, backSide, card)
         }
 
         buttonMoveCard.setOnClickListener {
@@ -65,7 +74,16 @@ class FlashcardListActivity : AppCompatActivity() {
         }
 
         buttonEditCard.setOnClickListener {
-            TODO()
+            intent = Intent(this, AddCardActivity::class.java)
+            val n = Bundle()
+            n.putString("collectionPath", collectionPath)
+            n.putInt("collectionId", collectionNumber)
+            n.putBoolean("calledFromAddCard", false)
+            n.putString("cardName", currentCard)
+            n.putBoolean("calledFromList", true)
+            intent.putExtras(n)
+            startActivity(intent)
+            finish()
         }
 
         buttonAddCard.setOnClickListener {
@@ -87,7 +105,7 @@ class FlashcardListActivity : AppCompatActivity() {
         return (this * resources.displayMetrics.density).toInt()
     }
 
-    private fun addFlashcardButton(frontSide: String, backSide: String) {
+    private fun addFlashcardButton(frontSide: String, backSide: String, cardName:String) {
 
         // Create a horizontal LinearLayout to hold the two buttons
         val rowLayout = LinearLayout(this).apply {
@@ -101,43 +119,125 @@ class FlashcardListActivity : AppCompatActivity() {
         }
 
         // Create the left button
-        val collectionButton = Button(this).apply {
-            text = frontSide + backSide
+        val frontSideButton = Button(this).apply {
+            text = frontSide
+            contentDescription = cardName
             isAllCaps = false
-
             setTextColor(ContextCompat.getColor(this@FlashcardListActivity, R.color.white))
             maxLines = 1
+
             layoutParams = LinearLayout.LayoutParams(
-                (330).dpToPx(),  // Width in pixels
+                (170).dpToPx(),  // Width in pixels
                 collectionDisplayHeight.dpToPx()   // Height in pixels
             ).apply {
                 setMargins(20, 0, 0, 4)
             }
 
-            // Create the stroke drawable with transparent center
-            val strokeDrawable = GradientDrawable().apply {
-                setColor(ContextCompat.getColor(this@FlashcardListActivity, R.color.transparent)) // Transparent center
-                setStroke(40.dpToPx(), ContextCompat.getColor(this@FlashcardListActivity, R.color.white)) // Stroke width and color
+            // Create a drawable and set it as the background
+            val drawable = GradientDrawable().apply {
+                shape = GradientDrawable.RECTANGLE
+                setColor(ContextCompat.getColor(this@FlashcardListActivity, R.color.primary))
+                setStroke(4, ContextCompat.getColor(this@FlashcardListActivity, R.color.primary))
+            }
+            background = drawable
+        }
+
+        // Create the right button
+        val backSideButton = Button(this).apply {
+
+            text = backSide
+            isAllCaps = false
+            setTextColor(ContextCompat.getColor(this@FlashcardListActivity, R.color.white))
+            maxLines = 1
+
+            layoutParams = LinearLayout.LayoutParams(
+                (170).dpToPx(),  // Width in pixels
+                collectionDisplayHeight.dpToPx()   // Height in pixels
+            ).apply {
+                setMargins(0, 0, 20, 4)
             }
 
-            // Get the existing drawable resource
-            val existingDrawable = ContextCompat.getDrawable(this@FlashcardListActivity, R.drawable.split_button)?.mutate()
-
-            // Combine stroke and existing drawable using LayerDrawable
-            val layerDrawable = LayerDrawable(arrayOf(strokeDrawable, existingDrawable))
-
-            // Set the combined drawable as the background
-            background = layerDrawable
-
-            setOnClickListener {
-                this.setBackgroundColor(ContextCompat.getColor(this@FlashcardListActivity, R.color.delete_highlight))
+            // Create a drawable and set it as the background
+            val drawable = GradientDrawable().apply {
+                shape = GradientDrawable.RECTANGLE
+                setColor(ContextCompat.getColor(this@FlashcardListActivity, R.color.highlight))
+                setStroke(4, ContextCompat.getColor(this@FlashcardListActivity, R.color.highlight))
             }
+            background = drawable
+        }
+
+        frontSideButton.setOnClickListener{
+            onCardPairClicked(frontSideButton, backSideButton, rowLayout)
+        }
+
+        backSideButton.setOnClickListener{
+            onCardPairClicked(frontSideButton, backSideButton, rowLayout)
         }
 
         // Add buttons to the horizontal layout
-        rowLayout.addView(collectionButton)
+        rowLayout.addView(frontSideButton)
+        rowLayout.addView(backSideButton)
 
         // Add the horizontal layout to the container
         container.addView(rowLayout)
+    }
+
+    private fun deactivateEditAndMoveButtons () {
+        buttonMoveCard.isEnabled = false
+        buttonMoveCard.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.button_color))
+        buttonEditCard.isEnabled = false
+        buttonEditCard.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.button_color))
+    }
+
+    private fun activateEditAndMoveButtons () {
+        buttonMoveCard.isEnabled = true
+        buttonMoveCard.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.highlight))
+        buttonEditCard.isEnabled = true
+        buttonEditCard.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.highlight))
+    }
+
+    private fun onCardPairClicked (frontSideButton:Button, backSideButton:Button, rowLayout:LinearLayout) {
+
+        if (currentCard != frontSideButton.contentDescription && currentCard != "") { //if another button pair is currently selected
+
+            //reset the old button pair selected state visually
+            val oldFrontSideButton: Button = currentButtonPair.getChildAt(0) as Button
+            val oldBackSideButton: Button = currentButtonPair.getChildAt(1) as Button
+            (oldFrontSideButton.background as GradientDrawable).setStroke(4, ContextCompat.getColor(this@FlashcardListActivity, R.color.primary))
+            (oldBackSideButton.background as GradientDrawable).setStroke(4, ContextCompat.getColor(this@FlashcardListActivity, R.color.highlight))
+
+            //select the clicked button pair visually
+            val newStrokeColor = ContextCompat.getColor(this@FlashcardListActivity, R.color.white)
+            (frontSideButton.background as GradientDrawable).setStroke(4, newStrokeColor)
+            (backSideButton.background as GradientDrawable).setStroke(4, newStrokeColor)
+
+            //select the clicked button pair
+            currentButtonPair = rowLayout
+            currentCard = frontSideButton.contentDescription.toString()
+
+        } else if (currentCard == "") { //if nothing is selected currently
+
+            //select the clicked button pair visually
+            val newStrokeColor = ContextCompat.getColor(this@FlashcardListActivity, R.color.white)
+            (frontSideButton.background as GradientDrawable).setStroke(4, newStrokeColor)
+            (backSideButton.background as GradientDrawable).setStroke(4, newStrokeColor)
+
+            //select the clicked button pair
+            currentButtonPair = rowLayout
+            currentCard = frontSideButton.contentDescription.toString()
+
+            activateEditAndMoveButtons()
+        } else { //if the button currently selected is clicked again
+
+            //reset the current button pair selected state visually
+            (frontSideButton.background as GradientDrawable).setStroke(4, ContextCompat.getColor(this@FlashcardListActivity, R.color.primary))
+            (backSideButton.background as GradientDrawable).setStroke(4, ContextCompat.getColor(this@FlashcardListActivity, R.color.highlight))
+
+            //reset the current button pair selected state
+            currentCard = ""
+
+            deactivateEditAndMoveButtons()
+        }
+
     }
 }

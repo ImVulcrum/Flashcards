@@ -102,6 +102,8 @@ class AddCardActivity<IOException> : AppCompatActivity() {
         val collectionNumber:Int = i ?:0
         val a:Boolean? = b?.getBoolean("calledFromAddCard")
         val calledFromAddCard:Boolean = a ?:false
+        val g:Boolean? = b?.getBoolean("calledFromList")
+        val calledFromList:Boolean = g ?:false
 
         var cardName:String = ""
         val propertiesPath = collectionPath + "/Properties.txt"
@@ -195,22 +197,43 @@ class AddCardActivity<IOException> : AppCompatActivity() {
             }
 
             abortCard(flashcardPath)
-            intent = Intent(this, TrainingActivity::class.java)
-            val b = Bundle()
-            b.putInt("collectionId", collectionNumber)
-            intent.putExtras(b)
-            startActivity(intent)
-            finish()
-        }
 
-        confirmCardButton.setOnClickListener {
-            if (confirmCard(cardName, collectionPath,flashcardPath, nativeLanguageTexbox.text.toString(), foreignLanguageTextbox.text.toString()))   {
+            if (calledFromList) {
+                intent = Intent(this, FlashcardListActivity::class.java)
+                val bu = Bundle()
+                bu.putString("collectionPath", collectionPath)
+                bu.putInt("collectionId", collectionNumber)
+                intent.putExtras(bu)
+                startActivity(intent)
+                finish()
+            } else {
                 intent = Intent(this, TrainingActivity::class.java)
                 val b = Bundle()
                 b.putInt("collectionId", collectionNumber)
                 intent.putExtras(b)
                 startActivity(intent)
                 finish()
+            }
+        }
+
+        confirmCardButton.setOnClickListener {
+            if (confirmCard(cardName, collectionPath,flashcardPath, nativeLanguageTexbox.text.toString(), foreignLanguageTextbox.text.toString()))   {
+                if (calledFromList) {
+                    intent = Intent(this, FlashcardListActivity::class.java)
+                    val bu = Bundle()
+                    bu.putString("collectionPath", collectionPath)
+                    bu.putInt("collectionId", collectionNumber)
+                    intent.putExtras(bu)
+                    startActivity(intent)
+                    finish()
+                } else {
+                    intent = Intent(this, TrainingActivity::class.java)
+                    val bun = Bundle()
+                    bun.putInt("collectionId", collectionNumber)
+                    intent.putExtras(bun)
+                    startActivity(intent)
+                    finish()
+                }
             }   else {
                 MyUtils.createShortToast(this,"native or foreign language cannot be empty")
             }

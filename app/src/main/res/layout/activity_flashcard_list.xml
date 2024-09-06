@@ -37,17 +37,13 @@
                 app:fabCustomSize="40dp"
                 tools:ignore="ContentDescription,SpeakableTextPresentCheck" />
 
-            <View
-                android:layout_width="0dp"
-                android:layout_height="0dp"
-                android:layout_weight="1" />
-
             <TextView
                 android:id="@+id/show_flashcards_header"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="start"
-                android:layout_marginEnd="50dp"
+                android:layout_marginStart="20dp"
+                android:maxLines="1"
                 android:text="Collection Name"
                 android:textAppearance="@style/SpaceGroteskLarge"
                 android:textColor="#FFFFFF" />
@@ -91,7 +87,7 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
+            android:layout_marginTop="40dp"
             android:orientation="horizontal">
 
             <com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -112,7 +108,7 @@
             <View
                 android:layout_width="0dp"
                 android:layout_height="0dp"
-                android:layout_weight="1"/>
+                android:layout_weight="1" />
 
             <com.google.android.material.floatingactionbutton.FloatingActionButton
                 android:id="@+id/b_edit_card"
@@ -131,7 +127,7 @@
             <View
                 android:layout_width="0dp"
                 android:layout_height="0dp"
-                android:layout_weight="1"/>
+                android:layout_weight="1" />
 
             <com.google.android.material.floatingactionbutton.FloatingActionButton
                 android:id="@+id/b_add_card"

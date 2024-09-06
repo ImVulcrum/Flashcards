@@ -94,6 +94,7 @@ class TrainingActivity: AppCompatActivity() {
                 Log.e("HUGE ERROR", "orderLine is null")
             }
         }
+
         editCardButton.isEnabled = false
         editCardButton.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.button_color))
         flashcardCounter.text = cardOrder.size.toString() + " Cards"
@@ -238,6 +239,7 @@ class TrainingActivity: AppCompatActivity() {
             b.putInt("collectionId", collectionNumber)
             b.putBoolean("calledFromAddCard", false)
             b.putString("cardName", currentCard.substring(2))
+            b.putBoolean("calledFromList", false)
             intent.putExtras(b)
             startActivity(intent)
             finish()
@@ -259,6 +261,7 @@ class TrainingActivity: AppCompatActivity() {
             b.putString("collectionPath", collectionPath)
             b.putInt("collectionId", collectionNumber)
             b.putBoolean("calledFromAddCard", true)
+            b.putBoolean("calledFromList", false)
             intent.putExtras(b)
             startActivity(intent)
             finish()

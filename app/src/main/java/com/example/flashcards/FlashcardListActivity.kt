@@ -31,6 +31,13 @@ class FlashcardListActivity : AppCompatActivity() {
 
     var currentCard:String = ""
     lateinit var currentButtonPair:LinearLayout
+    var collectionNumber = 0
+
+    @Deprecated("Deprecated in Java")
+    @SuppressLint("MissingSuperCall")
+    override fun onBackPressed() {
+        backToTraining()
+    }
 
     @SuppressLint("SetTextI18n")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -51,7 +58,7 @@ class FlashcardListActivity : AppCompatActivity() {
         val v:String? = b?.getString("collectionPath")
         val collectionPath:String = v ?:""
         val i:Int? = b?.getInt("collectionId")
-        val collectionNumber:Int = i ?:0
+        collectionNumber = i ?:0
 
         //set title and index hint
         collectionNameHeader.text = MyUtils.readLineFromFile(collectionPath + "/Properties.txt", 0)
@@ -87,17 +94,29 @@ class FlashcardListActivity : AppCompatActivity() {
         }
 
         buttonAddCard.setOnClickListener {
-            TODO()
-        }
-
-        backButton.setOnClickListener {
-            intent = Intent(this, TrainingActivity::class.java)
-            val b = Bundle()
-            b.putInt("collectionId", collectionNumber)
-            intent.putExtras(b)
+            intent = Intent(this, AddCardActivity::class.java)
+            val bun = Bundle()
+            bun.putString("collectionPath", collectionPath)
+            bun.putInt("collectionId", collectionNumber)
+            bun.putBoolean("calledFromAddCard", true)
+            bun.putBoolean("calledFromList", true)
+            intent.putExtras(bun)
             startActivity(intent)
             finish()
         }
+
+        backButton.setOnClickListener {
+            backToTraining()
+        }
+    }
+
+    private fun backToTraining() {
+        intent = Intent(this, TrainingActivity::class.java)
+        val b = Bundle()
+        b.putInt("collectionId", collectionNumber)
+        intent.putExtras(b)
+        startActivity(intent)
+        finish()
     }
 
     // Function to convert dp to pixels

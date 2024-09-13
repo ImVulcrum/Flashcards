@@ -1,5 +1,6 @@
 package com.example.flashcards
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
@@ -17,6 +18,15 @@ class CollectionSettingsActivity : AppCompatActivity() {
     private lateinit var collectionName: EditText
     private lateinit var archiveButton: Button
 
+    var collectionNumber = 0
+    lateinit var collectionPath: String
+
+    @Deprecated("Deprecated in Java")
+    @SuppressLint("MissingSuperCall")
+    override fun onBackPressed() {
+        backToTraining()
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         //boilerplate
         super.onCreate(savedInstanceState)
@@ -30,9 +40,9 @@ class CollectionSettingsActivity : AppCompatActivity() {
 
         val b = intent.extras
         val v: String? = b?.getString("collectionPath")
-        val collectionPath: String = v ?: ""
+        collectionPath = v ?: ""
         val i: Int? = b?.getInt("collectionId")
-        val collectionNumber: Int = i ?: 0
+        collectionNumber = i ?: 0
 
         collectionName.setText(MyUtils.readLineFromFile(collectionPath + "/Properties.txt", 0))
         nativeLanguageName.setText(MyUtils.readLineFromFile(collectionPath + "/Properties.txt", 1))
@@ -57,23 +67,26 @@ class CollectionSettingsActivity : AppCompatActivity() {
 
         //back button
         backButton.setOnClickListener {
-            if (nativeLanguageName.text.isNullOrEmpty() || foreignLanguageName.text.isNullOrEmpty()) {
-                MyUtils.createShortToast(this, "native or foreign language name cannot be empty")
-            } else if (collectionName.text.isNullOrEmpty()) {
-                MyUtils.createShortToast(this, "collection name cannot be empty")
-            } else {
-                MyUtils.writeTextFile(collectionPath + "/Properties.txt", 0, collectionName.text.toString())
-                MyUtils.writeTextFile(collectionPath + "/Properties.txt", 1, nativeLanguageName.text.toString())
-                MyUtils.writeTextFile(collectionPath + "/Properties.txt", 2, foreignLanguageName.text.toString())
+            backToTraining()
+        }
+    }
 
-                intent = Intent(this, TrainingActivity::class.java)
-                val b = Bundle()
-                b.putInt("collectionId", collectionNumber)
-                intent.putExtras(b)
-                startActivity(intent)
-                finish()
-            }
+    private fun backToTraining() {
+        if (nativeLanguageName.text.isNullOrEmpty() || foreignLanguageName.text.isNullOrEmpty()) {
+            MyUtils.createShortToast(this, "native or foreign language name cannot be empty")
+        } else if (collectionName.text.isNullOrEmpty()) {
+            MyUtils.createShortToast(this, "collection name cannot be empty")
+        } else {
+            MyUtils.writeTextFile(collectionPath + "/Properties.txt", 0, collectionName.text.toString())
+            MyUtils.writeTextFile(collectionPath + "/Properties.txt", 1, nativeLanguageName.text.toString())
+            MyUtils.writeTextFile(collectionPath + "/Properties.txt", 2, foreignLanguageName.text.toString())
 
+            intent = Intent(this, TrainingActivity::class.java)
+            val b = Bundle()
+            b.putInt("collectionId", collectionNumber)
+            intent.putExtras(b)
+            startActivity(intent)
+            finish()
         }
     }
 }

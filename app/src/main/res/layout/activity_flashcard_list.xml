@@ -46,7 +46,7 @@
                 android:maxLines="1"
                 android:text="Collection Name"
                 android:textAppearance="@style/SpaceGroteskLarge"
-                android:textColor="#FFFFFF" />
+                android:textColor="@color/white" />
 
         </LinearLayout>
 

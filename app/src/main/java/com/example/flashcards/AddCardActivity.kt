@@ -151,12 +151,23 @@ class AddCardActivity<IOException> : AppCompatActivity() {
 
         closeButton.setOnClickListener {
             abortCard(flashcardPath)
-            intent = Intent(this, TrainingActivity::class.java)
-            val b = Bundle()
-            b.putInt("collectionId", collectionNumber)
-            intent.putExtras(b)
-            startActivity(intent)
-            finish()
+
+            if (calledFromList) {
+                intent = Intent(this, FlashcardListActivity::class.java)
+                val bu = Bundle()
+                bu.putString("collectionPath", collectionPath)
+                bu.putInt("collectionId", collectionNumber)
+                intent.putExtras(bu)
+                startActivity(intent)
+                finish()
+            } else {
+                intent = Intent(this, TrainingActivity::class.java)
+                val b = Bundle()
+                b.putInt("collectionId", collectionNumber)
+                intent.putExtras(b)
+                startActivity(intent)
+                finish()
+            }
         }
 
         deleteButton.setOnClickListener {

@@ -284,11 +284,11 @@
                 android:layout_height="64dp"
                 android:layout_marginStart="100dp"
                 android:clickable="true"
-                android:src="@android:drawable/ic_input_add"
+                android:src="@drawable/plus"
                 app:backgroundTint="@color/primary"
                 app:elevation="0dp"
                 app:fabCustomSize="64dp"
-                app:maxImageSize="55dp"
+                app:maxImageSize="40dp"
                 app:shapeAppearance="@style/Widget.Material3.CircularProgressIndicator.Small"
                 app:tint="@color/white"
                 tools:ignore="ContentDescription,SpeakableTextPresentCheck" />

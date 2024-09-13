@@ -1,5 +1,6 @@
 package com.example.flashcards
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
@@ -16,6 +17,12 @@ class SettingsActivity : AppCompatActivity() {
     private lateinit var nativeLanguagePrompt: EditText
     private lateinit var foreignLanguagePrompt: EditText
 
+    @Deprecated("Deprecated in Java")
+    @SuppressLint("MissingSuperCall")
+    override fun onBackPressed() {
+        saveSettings()
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         //boilerplate
         super.onCreate(savedInstanceState)
@@ -27,7 +34,6 @@ class SettingsActivity : AppCompatActivity() {
         foreignLanguagePrompt = findViewById(R.id.enter_foreign_language_name)
 
         val sharedPref = getSharedPreferences("pref", MODE_PRIVATE)
-        val editor = sharedPref.edit()
 
         val nativeLanguage = sharedPref.getString("native_language", "German").toString()
         val foreignLanguage = sharedPref.getString("foreign_language", "Spanish").toString()
@@ -39,19 +45,26 @@ class SettingsActivity : AppCompatActivity() {
 
         //back button
         backButton.setOnClickListener {
-            if (nativeLanguagePrompt.text.isNullOrEmpty() || foreignLanguagePrompt.text.isNullOrEmpty()) {
-                MyUtils.createShortToast(this, "native or foreign language name cannot be empty")
-            }else if (setCollectionIndex.text.isNullOrEmpty()){
-                MyUtils.createShortToast(this, "collection index cannot be empty")
-            } else {
-                editor.putString("native_language", nativeLanguagePrompt.text.toString())
-                editor.putString("foreign_language", foreignLanguagePrompt.text.toString())
-                editor.putInt("collection_count", setCollectionIndex.text.toString().toInt()-1)
-                editor.apply()
+            saveSettings()
+        }
+    }
 
-                intent = Intent(this, MainActivity::class.java)
-                startActivity(intent)
-            }
+    private fun saveSettings() {
+        val sharedPref = getSharedPreferences("pref", MODE_PRIVATE)
+        val editor = sharedPref.edit()
+
+        if (nativeLanguagePrompt.text.isNullOrEmpty() || foreignLanguagePrompt.text.isNullOrEmpty()) {
+            MyUtils.createShortToast(this, "native or foreign language name cannot be empty")
+        }else if (setCollectionIndex.text.isNullOrEmpty()){
+            MyUtils.createShortToast(this, "collection index cannot be empty")
+        } else {
+            editor.putString("native_language", nativeLanguagePrompt.text.toString())
+            editor.putString("foreign_language", foreignLanguagePrompt.text.toString())
+            editor.putInt("collection_count", setCollectionIndex.text.toString().toInt()-1)
+            editor.apply()
+
+            intent = Intent(this, MainActivity::class.java)
+            startActivity(intent)
         }
     }
 }

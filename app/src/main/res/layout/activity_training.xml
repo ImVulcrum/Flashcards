@@ -12,26 +12,49 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginTop="8dp"
         android:gravity="center_horizontal"
         android:orientation="vertical"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
-        <TextView
-            android:id="@+id/collection_title"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:gravity="center"
-            android:text="Collection Name"
-            android:textAppearance="@style/SpaceGroteskLarge"
-            android:textColor="@color/white" />
+            android:orientation="horizontal">
+
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
+                android:id="@+id/b_back_flashcards"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_gravity="center|end"
+                android:layout_marginStart="8dp"
+                android:clickable="true"
+                android:src="@drawable/back"
+                app:backgroundTint="@color/highlight"
+                app:fabCustomSize="40dp"
+                app:tint="@color/white"
+                tools:ignore="ContentDescription,SpeakableTextPresentCheck" />
+
+            <TextView
+                android:id="@+id/collection_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="end"
+                android:layout_marginStart="5dp"
+                android:gravity="center_horizontal"
+                android:maxLines="1"
+                android:paddingStart="-45dp"
+                android:text="Collection Name"
+                android:textAppearance="@style/SpaceGroteskLarge"
+                android:textColor="@color/white" />
+        </LinearLayout>
 
         <View
             android:id="@+id/divider2"
             android:layout_width="match_parent"
             android:layout_height="1dp"
+            android:layout_marginTop="5dp"
             android:background="?android:attr/listDivider"
             android:backgroundTint="@color/white"
             android:backgroundTintMode="add" />
@@ -50,24 +73,23 @@
             android:orientation="horizontal">
 
             <com.google.android.material.floatingactionbutton.FloatingActionButton
-                android:id="@+id/b_back_flashcards"
+                android:id="@+id/b_shuffle_flashcards"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="start"
                 android:layout_marginStart="10dp"
                 android:clickable="true"
-                android:src="@drawable/back"
-                app:tint="@color/white"
+                android:src="@drawable/shuffle"
                 app:backgroundTint="@color/highlight"
                 app:elevation="0dp"
-                app:maxImageSize="35dp"
+                app:maxImageSize="45dp"
                 app:shapeAppearance="@style/Widget.Material3.CircularProgressIndicator.Small"
+                app:tint="@color/white"
                 tools:ignore="ContentDescription,SpeakableTextPresentCheck" />
 
             <View
                 android:layout_width="0dp"
                 android:layout_height="0dp"
-                android:layout_weight="1"/>
+                android:layout_weight="1" />
 
             <com.google.android.material.floatingactionbutton.FloatingActionButton
                 android:id="@+id/b_show_flashcards"
@@ -86,7 +108,7 @@
             <View
                 android:layout_width="0dp"
                 android:layout_height="0dp"
-                android:layout_weight="1"/>
+                android:layout_weight="1" />
 
             <com.google.android.material.floatingactionbutton.FloatingActionButton
                 android:id="@+id/b_settings_flashcards"
@@ -97,10 +119,10 @@
                 android:clickable="true"
                 android:src="@drawable/settings"
                 app:backgroundTint="@color/highlight"
-                app:tint="@color/white"
                 app:elevation="0dp"
                 app:maxImageSize="55dp"
                 app:shapeAppearance="@style/Widget.Material3.CircularProgressIndicator.Small"
+                app:tint="@color/white"
                 tools:ignore="ContentDescription,SpeakableTextPresentCheck" />
         </LinearLayout>
 
@@ -119,7 +141,7 @@
             android:id="@+id/flashcard_id"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="40dp"
+            android:layout_marginTop="20dp"
             android:gravity="center_horizontal"
             android:text="card id" />
 
@@ -151,23 +173,23 @@
                 android:src="@drawable/unmuted"
                 app:backgroundTint="@color/highlight"
                 app:elevation="0dp"
-                app:tint="@color/white"
                 app:maxImageSize="40dp"
                 app:shapeAppearance="@style/Widget.Material3.CircularProgressIndicator.Small"
+                app:tint="@color/white"
                 tools:ignore="ContentDescription,SpeakableTextPresentCheck" />
 
             <com.google.android.material.floatingactionbutton.FloatingActionButton
-                android:id="@+id/b_shuffle_flashcards"
+                android:id="@+id/b_move_flashcards"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="40dp"
                 android:clickable="true"
-                android:src="@drawable/shuffle"
+                android:src="@drawable/move"
                 app:backgroundTint="@color/highlight"
                 app:elevation="0dp"
-                app:tint="@color/white"
                 app:maxImageSize="45dp"
                 app:shapeAppearance="@style/Widget.Material3.CircularProgressIndicator.Small"
+                app:tint="@color/white"
                 tools:ignore="ContentDescription,SpeakableTextPresentCheck" />
 
             <com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -204,7 +226,7 @@
             android:id="@+id/textView2"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="60dp"
+            android:layout_marginTop="30dp"
             android:gravity="center_horizontal"
             android:text="only applies on next shuffle"
             android:textAppearance="@style/SpaceGroteskSmall"
@@ -252,8 +274,8 @@
             android:layout_height="wrap_content"
             android:text="auto shuffle"
             android:textAppearance="@style/SpaceGroteskVerySmall"
-            app:buttonTint="@color/strong_highlight"
-            android:textColor="@color/white" />
+            android:textColor="@color/white"
+            app:buttonTint="@color/strong_highlight" />
 
     </LinearLayout>
 

@@ -33,6 +33,12 @@ class TrainingActivity: AppCompatActivity() {
     var cardOrder = listOf<String>()
     var cardIndex: Int = 0
 
+    @Deprecated("Deprecated in Java")
+    @SuppressLint("MissingSuperCall")
+    override fun onBackPressed() {
+        backToMainMenu()
+    }
+
     @SuppressLint("SetTextI18n")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -216,9 +222,7 @@ class TrainingActivity: AppCompatActivity() {
 
         //back button
         backButton.setOnClickListener {
-            MyUtils.stopAudio()
-            intent = Intent(this, MainActivity::class.java)
-            startActivity(intent)
+            backToMainMenu()
         }
 
         editCardButton.setOnClickListener {
@@ -291,6 +295,12 @@ class TrainingActivity: AppCompatActivity() {
             startActivity(intent)
             finish()
         }
+    }
+
+    private fun backToMainMenu() {
+        MyUtils.stopAudio()
+        intent = Intent(this, MainActivity::class.java)
+        startActivity(intent)
     }
 
     private fun shuffleCards(collectionPath: String, nativeToForeign: Boolean, foreignToNative: Boolean): List<String> {

@@ -226,6 +226,7 @@ class TrainingActivity: AppCompatActivity() {
         }
 
         editCardButton.setOnClickListener {
+            MyUtils.stopAudio()
             var currentCard = ""
             if (!flashcardShowsQuestion && cardIndex != 0) {
                 currentCard = cardOrder[cardIndex-1]
@@ -250,6 +251,7 @@ class TrainingActivity: AppCompatActivity() {
         }
 
         showAllCardsButton.setOnClickListener {
+            MyUtils.stopAudio()
             intent = Intent(this, FlashcardListActivity::class.java)
             val b = Bundle()
             b.putString("collectionPath", collectionPath)
@@ -260,6 +262,7 @@ class TrainingActivity: AppCompatActivity() {
         }
 
         addCardButton.setOnClickListener {
+            MyUtils.stopAudio()
             intent = Intent(this, AddCardActivity::class.java)
             val b = Bundle()
             b.putString("collectionPath", collectionPath)
@@ -272,6 +275,7 @@ class TrainingActivity: AppCompatActivity() {
         }
 
         shuffleButton.setOnClickListener {
+            MyUtils.stopAudio()
             MyUtils.showConfirmationDialog(this,"Shuffle Cards", "Are you sure you want to shuffle?") {userChoice ->
                 if (userChoice) {
                     cardOrder = shuffleCards(collectionPath, nativeToForeignActive, foreignToNativeActive)
@@ -287,6 +291,7 @@ class TrainingActivity: AppCompatActivity() {
         }
 
         collectionSettingButton.setOnClickListener {
+            MyUtils.stopAudio()
             intent = Intent(this, CollectionSettingsActivity::class.java)
             val b = Bundle()
             b.putString("collectionPath", collectionPath)

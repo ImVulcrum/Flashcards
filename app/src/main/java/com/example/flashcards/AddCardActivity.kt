@@ -54,7 +54,7 @@ class AddCardActivity<IOException> : AppCompatActivity() {
     private var recordFile: File? = null
     private var isRecording = false
 
-    var flashcardPath:String = ""
+    var pathOfTheCurrentFlashcard:String = ""
 
     @Deprecated("Deprecated in Java")
     @SuppressLint("MissingSuperCall")
@@ -106,6 +106,7 @@ class AddCardActivity<IOException> : AppCompatActivity() {
         val calledFromList:Boolean = g ?:false
 
         var cardName:String = ""
+        val flashcardPath = getExternalFilesDir(null).toString() + "/Cards"
         val propertiesPath = collectionPath + "/Properties.txt"
 
         //set the language labels
@@ -116,7 +117,9 @@ class AddCardActivity<IOException> : AppCompatActivity() {
         if (calledFromAddCard) {
             actionBar.removeView(deleteButton)
 
-            flashcardPath = createCard(collectionPath, collectionNumber=collectionNumber)
+            pathOfTheCurrentFlashcard = createCard(flashcardPath= flashcardPath, collectionNumber=collectionNumber, collectionPath=collectionPath)
+
+            cardName = pathOfTheCurrentFlashcard.removePrefix(flashcardPath+"/")
 
             //grey out audio buttons
             nativePlayButton.backgroundTintList = (ContextCompat.getColorStateList(this@AddCardActivity, R.color.button_color))
@@ -134,23 +137,23 @@ class AddCardActivity<IOException> : AppCompatActivity() {
             cardName = c ?:""
 
             //set card id text
-            cardId.text = "Collection_" + collectionNumber.toString() + " (" + '"' + MyUtils.readLineFromFile(collectionPath + "/Properties.txt", 0) +'"'+ ")" + " - Card_#" + cardName.substring(10)
+            cardId.text = "Collection_" + collectionNumber.toString() + " (" + '"' + MyUtils.readLineFromFile(collectionPath + "/Properties.txt", 0) +'"'+ ")" + " - Card_#" + cardName.substring(5)
 
-            flashcardPath = "$collectionPath/$cardName"
+            pathOfTheCurrentFlashcard = "$flashcardPath/$cardName"
 
-            nativeLanguageTexbox.setText(MyUtils.readLineFromFile(flashcardPath + "/Content.txt", 0))
-            foreignLanguageTextbox.setText(MyUtils.readLineFromFile(flashcardPath + "/Content.txt", 1))
+            nativeLanguageTexbox.setText(MyUtils.readLineFromFile(pathOfTheCurrentFlashcard + "/Content.txt", 0))
+            foreignLanguageTextbox.setText(MyUtils.readLineFromFile(pathOfTheCurrentFlashcard + "/Content.txt", 1))
 
-            if (!MyUtils.fileExists(flashcardPath + "/native.mp3")) {
+            if (!MyUtils.fileExists(pathOfTheCurrentFlashcard + "/native.mp3")) {
                 nativePlayButton.backgroundTintList = (ContextCompat.getColorStateList(this@AddCardActivity, R.color.button_color))
             }
-            if (!MyUtils.fileExists(flashcardPath + "/foreign.mp3")) {
+            if (!MyUtils.fileExists(pathOfTheCurrentFlashcard + "/foreign.mp3")) {
                 foreignPlayButton.backgroundTintList = (ContextCompat.getColorStateList(this@AddCardActivity, R.color.button_color))
             }
         }
 
-        closeButton.setOnClickListener {
-            abortCard(flashcardPath)
+        closeButton.setOnClickListener { //only visible when adding a new card
+            abortCard(pathOfTheCurrentFlashcard)
 
             if (calledFromList) {
                 intent = Intent(this, FlashcardListActivity::class.java)
@@ -170,7 +173,24 @@ class AddCardActivity<IOException> : AppCompatActivity() {
             }
         }
 
-        deleteButton.setOnClickListener {
+        deleteButton.setOnClickListener { //only visble when editing a card
+            //remove the card from the flashcards file of the collection
+            val cardStringInTheCollection = MyUtils.readLineFromFile(collectionPath + "/Flashcards.txt", 0)
+
+            if (cardStringInTheCollection != null) {
+                val flashcardsInTheCollection: MutableList<String> = cardStringInTheCollection.split(" ").toMutableList()
+                flashcardsInTheCollection.remove(cardName)
+
+                if (flashcardsInTheCollection.isEmpty()) {
+                    MyUtils.writeTextFile(collectionPath + "/Flashcards.txt", 0, "-")
+                }   else {
+                    MyUtils.writeTextFile(collectionPath + "/Flashcards.txt", 0, flashcardsInTheCollection.joinToString(" "))
+                }
+            }   else {
+                MyUtils.createShortToast(this, "Error: There are no cards in the collection for some reason")
+            }
+
+            //remove the card from the orderline in the properties file
             val cardOrder = MyUtils.readLineFromFile(collectionPath + "/Properties.txt", 3)
             if (cardOrder == "-") {
                 //do nothing
@@ -207,11 +227,13 @@ class AddCardActivity<IOException> : AppCompatActivity() {
                 }
             }
 
-            abortCard(flashcardPath)
+            //delete the folder of the card
+            abortCard(pathOfTheCurrentFlashcard)
 
             if (calledFromList) {
                 intent = Intent(this, FlashcardListActivity::class.java)
                 val bu = Bundle()
+                bu.putString("flashcardPath", flashcardPath)
                 bu.putString("collectionPath", collectionPath)
                 bu.putInt("collectionId", collectionNumber)
                 intent.putExtras(bu)
@@ -227,11 +249,12 @@ class AddCardActivity<IOException> : AppCompatActivity() {
             }
         }
 
-        confirmCardButton.setOnClickListener {
-            if (confirmCard(cardName, collectionPath,flashcardPath, nativeLanguageTexbox.text.toString(), foreignLanguageTextbox.text.toString()))   {
+        confirmCardButton.setOnClickListener { //visble when adding a new card AND editing an old one
+            if (confirmCard(creatingNewCard = calledFromAddCard,collectionPath= collectionPath, flashcardName = cardName, nativeLanguagePrompt = nativeLanguageTexbox.text.toString(), foreignLanguagePrompt = foreignLanguageTextbox.text.toString()))   {
                 if (calledFromList) {
                     intent = Intent(this, FlashcardListActivity::class.java)
                     val bu = Bundle()
+                    bu.putString("flashcardPath", flashcardPath)
                     bu.putString("collectionPath", collectionPath)
                     bu.putInt("collectionId", collectionNumber)
                     intent.putExtras(bu)
@@ -250,12 +273,13 @@ class AddCardActivity<IOException> : AppCompatActivity() {
             }
         }
 
-        addAnotherCardButton.setOnClickListener {
-            if (confirmCard("", collectionPath, flashcardPath, nativeLanguageTexbox.text.toString(), foreignLanguageTextbox.text.toString()))   {
+        addAnotherCardButton.setOnClickListener { //only visible when adding a new card
+            if (confirmCard(creatingNewCard = true, collectionPath=collectionPath, flashcardName = cardName, nativeLanguagePrompt = nativeLanguageTexbox.text.toString(), foreignLanguagePrompt = foreignLanguageTextbox.text.toString()))   {
                 nativeLanguageTexbox.text.clear()
                 foreignLanguageTextbox.text.clear()
 
-                flashcardPath = createCard(collectionPath, collectionNumber=collectionNumber)
+                pathOfTheCurrentFlashcard = createCard(flashcardPath, collectionNumber=collectionNumber, collectionPath=collectionPath)
+                cardName = pathOfTheCurrentFlashcard.removePrefix(flashcardPath+"/")
 
                 nativePlayButton.backgroundTintList = (ContextCompat.getColorStateList(this@AddCardActivity, R.color.button_color))
                 foreignPlayButton.backgroundTintList = (ContextCompat.getColorStateList(this@AddCardActivity, R.color.button_color))
@@ -268,7 +292,7 @@ class AddCardActivity<IOException> : AppCompatActivity() {
         nativeRecordButton.setOnTouchListener { view, event ->
             when (event.action) {
                 MotionEvent.ACTION_DOWN -> {
-                    startRecording(flashcardPath, "native", nativeRecordButton)
+                    startRecording(pathOfTheCurrentFlashcard, "native", nativeRecordButton)
                 }
                 MotionEvent.ACTION_UP -> {
                     stopRecording(nativeRecordButton)
@@ -282,7 +306,7 @@ class AddCardActivity<IOException> : AppCompatActivity() {
         foreignRecordButton.setOnTouchListener { view, event ->
             when (event.action) {
                 MotionEvent.ACTION_DOWN -> {
-                    startRecording(flashcardPath, "foreign", foreignRecordButton)
+                    startRecording(pathOfTheCurrentFlashcard, "foreign", foreignRecordButton)
                 }
                 MotionEvent.ACTION_UP -> {
                     stopRecording(foreignRecordButton)
@@ -294,66 +318,75 @@ class AddCardActivity<IOException> : AppCompatActivity() {
         }
 
         nativePlayButton.setOnClickListener {
-            if (!MyUtils.playAudio("$flashcardPath/native.mp3")) {
+            if (!MyUtils.playAudio("$pathOfTheCurrentFlashcard/native.mp3")) {
                 MyUtils.createShortToast(this, "Native audio does not exist")
             }
         }
 
         foreignPlayButton.setOnClickListener {
-            if (!MyUtils.playAudio("$flashcardPath/foreign.mp3")) {
+            if (!MyUtils.playAudio("$pathOfTheCurrentFlashcard/foreign.mp3")) {
                 MyUtils.createShortToast(this, "Foreign audio does not exist")
             }
         }
 
         nativeDeleteButton.setOnClickListener {
-            MyUtils.deleteFile(this, "$flashcardPath/native.mp3", "Audio deleted successfully")
+            MyUtils.deleteFile(this, "$pathOfTheCurrentFlashcard/native.mp3", "Audio deleted successfully")
             nativePlayButton.backgroundTintList = (ContextCompat.getColorStateList(this@AddCardActivity, R.color.button_color))
         }
 
         foreignDeleteButton.setOnClickListener {
-            MyUtils.deleteFile(this, "$flashcardPath/foreign.mp3", "Audio deleted successfully")
+            MyUtils.deleteFile(this, "$pathOfTheCurrentFlashcard/foreign.mp3", "Audio deleted successfully")
             foreignPlayButton.backgroundTintList = (ContextCompat.getColorStateList(this@AddCardActivity, R.color.button_color))
         }
     }
 
-    private fun createCard(collectionPath: String, showMessage:Boolean =false, collectionNumber:Int):String{
+    private fun createCard(flashcardPath: String, showMessage:Boolean =false, collectionNumber:Int, collectionPath:String):String{
         val sharedPref = getSharedPreferences("pref", MODE_PRIVATE)
         val editor = sharedPref.edit()
 
-        var flashcardCount = sharedPref.getInt(collectionPath, 0)
-        cardId.text = "Collection_" + collectionNumber.toString() + " (" + '"' + MyUtils.readLineFromFile(collectionPath + "/Properties.txt", 0) +'"'+ ")" + " - Card_#$flashcardCount"
+        var flashcardIndexOfNextCard = sharedPref.getInt(collectionPath, 0)
+        cardId.text = "Collection_" + collectionNumber.toString() + " (" + '"' + MyUtils.readLineFromFile(collectionPath + "/Properties.txt", 0) +'"'+ ")" + " - Card_#$flashcardIndexOfNextCard"
 
+        val pathOfCreatedFlashcard = "$flashcardPath/Flashcard_$flashcardIndexOfNextCard"
 
+        MyUtils.createFolder(this, flashcardPath, "Flashcard_$flashcardIndexOfNextCard", "Flashcard created successfully", showMessage)
+        MyUtils.createTextFile(pathOfCreatedFlashcard, "Content.txt")
 
-        val flashcardPath = "$collectionPath/Flashcard_$flashcardCount"
-
-        MyUtils.createFolder(this, collectionPath, "Flashcard_$flashcardCount", "Flashcard created successfully", showMessage)
-        MyUtils.createTextFile(flashcardPath, "Content.txt")
-
-        flashcardCount++
-        editor.putInt(collectionPath, flashcardCount)
+        flashcardIndexOfNextCard++
+        editor.putInt(collectionPath, flashcardIndexOfNextCard)
         editor.apply()
 
-        return flashcardPath
+        return pathOfCreatedFlashcard
     }
 
-    private fun confirmCard(cardName: String, collectionPath: String, flashcardPath: String, nativeLanguagePrompt: String, foreignLanguagePrompt: String):Boolean {
+    private fun confirmCard(creatingNewCard: Boolean, collectionPath: String, flashcardName: String, nativeLanguagePrompt: String, foreignLanguagePrompt: String):Boolean {
         if (nativeLanguagePrompt.isNullOrEmpty() || foreignLanguagePrompt.isNullOrEmpty()) {
             return false
         } else {
-            val flashcardId = flashcardPath.removePrefix(collectionPath+"/")
+            MyUtils.writeTextFile(pathOfTheCurrentFlashcard + "/Content.txt", 0, nativeLanguagePrompt)
+            MyUtils.writeTextFile(pathOfTheCurrentFlashcard + "/Content.txt", 1, foreignLanguagePrompt)
 
-            MyUtils.writeTextFile(flashcardPath + "/Content.txt", 0, nativeLanguagePrompt)
-            MyUtils.writeTextFile(flashcardPath + "/Content.txt", 1, foreignLanguagePrompt)
+            if (creatingNewCard) { //only when it is a new card it should be added to the orderline
+                //adding the collection reference to the flashcard
+                MyUtils.writeTextFile(pathOfTheCurrentFlashcard + "/Content.txt", 2, collectionPath)
 
-            if (cardName == "") {
-                var cardOrder = MyUtils.readLineFromFile(collectionPath + "/Properties.txt", 3)
+                //adding the card to the flashcards file or the collection
+                var cardStringInTheCollection = MyUtils.readLineFromFile(collectionPath + "/Flashcards.txt", 0)
                 var space = " "
+                if (cardStringInTheCollection == "-") {
+                    cardStringInTheCollection = ""
+                    space = ""
+                }
+                MyUtils.writeTextFile(collectionPath + "/Flashcards.txt", 0, cardStringInTheCollection + space + flashcardName)
+
+                //adding the card to the shuffle order line in the properties file of the corresponding collection
+                var cardOrder = MyUtils.readLineFromFile(collectionPath + "/Properties.txt", 3)
+                space = " "
                 if (cardOrder == "-") {
                     cardOrder = ""
                     space = ""
                 }
-                MyUtils.writeTextFile(collectionPath + "/Properties.txt", 3, cardOrder + space + "n_" + flashcardId)
+                MyUtils.writeTextFile(collectionPath + "/Properties.txt", 3, cardOrder + space + "n_" + flashcardName)
             }
 
             MyUtils.createShortToast(this, "Card saved successfully")

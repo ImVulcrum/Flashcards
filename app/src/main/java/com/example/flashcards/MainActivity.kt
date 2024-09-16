@@ -3,6 +3,7 @@ package com.example.flashcards
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.CheckBox
@@ -24,6 +25,7 @@ class MainActivity : AppCompatActivity() {
     private var collectionDisplayWidth = 320
     private var collectionDisplayHeight = 40
     lateinit var appPath: String
+    lateinit var collectionPath: String
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -36,17 +38,16 @@ class MainActivity : AppCompatActivity() {
         showArchivedCollections = findViewById(R.id.show_archived_collections)
 
         appPath = getExternalFilesDir(null).toString()
+        collectionPath = appPath + "/Collections"
 
         //scan for collections
-        val collections = MyUtils.getFoldersInDirectory(appPath)
+        val collections = MyUtils.getFoldersInDirectory(collectionPath)
 
         for (collection in collections) {
-            if (MyUtils.readLineFromFile(appPath + "/" + collection + "/Properties.txt", 5) == "false" || MyUtils.readLineFromFile(appPath + "/" + collection + "/Properties.txt", 5) == "") {
+            if (MyUtils.readLineFromFile(collectionPath + "/" + collection + "/Properties.txt", 5) == "false" || MyUtils.readLineFromFile(collectionPath + "/" + collection + "/Properties.txt", 5) == "") {
                 addCollectionButtons(collection.removePrefix("Collection_").toInt(), false)
             }
         }
-
-        MyUtils.createFolder(this,"/storage/emulated/0/DCIM/", "Flashcards", "", false)
 
         buttonAdd.setOnClickListener {
             addCollection()
@@ -60,14 +61,14 @@ class MainActivity : AppCompatActivity() {
         showArchivedCollections.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked) {
                 for (collection in collections) {
-                    if (MyUtils.readLineFromFile(appPath + "/" + collection + "/Properties.txt", 5) == "true") {
+                    if (MyUtils.readLineFromFile(collectionPath + "/" + collection + "/Properties.txt", 5) == "true") {
                         addCollectionButtons(collection.removePrefix("Collection_").toInt(), false, R.color.button_color)
                     }
                 }
             }   else {
                 container.removeAllViews()
                 for (collection in collections) {
-                    if (MyUtils.readLineFromFile(appPath + "/" + collection + "/Properties.txt", 5) == "false" || MyUtils.readLineFromFile(appPath + "/" + collection + "/Properties.txt", 5) == "") {
+                    if (MyUtils.readLineFromFile(collectionPath + "/" + collection + "/Properties.txt", 5) == "false" || MyUtils.readLineFromFile(collectionPath + "/" + collection + "/Properties.txt", 5) == "") {
                         addCollectionButtons(collection.removePrefix("Collection_").toInt(), false)
                     }
                 }
@@ -92,10 +93,10 @@ class MainActivity : AppCompatActivity() {
 
         collectionCount++
         val folderName = "Collection_$collectionCount"
-        val folderPath = appPath + "/" + folderName
+        val folderPath = collectionPath + "/" + folderName
         val fileName = "Properties.txt"
 
-        if (MyUtils.createFolder(this, appPath, folderName, "Collection created successfully")) { //only do something if the folder does not exist
+        if (MyUtils.createFolder(this, collectionPath, folderName, "Collection created successfully")) { //only do something if the folder does not exist
             MyUtils.createTextFile(folderPath, fileName)
             MyUtils.writeTextFile(folderPath + "/" + fileName, 0, "Collection_$collectionCount")
             MyUtils.writeTextFile(folderPath + "/" + fileName, 1, nativeLanguage)
@@ -131,7 +132,7 @@ class MainActivity : AppCompatActivity() {
             if (isNewCreated) {
                 text = "Collection_$collectionId"
             }   else {
-                text = MyUtils.readLineFromFile(appPath + "/Collection_$collectionId/Properties.txt", 0)
+                text = MyUtils.readLineFromFile(collectionPath + "/Collection_$collectionId/Properties.txt", 0)
             }
 
             isAllCaps = false
@@ -170,7 +171,7 @@ class MainActivity : AppCompatActivity() {
                 MyUtils.showConfirmationDialog(this@MainActivity,"Delete Collection", "Are you sure you want to delete this collection?") {userChoice ->
                     if (userChoice) {
                         container.removeView(rowLayout)
-                        MyUtils.deleteFolder(this@MainActivity, appPath + "/" + button.contentDescription.toString(), "Collection deleted successfully")
+                        MyUtils.deleteFolder(this@MainActivity, collectionPath + "/" + button.contentDescription.toString(), "Collection deleted successfully")
                     }
                 }
             }

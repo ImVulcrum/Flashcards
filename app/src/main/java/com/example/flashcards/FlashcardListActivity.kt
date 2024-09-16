@@ -55,6 +55,8 @@ class FlashcardListActivity : AppCompatActivity() {
         buttonAddCard = findViewById(R.id.b_add_card)
 
         val b = intent.extras
+        val k:String? = b?.getString("flashcardPath")
+        val flashcardPath:String = k ?:""
         val v:String? = b?.getString("collectionPath")
         val collectionPath:String = v ?:""
         val i:Int? = b?.getInt("collectionId")
@@ -68,11 +70,11 @@ class FlashcardListActivity : AppCompatActivity() {
         deactivateEditAndMoveButtons()
 
         //scan for flashcards and add them to the list view
-        val cards = MyUtils.getFoldersInDirectory(collectionPath)
+        val cards = getCardFolderNames(collectionPath)
 
         for (card in cards) {
-            val frontSide:String = MyUtils.readLineFromFile(collectionPath + "/" + card + "/Content.txt", 0).toString()
-            val backSide:String = MyUtils.readLineFromFile(collectionPath + "/" + card + "/Content.txt", 1).toString()
+            val frontSide:String = MyUtils.readLineFromFile(flashcardPath + "/" + card + "/Content.txt", 0).toString()
+            val backSide:String = MyUtils.readLineFromFile(flashcardPath + "/" + card + "/Content.txt", 1).toString()
             addFlashcardButton(frontSide, backSide, card)
         }
 
@@ -108,6 +110,18 @@ class FlashcardListActivity : AppCompatActivity() {
         backButton.setOnClickListener {
             backToTraining()
         }
+    }
+
+    private fun getCardFolderNames(collectionPath: String): List<String> {
+        val cardString = MyUtils.readLineFromFile(collectionPath + "/Flashcards.txt", 0)
+        var cardNames = listOf<String>()
+
+        if (cardString != null) {
+            cardNames = cardString.split(" ")
+        }   else {
+            MyUtils.createShortToast(this,"No cards in this collection")
+        }
+        return cardNames
     }
 
     private fun backToTraining() {

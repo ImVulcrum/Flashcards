@@ -28,7 +28,9 @@ class TrainingActivity: AppCompatActivity() {
     private lateinit var muteAudioButton: FloatingActionButton
     private lateinit var collectionSettingButton: FloatingActionButton
     private lateinit var showAllCardsButton: FloatingActionButton
+
     private lateinit var appPath:String
+    private lateinit var flashcardPath:String
 
     var cardOrder = listOf<String>()
     var cardIndex: Int = 0
@@ -59,8 +61,6 @@ class TrainingActivity: AppCompatActivity() {
         collectionSettingButton = findViewById(R.id.b_settings_flashcards)
         showAllCardsButton = findViewById(R.id.b_show_flashcards)
 
-        appPath = getExternalFilesDir(null).toString()
-
         val sharedPref = getSharedPreferences("pref", MODE_PRIVATE)
         val editor = sharedPref.edit()
 
@@ -74,7 +74,9 @@ class TrainingActivity: AppCompatActivity() {
         val v:Int? = b?.getInt("collectionId")
         val collectionNumber:Int = v ?:0
 
-        val collectionPath = appPath + "/Collection_$collectionNumber"
+        appPath = getExternalFilesDir(null).toString()
+        flashcardPath = appPath + "/Cards"
+        val collectionPath = appPath + "/Collections/Collection_$collectionNumber"
         val propertiesPath = collectionPath + "/Properties.txt"
 
         if (MyUtils.readLineFromFile(propertiesPath, 4) != "") {
@@ -140,7 +142,7 @@ class TrainingActivity: AppCompatActivity() {
                     MyUtils.playAudio(collectionPath + "/" + cardOrder[cardIndex].substring(2) + audioFile)
                 }
 
-                flashcardButton.text = MyUtils.readLineFromFile(collectionPath + "/" + cardOrder[cardIndex].substring(2) + "/Content.txt", line)
+                flashcardButton.text = MyUtils.readLineFromFile(flashcardPath + "/" + cardOrder[cardIndex].substring(2) + "/Content.txt", line)
                 flashcardId.text = cardOrder[cardIndex].substring(2)
 
                 if (cardIndex+1 == cardOrder.size) {
@@ -170,10 +172,10 @@ class TrainingActivity: AppCompatActivity() {
 
                 if (!audioMuted) {
                     MyUtils.stopAudio()
-                    MyUtils.playAudio(collectionPath + "/" + cardOrder[cardIndex].substring(2) + audioFile)
+                    MyUtils.playAudio(flashcardPath + "/" + cardOrder[cardIndex].substring(2) + audioFile)
                 }
 
-                flashcardButton.text = MyUtils.readLineFromFile(collectionPath + "/" + cardOrder[cardIndex].substring(2) + "/Content.txt", line)
+                flashcardButton.text = MyUtils.readLineFromFile(flashcardPath + "/" + cardOrder[cardIndex].substring(2) + "/Content.txt", line)
                 flashcardId.text = cardOrder[cardIndex].substring(2)
             }
         }
@@ -254,6 +256,7 @@ class TrainingActivity: AppCompatActivity() {
             MyUtils.stopAudio()
             intent = Intent(this, FlashcardListActivity::class.java)
             val b = Bundle()
+            b.putString("flashcardPath", flashcardPath)
             b.putString("collectionPath", collectionPath)
             b.putInt("collectionId", collectionNumber)
             intent.putExtras(b)
@@ -310,6 +313,7 @@ class TrainingActivity: AppCompatActivity() {
 
     private fun shuffleCards(collectionPath: String, nativeToForeign: Boolean, foreignToNative: Boolean): List<String> {
         val cards = getCardFolderNames(collectionPath)
+        Log.e("cards", cards.size.toString())
         val prefixes = listOf("n_", "f_")
         var shuffledCards = mutableListOf<String>()
 
@@ -345,7 +349,13 @@ class TrainingActivity: AppCompatActivity() {
     }
 
     private fun getCardFolderNames(folderPath: String): List<String> {
-        val folder = File(folderPath)
-        return folder.listFiles { file -> file.isDirectory }?.map { it.name } ?: emptyList()
+        val cardString = MyUtils.readLineFromFile(folderPath + "/Flashcards.txt", 0)
+
+        if (cardString != null) {
+            return cardString.split(" ")
+        }   else {
+            MyUtils.createShortToast(this,"No cards in this collection, huge error")
+            return listOf()
+        }
     }
 }

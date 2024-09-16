@@ -174,58 +174,8 @@ class AddCardActivity<IOException> : AppCompatActivity() {
         }
 
         deleteButton.setOnClickListener { //only visble when editing a card
-            //remove the card from the flashcards file of the collection
-            val cardStringInTheCollection = MyUtils.readLineFromFile(collectionPath + "/Flashcards.txt", 0)
-
-            if (cardStringInTheCollection != null) {
-                val flashcardsInTheCollection: MutableList<String> = cardStringInTheCollection.split(" ").toMutableList()
-                flashcardsInTheCollection.remove(cardName)
-
-                if (flashcardsInTheCollection.isEmpty()) {
-                    MyUtils.writeTextFile(collectionPath + "/Flashcards.txt", 0, "-")
-                }   else {
-                    MyUtils.writeTextFile(collectionPath + "/Flashcards.txt", 0, flashcardsInTheCollection.joinToString(" "))
-                }
-            }   else {
-                MyUtils.createShortToast(this, "Error: There are no cards in the collection for some reason")
-            }
-
-            //remove the card from the orderline in the properties file
-            val cardOrder = MyUtils.readLineFromFile(collectionPath + "/Properties.txt", 3)
-            if (cardOrder == "-") {
-                //do nothing
-            } else {
-                if (cardOrder != null) {
-                    val cards: MutableList<String>
-                    cards = cardOrder.split(" ").toMutableList()
-
-                    cards.remove("n_" + cardName)
-                    cards.remove("f_" + cardName)
-
-                    if (cards.isNotEmpty()) {
-                        MyUtils.writeTextFile(collectionPath + "/Properties.txt", 3, cards.joinToString(" "))
-
-                        //set the index logic
-                        var cardIndex = MyUtils.readLineFromFile(collectionPath + "/Properties.txt", 4)?.toInt()
-                        if (cardIndex != null) {
-                            cardIndex = cardIndex -1
-                        }
-
-                        if (cardIndex != null) {
-                            if (cardIndex < 0) {
-                                cardIndex = 0
-                            }
-                        }
-                        MyUtils.writeTextFile(collectionPath + "/Properties.txt", 4, cardIndex.toString())
-
-                    }   else {
-                        MyUtils.writeTextFile(collectionPath + "/Properties.txt", 3, "-")
-                        MyUtils.writeTextFile(collectionPath + "/Properties.txt", 4, "0")
-                    }
-                } else {
-                    Log.e("HUGE ERROR", "orderLine is null")
-                }
-            }
+            //removes it from the flashcards and properties file
+            MyUtils.removeCardFromCollection(this, collectionPath, cardName)
 
             //delete the folder of the card
             abortCard(pathOfTheCurrentFlashcard)
@@ -366,27 +316,9 @@ class AddCardActivity<IOException> : AppCompatActivity() {
             MyUtils.writeTextFile(pathOfTheCurrentFlashcard + "/Content.txt", 0, nativeLanguagePrompt)
             MyUtils.writeTextFile(pathOfTheCurrentFlashcard + "/Content.txt", 1, foreignLanguagePrompt)
 
-            if (creatingNewCard) { //only when it is a new card it should be added to the orderline
-                //adding the collection reference to the flashcard
-                MyUtils.writeTextFile(pathOfTheCurrentFlashcard + "/Content.txt", 2, collectionPath)
-
-                //adding the card to the flashcards file or the collection
-                var cardStringInTheCollection = MyUtils.readLineFromFile(collectionPath + "/Flashcards.txt", 0)
-                var space = " "
-                if (cardStringInTheCollection == "-") {
-                    cardStringInTheCollection = ""
-                    space = ""
-                }
-                MyUtils.writeTextFile(collectionPath + "/Flashcards.txt", 0, cardStringInTheCollection + space + flashcardName)
-
-                //adding the card to the shuffle order line in the properties file of the corresponding collection
-                var cardOrder = MyUtils.readLineFromFile(collectionPath + "/Properties.txt", 3)
-                space = " "
-                if (cardOrder == "-") {
-                    cardOrder = ""
-                    space = ""
-                }
-                MyUtils.writeTextFile(collectionPath + "/Properties.txt", 3, cardOrder + space + "n_" + flashcardName)
+            //only when it is a new card it should be added to the orderline and the flashcards file and the collection reference should be added to the card
+            if (creatingNewCard) {
+                MyUtils.addCardToCollectionAndReferenceCollection(collectionPath, flashcardName, pathOfTheCurrentFlashcard)
             }
 
             MyUtils.createShortToast(this, "Card saved successfully")

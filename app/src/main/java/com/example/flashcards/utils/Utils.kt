@@ -249,6 +249,104 @@ object MyUtils {
         return folderNames
     }
 
+    fun getCardFolderNames(context: Context, collectionPath:String): List<String> {
+        val cardString = readLineFromFile(collectionPath + "/Flashcards.txt", 0)
+        var cardNames = listOf<String>()
+
+        if (cardString != null) {
+            if (cardString != "-") {
+                cardNames = cardString.split(" ")
+            }
+        }   else {
+            createShortToast(context,"No cards in this collection")
+        }
+        return cardNames
+    }
+
+    fun moveCardToCollection(context: Context, oldCollectionPath:String, newCollectionPath:String, cardName:String, pathOfTheFlashcard:String) {
+        removeCardFromCollection(context, oldCollectionPath, cardName)
+
+        addCardToCollectionAndReferenceCollection(newCollectionPath, cardName, pathOfTheFlashcard)
+    }
+
+    fun addCardToCollectionAndReferenceCollection(collectionPath:String, flashcardName:String, pathOfTheFlashcard:String) {
+        //adding the collection reference to the flashcard
+        writeTextFile(pathOfTheFlashcard + "/Content.txt", 2, collectionPath)
+
+        //adding the card to the flashcards file or the collection
+        var cardStringInTheCollection = readLineFromFile(collectionPath + "/Flashcards.txt", 0)
+        var space = " "
+        if (cardStringInTheCollection == "-") {
+            cardStringInTheCollection = ""
+            space = ""
+        }
+        writeTextFile(collectionPath + "/Flashcards.txt", 0, cardStringInTheCollection + space + flashcardName)
+
+        //adding the card to the shuffle order line in the properties file of the corresponding collection
+        var cardOrder = readLineFromFile(collectionPath + "/Properties.txt", 3)
+        space = " "
+        if (cardOrder == "-") {
+            cardOrder = ""
+            space = ""
+        }
+        writeTextFile(collectionPath + "/Properties.txt", 3, cardOrder + space + "n_" + flashcardName)
+    }
+
+    fun removeCardFromCollection(context: Context, collectionPath:String, cardName:String) {
+        //remove the card from the flashcards file of the collection
+        val cardStringInTheCollection = readLineFromFile(collectionPath + "/Flashcards.txt", 0)
+
+        if (cardStringInTheCollection != null) {
+            val flashcardsInTheCollection: MutableList<String> = cardStringInTheCollection.split(" ").toMutableList()
+            flashcardsInTheCollection.remove(cardName)
+
+            if (flashcardsInTheCollection.isEmpty()) {
+                writeTextFile(collectionPath + "/Flashcards.txt", 0, "-")
+            }   else {
+                writeTextFile(collectionPath + "/Flashcards.txt", 0, flashcardsInTheCollection.joinToString(" "))
+            }
+        }   else {
+            createShortToast(context, "Error: There are no cards in the collection for some reason")
+        }
+
+        //remove the card from the orderline in the properties file
+        val cardOrder = readLineFromFile(collectionPath + "/Properties.txt", 3)
+        if (cardOrder == "-") {
+            //do nothing
+        } else {
+            if (cardOrder != null) {
+                val cards: MutableList<String>
+                cards = cardOrder.split(" ").toMutableList()
+
+                cards.remove("n_" + cardName)
+                cards.remove("f_" + cardName)
+
+                if (cards.isNotEmpty()) {
+                    writeTextFile(collectionPath + "/Properties.txt", 3, cards.joinToString(" "))
+
+                    //set the index logic
+                    var cardIndex = readLineFromFile(collectionPath + "/Properties.txt", 4)?.toInt()
+                    if (cardIndex != null) {
+                        cardIndex = cardIndex -1
+                    }
+
+                    if (cardIndex != null) {
+                        if (cardIndex < 0) {
+                            cardIndex = 0
+                        }
+                    }
+                    writeTextFile(collectionPath + "/Properties.txt", 4, cardIndex.toString())
+
+                }   else {
+                    writeTextFile(collectionPath + "/Properties.txt", 3, "-")
+                    writeTextFile(collectionPath + "/Properties.txt", 4, "0")
+                }
+            } else {
+                Log.e("HUGE ERROR", "orderLine is null")
+            }
+        }
+    }
+
     fun fileExists(filePath: String): Boolean {
         val file = File(filePath)
         return file.exists() && file.isFile

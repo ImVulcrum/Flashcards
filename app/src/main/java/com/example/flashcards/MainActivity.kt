@@ -94,20 +94,24 @@ class MainActivity : AppCompatActivity() {
         collectionCount++
         val folderName = "Collection_$collectionCount"
         val folderPath = collectionPath + "/" + folderName
-        val fileName = "Properties.txt"
+        val propertiesFileName = "Properties.txt"
+        val flashcardsFileName = "Flashcards.txt"
 
-        if (MyUtils.createFolder(this, collectionPath, folderName, "Collection created successfully")) { //only do something if the folder does not exist
-            MyUtils.createTextFile(folderPath, fileName)
-            MyUtils.writeTextFile(folderPath + "/" + fileName, 0, "Collection_$collectionCount")
-            MyUtils.writeTextFile(folderPath + "/" + fileName, 1, nativeLanguage)
-            MyUtils.writeTextFile(folderPath + "/" + fileName, 2, foreignLanguage)
-            MyUtils.writeTextFile(folderPath + "/" + fileName, 3, "-")
-            MyUtils.writeTextFile(folderPath + "/" + fileName, 5, "false")
+        if (MyUtils.createFolder(this, collectionPath, folderName, "Collection created successfully")) { //only do something if the folder does not exist already
+            MyUtils.createTextFile(folderPath, flashcardsFileName)
+            MyUtils.writeTextFile(folderPath + "/" + flashcardsFileName, 0, "-")
+
+            MyUtils.createTextFile(folderPath, propertiesFileName)
+            MyUtils.writeTextFile(folderPath + "/" + propertiesFileName, 0, "Collection_$collectionCount")
+            MyUtils.writeTextFile(folderPath + "/" + propertiesFileName, 1, nativeLanguage)
+            MyUtils.writeTextFile(folderPath + "/" + propertiesFileName, 2, foreignLanguage)
+            MyUtils.writeTextFile(folderPath + "/" + propertiesFileName, 3, "-")
+            MyUtils.writeTextFile(folderPath + "/" + propertiesFileName, 5, "false")
 
             addCollectionButtons(collectionCount, true)
-        }
 
-        editor.putInt(folderPath, 0)
+            editor.putInt(folderPath, 0)
+        }
 
         editor.putInt("collection_count", collectionCount)
         editor.apply()

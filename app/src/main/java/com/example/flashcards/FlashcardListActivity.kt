@@ -70,7 +70,7 @@ class FlashcardListActivity : AppCompatActivity() {
         deactivateEditAndMoveButtons()
 
         //scan for flashcards and add them to the list view
-        val cards = getCardFolderNames(collectionPath)
+        val cards = MyUtils.getCardFolderNames(this, collectionPath)
 
         for (card in cards) {
             val frontSide:String = MyUtils.readLineFromFile(flashcardPath + "/" + card + "/Content.txt", 0).toString()
@@ -110,18 +110,6 @@ class FlashcardListActivity : AppCompatActivity() {
         backButton.setOnClickListener {
             backToTraining()
         }
-    }
-
-    private fun getCardFolderNames(collectionPath: String): List<String> {
-        val cardString = MyUtils.readLineFromFile(collectionPath + "/Flashcards.txt", 0)
-        var cardNames = listOf<String>()
-
-        if (cardString != null) {
-            cardNames = cardString.split(" ")
-        }   else {
-            MyUtils.createShortToast(this,"No cards in this collection")
-        }
-        return cardNames
     }
 
     private fun backToTraining() {

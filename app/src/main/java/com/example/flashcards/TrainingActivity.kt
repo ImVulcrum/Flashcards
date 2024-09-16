@@ -312,7 +312,7 @@ class TrainingActivity: AppCompatActivity() {
     }
 
     private fun shuffleCards(collectionPath: String, nativeToForeign: Boolean, foreignToNative: Boolean): List<String> {
-        val cards = getCardFolderNames(collectionPath)
+        val cards = MyUtils.getCardFolderNames(this, collectionPath)
         Log.e("cards", cards.size.toString())
         val prefixes = listOf("n_", "f_")
         var shuffledCards = mutableListOf<String>()
@@ -346,16 +346,5 @@ class TrainingActivity: AppCompatActivity() {
         MyUtils.writeTextFile(collectionPath + "/Properties.txt", 4, "0")
 
         return shuffledCards
-    }
-
-    private fun getCardFolderNames(folderPath: String): List<String> {
-        val cardString = MyUtils.readLineFromFile(folderPath + "/Flashcards.txt", 0)
-
-        if (cardString != null) {
-            return cardString.split(" ")
-        }   else {
-            MyUtils.createShortToast(this,"No cards in this collection, huge error")
-            return listOf()
-        }
     }
 }

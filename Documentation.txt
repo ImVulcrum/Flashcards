@@ -6,11 +6,17 @@ Important
 ONE CARD CAN ONLY BE IN ONE COLLECTION AT THE SAME TIME TO PREVENT CHAOS AND SPAGHETTI CODE
 
 Creating a new flashcard: 	create the flashcard folder
-				write to the Content.txt (in the flashcard folder) file the corresponding collection
+				write to the Content.txt file (in the flashcard folder) the corresponding collection
 				write the card to the Flashcards.txt file of the collection
 				write the card to the shuffle card order (Properties.txt of the corresponding collection)
 
 Deleting a flashcard:		delete the card from the Flashcards.txt file of the corresponding collection
 				delete the card from the shuffle card order (Properties.txt of the corresponding collection)
 				delete the flashcard folder
+
+Moving a flashcard		delete the card from the Flashcards.txt file of the collection
+				delete the card from the shuffle card order (Properties.txt of the corresponding collection)
+				overwrite the Content.txt file (in the flashcard folder) with the new collection reference
+				write the card to the Flashcards.txt file of the new collection
+				write the card to the shuffle card order (Properties.txt of the new collection)
 				

@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.res.ColorStateList
 import android.graphics.drawable.GradientDrawable
-import android.graphics.drawable.LayerDrawable
 import android.os.Bundle
 import android.view.ViewGroup
 import android.widget.Button
@@ -12,7 +11,6 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
-import com.example.flashcards.databinding.ActivityMainBinding
 import com.example.flashcards.utils.MyUtils
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 
@@ -140,7 +138,7 @@ class FlashcardListActivity : AppCompatActivity() {
         }
 
         // Create the left button
-        val frontSideButton = Button(this).apply {
+        val leftButton = Button(this).apply {
             text = frontSide
             contentDescription = cardName
             isAllCaps = false
@@ -164,7 +162,7 @@ class FlashcardListActivity : AppCompatActivity() {
         }
 
         // Create the right button
-        val backSideButton = Button(this).apply {
+        val rightButton = Button(this).apply {
 
             text = backSide
             isAllCaps = false
@@ -187,17 +185,17 @@ class FlashcardListActivity : AppCompatActivity() {
             background = drawable
         }
 
-        frontSideButton.setOnClickListener{
-            onCardPairClicked(frontSideButton, backSideButton, rowLayout)
+        leftButton.setOnClickListener{
+            onCardPairClicked(leftButton, rightButton, rowLayout)
         }
 
-        backSideButton.setOnClickListener{
-            onCardPairClicked(frontSideButton, backSideButton, rowLayout)
+        rightButton.setOnClickListener{
+            onCardPairClicked(leftButton, rightButton, rowLayout)
         }
 
         // Add buttons to the horizontal layout
-        rowLayout.addView(frontSideButton)
-        rowLayout.addView(backSideButton)
+        rowLayout.addView(leftButton)
+        rowLayout.addView(rightButton)
 
         // Add the horizontal layout to the container
         container.addView(rowLayout)
@@ -217,9 +215,9 @@ class FlashcardListActivity : AppCompatActivity() {
         buttonEditCard.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.highlight))
     }
 
-    private fun onCardPairClicked (frontSideButton:Button, backSideButton:Button, rowLayout:LinearLayout) {
+    private fun onCardPairClicked (leftButton:Button, rightButton:Button, rowLayout:LinearLayout) {
 
-        if (currentCard != frontSideButton.contentDescription && currentCard != "") { //if another button pair is currently selected
+        if (currentCard != leftButton.contentDescription && currentCard != "") { //if another button pair is currently selected
 
             //reset the old button pair selected state visually
             val oldFrontSideButton: Button = currentButtonPair.getChildAt(0) as Button
@@ -229,30 +227,30 @@ class FlashcardListActivity : AppCompatActivity() {
 
             //select the clicked button pair visually
             val newStrokeColor = ContextCompat.getColor(this@FlashcardListActivity, R.color.white)
-            (frontSideButton.background as GradientDrawable).setStroke(4, newStrokeColor)
-            (backSideButton.background as GradientDrawable).setStroke(4, newStrokeColor)
+            (leftButton.background as GradientDrawable).setStroke(4, newStrokeColor)
+            (rightButton.background as GradientDrawable).setStroke(4, newStrokeColor)
 
             //select the clicked button pair
             currentButtonPair = rowLayout
-            currentCard = frontSideButton.contentDescription.toString()
+            currentCard = leftButton.contentDescription.toString()
 
         } else if (currentCard == "") { //if nothing is selected currently
 
             //select the clicked button pair visually
             val newStrokeColor = ContextCompat.getColor(this@FlashcardListActivity, R.color.white)
-            (frontSideButton.background as GradientDrawable).setStroke(4, newStrokeColor)
-            (backSideButton.background as GradientDrawable).setStroke(4, newStrokeColor)
+            (leftButton.background as GradientDrawable).setStroke(4, newStrokeColor)
+            (rightButton.background as GradientDrawable).setStroke(4, newStrokeColor)
 
             //select the clicked button pair
             currentButtonPair = rowLayout
-            currentCard = frontSideButton.contentDescription.toString()
+            currentCard = leftButton.contentDescription.toString()
 
             activateEditAndMoveButtons()
         } else { //if the button currently selected is clicked again
 
             //reset the current button pair selected state visually
-            (frontSideButton.background as GradientDrawable).setStroke(4, ContextCompat.getColor(this@FlashcardListActivity, R.color.primary))
-            (backSideButton.background as GradientDrawable).setStroke(4, ContextCompat.getColor(this@FlashcardListActivity, R.color.highlight))
+            (leftButton.background as GradientDrawable).setStroke(4, ContextCompat.getColor(this@FlashcardListActivity, R.color.primary))
+            (rightButton.background as GradientDrawable).setStroke(4, ContextCompat.getColor(this@FlashcardListActivity, R.color.highlight))
 
             //reset the current button pair selected state
             currentCard = ""

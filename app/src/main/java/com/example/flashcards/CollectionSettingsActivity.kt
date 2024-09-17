@@ -18,7 +18,8 @@ class CollectionSettingsActivity : AppCompatActivity() {
     private lateinit var collectionName: EditText
     private lateinit var archiveButton: Button
 
-    var collectionNumber = 0
+    private lateinit var nameOfCurrentCollection:String
+
     lateinit var collectionPath: String
 
     @Deprecated("Deprecated in Java")
@@ -41,8 +42,9 @@ class CollectionSettingsActivity : AppCompatActivity() {
         val b = intent.extras
         val v: String? = b?.getString("collectionPath")
         collectionPath = v ?: ""
-        val i: Int? = b?.getInt("collectionId")
-        collectionNumber = i ?: 0
+        val i: String? = b?.getString("collectionId")
+
+        nameOfCurrentCollection = i ?:""
 
         collectionName.setText(MyUtils.readLineFromFile(collectionPath + "/Properties.txt", 0))
         nativeLanguageName.setText(MyUtils.readLineFromFile(collectionPath + "/Properties.txt", 1))
@@ -83,7 +85,7 @@ class CollectionSettingsActivity : AppCompatActivity() {
 
             intent = Intent(this, TrainingActivity::class.java)
             val b = Bundle()
-            b.putInt("collectionId", collectionNumber)
+            b.putString("collectionId", nameOfCurrentCollection)
             intent.putExtras(b)
             startActivity(intent)
             finish()

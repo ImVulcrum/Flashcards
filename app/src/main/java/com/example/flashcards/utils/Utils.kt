@@ -24,6 +24,9 @@ import java.io.BufferedReader
 import java.io.File
 import java.io.FileReader
 import java.io.IOException
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 object MyUtils {
     data class SpinnerItem(val text: String, val description: String)
@@ -382,6 +385,11 @@ object MyUtils {
             createShortToast(context,"No cards in this collection")
         }
         return cardNames
+    }
+
+    fun getCurrentDate(): String {
+        val dateFormat = SimpleDateFormat("dd.MM.yyyy", Locale.getDefault())
+        return dateFormat.format(Date())
     }
 
     fun moveCardToCollection(context: Context, oldCollectionPath:String, newCollectionPath:String, cardName:String, pathOfTheFlashcard:String) {

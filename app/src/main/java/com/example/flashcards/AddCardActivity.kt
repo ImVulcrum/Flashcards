@@ -98,12 +98,13 @@ class AddCardActivity<IOException> : AppCompatActivity() {
         val b = intent.extras
         val v:String? = b?.getString("collectionPath")
         val collectionPath:String = v ?:""
-        val i:Int? = b?.getInt("collectionId")
-        val collectionNumber:Int = i ?:0
+        val i:String? = b?.getString("collectionId")
+        val nameOfCurrentCollection:String = i ?:""
         val a:Boolean? = b?.getBoolean("calledFromAddCard")
         val calledFromAddCard:Boolean = a ?:false
         val g:Boolean? = b?.getBoolean("calledFromList")
         val calledFromList:Boolean = g ?:false
+
 
         var cardName:String = ""
         val flashcardPath = getExternalFilesDir(null).toString() + "/Cards"
@@ -117,7 +118,7 @@ class AddCardActivity<IOException> : AppCompatActivity() {
         if (calledFromAddCard) {
             actionBar.removeView(deleteButton)
 
-            pathOfTheCurrentFlashcard = createCard(flashcardPath= flashcardPath, collectionNumber=collectionNumber, collectionPath=collectionPath)
+            pathOfTheCurrentFlashcard = createCard(flashcardPath= flashcardPath, collectionName=nameOfCurrentCollection, collectionPath=collectionPath)
 
             cardName = pathOfTheCurrentFlashcard.removePrefix(flashcardPath+"/")
 
@@ -137,7 +138,7 @@ class AddCardActivity<IOException> : AppCompatActivity() {
             cardName = c ?:""
 
             //set card id text
-            cardId.text = "Collection_" + collectionNumber.toString() + " (" + '"' + MyUtils.readLineFromFile(collectionPath + "/Properties.txt", 0) +'"'+ ")" + " - Card_#" + cardName.substring(5)
+            cardId.text = nameOfCurrentCollection + " (" + '"' + MyUtils.readLineFromFile(collectionPath + "/Properties.txt", 0) +'"'+ ")" + " - Card_#" + cardName.substring(5)
 
             pathOfTheCurrentFlashcard = "$flashcardPath/$cardName"
 
@@ -159,14 +160,14 @@ class AddCardActivity<IOException> : AppCompatActivity() {
                 intent = Intent(this, FlashcardListActivity::class.java)
                 val bu = Bundle()
                 bu.putString("collectionPath", collectionPath)
-                bu.putInt("collectionId", collectionNumber)
+                bu.putString("collectionId", nameOfCurrentCollection)
                 intent.putExtras(bu)
                 startActivity(intent)
                 finish()
             } else {
                 intent = Intent(this, TrainingActivity::class.java)
                 val b = Bundle()
-                b.putInt("collectionId", collectionNumber)
+                b.putString("collectionId", nameOfCurrentCollection)
                 intent.putExtras(b)
                 startActivity(intent)
                 finish()
@@ -185,14 +186,14 @@ class AddCardActivity<IOException> : AppCompatActivity() {
                 val bu = Bundle()
                 bu.putString("flashcardPath", flashcardPath)
                 bu.putString("collectionPath", collectionPath)
-                bu.putInt("collectionId", collectionNumber)
+                bu.putString("collectionId", nameOfCurrentCollection)
                 intent.putExtras(bu)
                 startActivity(intent)
                 finish()
             } else {
                 intent = Intent(this, TrainingActivity::class.java)
                 val b = Bundle()
-                b.putInt("collectionId", collectionNumber)
+                b.putString("collectionId", nameOfCurrentCollection)
                 intent.putExtras(b)
                 startActivity(intent)
                 finish()
@@ -206,14 +207,14 @@ class AddCardActivity<IOException> : AppCompatActivity() {
                     val bu = Bundle()
                     bu.putString("flashcardPath", flashcardPath)
                     bu.putString("collectionPath", collectionPath)
-                    bu.putInt("collectionId", collectionNumber)
+                    bu.putString("collectionId", nameOfCurrentCollection)
                     intent.putExtras(bu)
                     startActivity(intent)
                     finish()
                 } else {
                     intent = Intent(this, TrainingActivity::class.java)
                     val bun = Bundle()
-                    bun.putInt("collectionId", collectionNumber)
+                    bun.putString("collectionId", nameOfCurrentCollection)
                     intent.putExtras(bun)
                     startActivity(intent)
                     finish()
@@ -228,7 +229,7 @@ class AddCardActivity<IOException> : AppCompatActivity() {
                 nativeLanguageTexbox.text.clear()
                 foreignLanguageTextbox.text.clear()
 
-                pathOfTheCurrentFlashcard = createCard(flashcardPath, collectionNumber=collectionNumber, collectionPath=collectionPath)
+                pathOfTheCurrentFlashcard = createCard(flashcardPath, collectionName=nameOfCurrentCollection, collectionPath=collectionPath)
                 cardName = pathOfTheCurrentFlashcard.removePrefix(flashcardPath+"/")
 
                 nativePlayButton.backgroundTintList = (ContextCompat.getColorStateList(this@AddCardActivity, R.color.button_color))
@@ -290,12 +291,12 @@ class AddCardActivity<IOException> : AppCompatActivity() {
         }
     }
 
-    private fun createCard(flashcardPath: String, showMessage:Boolean =false, collectionNumber:Int, collectionPath:String):String{
+    private fun createCard(flashcardPath: String, showMessage:Boolean =false, collectionName:String, collectionPath:String):String{
         val sharedPref = getSharedPreferences("pref", MODE_PRIVATE)
         val editor = sharedPref.edit()
 
         var flashcardIndexOfNextCard = sharedPref.getInt("flashcard_index", 0)
-        cardId.text = "Collection_" + collectionNumber.toString() + " (" + '"' + MyUtils.readLineFromFile(collectionPath + "/Properties.txt", 0) +'"'+ ")" + " - Card_#$flashcardIndexOfNextCard"
+        cardId.text = collectionName + " (" + '"' + MyUtils.readLineFromFile(collectionPath + "/Properties.txt", 0) +'"'+ ")" + " - Card_#$flashcardIndexOfNextCard"
 
         val pathOfCreatedFlashcard = "$flashcardPath/Card_$flashcardIndexOfNextCard"
 

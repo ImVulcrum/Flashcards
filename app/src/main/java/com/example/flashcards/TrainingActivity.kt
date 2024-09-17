@@ -7,12 +7,10 @@ import android.os.Bundle
 import android.util.Log
 import android.widget.Button
 import android.widget.TextView
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.example.flashcards.utils.MyUtils
-import java.io.File
 
 class TrainingActivity: AppCompatActivity() {
     private lateinit var backButton: FloatingActionButton
@@ -74,13 +72,13 @@ class TrainingActivity: AppCompatActivity() {
         var audioMuted = sharedPref.getBoolean("audio_muted", false)
 
         val b = intent.extras
-        val v:Int? = b?.getInt("collectionId")
-        val collectionNumber:Int = v ?:0
+        val v:String? = b?.getString("collectionId")
+        val nameOfCurrentCollection = v ?:""
 
         appPath = getExternalFilesDir(null).toString()
         flashcardPath = appPath + "/Cards"
         val collectionsPath = appPath + "/Collections"
-        val collectionPath = collectionsPath + "/Collection_$collectionNumber"
+        val collectionPath = collectionsPath + "/$nameOfCurrentCollection"
         val propertiesPath = collectionPath + "/Properties.txt"
 
         if (MyUtils.readLineFromFile(propertiesPath, 4) != "") {
@@ -121,13 +119,13 @@ class TrainingActivity: AppCompatActivity() {
         }
 
         collectionTitle.text = MyUtils.readLineFromFile(propertiesPath, 0)
-        collectionIndex.text = "Collection_$collectionNumber"
+        collectionIndex.text = nameOfCurrentCollection
 
         nativeToForeignButton.text = MyUtils.readLineFromFile(propertiesPath, 1) + " - " + MyUtils.readLineFromFile(propertiesPath, 2)
         foreignToNativeButton.text = MyUtils.readLineFromFile(propertiesPath, 2) + " - " + MyUtils.readLineFromFile(propertiesPath, 1)
         foreignToNativeButton.setBackgroundColor(ContextCompat.getColor(this, R.color.button_color))
 
-        flashcardButton.setOnClickListener{ //die reihenfolge kann nicht verändert werden während man in dieser activity ist!!!
+        flashcardButton.setOnClickListener{
             if (flashcardShowsQuestion) {
                 flashcardShowsQuestion = false
 
@@ -208,25 +206,24 @@ class TrainingActivity: AppCompatActivity() {
             val cardString = flashcardButton.text.toString()
 
             val collectionIds = MyUtils.getFoldersInDirectory(collectionsPath)
-            val collectionTupel = mutableListOf<MyUtils.SpinnerItem>()
+            val collectionTuple = mutableListOf<MyUtils.SpinnerItem>()
             for (collectionId in collectionIds) {
                 val collectionName = MyUtils.readLineFromFile(collectionsPath + "/" + collectionId + "/Properties.txt", 0)
                 collectionName?.let { it1 -> MyUtils.SpinnerItem(it1, collectionId) }
-                    ?.let { it2 -> collectionTupel.add(it2) }
+                    ?.let { it2 -> collectionTuple.add(it2) }
             }
 
-            MyUtils.showDropdownDialog(this,"Move Card: $cardString", "Chose the collection this card should be moved to", collectionTupel) { isConfirmed, selectedItem ->
+            MyUtils.showDropdownDialog(this,"Move Card: $cardString", "Chose the collection this card should be moved to", collectionTuple) { isConfirmed, selectedItem ->
                 if (isConfirmed) {
                     if (selectedItem != null) {
                         MyUtils.moveCardToCollection(context=this, oldCollectionPath = collectionPath, newCollectionPath = collectionsPath + "/" + selectedItem.description, cardName = cardOrder[cardIndex].substring(2), pathOfTheFlashcard = flashcardPath + "/" + cardOrder[cardIndex].substring(2))
+
                         MyUtils.createShortToast(this, "Moved to collection: ${selectedItem.description}")
-                        // Create an intent to restart the current activity
+
+                        //reload the activity
                         val intent = intent
-                        // Optional: You can add flags to clear the activity stack if needed
                         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
-                        // Finish the current activity
                         finish()
-                        // Start the activity again
                         startActivity(intent)
                     }
                 } else {
@@ -284,7 +281,7 @@ class TrainingActivity: AppCompatActivity() {
             intent = Intent(this, AddCardActivity::class.java)
             val b = Bundle()
             b.putString("collectionPath", collectionPath)
-            b.putInt("collectionId", collectionNumber)
+            b.putString("collectionId", nameOfCurrentCollection)
             b.putBoolean("calledFromAddCard", false)
             b.putString("cardName", currentCard.substring(2))
             b.putBoolean("calledFromList", false)
@@ -299,7 +296,7 @@ class TrainingActivity: AppCompatActivity() {
             val b = Bundle()
             b.putString("flashcardPath", flashcardPath)
             b.putString("collectionPath", collectionPath)
-            b.putInt("collectionId", collectionNumber)
+            b.putString("collectionId", nameOfCurrentCollection)
             intent.putExtras(b)
             startActivity(intent)
             finish()
@@ -310,7 +307,7 @@ class TrainingActivity: AppCompatActivity() {
             intent = Intent(this, AddCardActivity::class.java)
             val b = Bundle()
             b.putString("collectionPath", collectionPath)
-            b.putInt("collectionId", collectionNumber)
+            b.putString("collectionId", nameOfCurrentCollection)
             b.putBoolean("calledFromAddCard", true)
             b.putBoolean("calledFromList", false)
             intent.putExtras(b)
@@ -339,7 +336,7 @@ class TrainingActivity: AppCompatActivity() {
             intent = Intent(this, CollectionSettingsActivity::class.java)
             val b = Bundle()
             b.putString("collectionPath", collectionPath)
-            b.putInt("collectionId", collectionNumber)
+            b.putString("collectionId", nameOfCurrentCollection)
             intent.putExtras(b)
             startActivity(intent)
             finish()

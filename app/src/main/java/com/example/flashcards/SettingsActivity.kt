@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
+import android.widget.CheckBox
 import android.widget.EditText
 import androidx.appcompat.app.AppCompatActivity
 import com.example.flashcards.utils.MyUtils
@@ -17,6 +18,7 @@ class SettingsActivity : AppCompatActivity() {
     private lateinit var setFlashcardIndex: EditText
     private lateinit var nativeLanguagePrompt: EditText
     private lateinit var foreignLanguagePrompt: EditText
+    private lateinit var useDateCheckbox: CheckBox
 
     @Deprecated("Deprecated in Java")
     @SuppressLint("MissingSuperCall")
@@ -34,22 +36,32 @@ class SettingsActivity : AppCompatActivity() {
         setFlashcardIndex = findViewById(R.id.flashcard_index)
         nativeLanguagePrompt = findViewById(R.id.enter_native_language_name)
         foreignLanguagePrompt = findViewById(R.id.enter_foreign_language_name)
+        useDateCheckbox = findViewById(R.id.use_date_as_collection_index)
 
         val sharedPref = getSharedPreferences("pref", MODE_PRIVATE)
 
         val nativeLanguage = sharedPref.getString("native_language", "German").toString()
         val foreignLanguage = sharedPref.getString("foreign_language", "Spanish").toString()
-        val collectionIndex = (sharedPref.getInt("collection_count", 0)).toString()
         val flashcardIndex = (sharedPref.getInt("flashcard_index", 0)).toString()
+        val collectionIndexName = (sharedPref.getString("index_of_next_collection_to_be_created", "Collection_0"))
+
+        val collectionIndexNumber = collectionIndexName?.removePrefix("Collection_")
 
         nativeLanguagePrompt.setText(nativeLanguage)
         foreignLanguagePrompt.setText(foreignLanguage)
-        setCollectionIndex.setText(collectionIndex)
+        setCollectionIndex.setText(collectionIndexNumber)
         setFlashcardIndex.setText(flashcardIndex)
+        useDateCheckbox.isChecked = sharedPref.getBoolean("use_date_as_collection_index", false)
 
         //back button
         backButton.setOnClickListener {
             saveSettings()
+        }
+
+        useDateCheckbox.setOnClickListener {
+            val editor = sharedPref.edit()
+            editor.putBoolean("use_date_as_collection_index", useDateCheckbox.isChecked)
+            editor.apply()
         }
     }
 
@@ -64,7 +76,7 @@ class SettingsActivity : AppCompatActivity() {
         } else {
             editor.putString("native_language", nativeLanguagePrompt.text.toString())
             editor.putString("foreign_language", foreignLanguagePrompt.text.toString())
-            editor.putInt("collection_count", setCollectionIndex.text.toString().toInt())
+            editor.putString("index_of_next_collection_to_be_created", "Collection_" + setCollectionIndex.text.toString())
             editor.putInt("flashcard_index", setFlashcardIndex.text.toString().toInt())
             editor.apply()
 

@@ -44,7 +44,7 @@ class MainActivity : AppCompatActivity() {
 
         for (collection in collections) {
             if (MyUtils.readLineFromFile(collectionPath + "/" + collection + "/Properties.txt", 5) == "false" || MyUtils.readLineFromFile(collectionPath + "/" + collection + "/Properties.txt", 5) == "") {
-                addCollectionButtons(collection.removePrefix("Collection_").toInt(), false)
+                addCollectionButtons(collection, false)
             }
         }
 
@@ -61,14 +61,14 @@ class MainActivity : AppCompatActivity() {
             if (isChecked) {
                 for (collection in collections) {
                     if (MyUtils.readLineFromFile(collectionPath + "/" + collection + "/Properties.txt", 5) == "true") {
-                        addCollectionButtons(collection.removePrefix("Collection_").toInt(), false, R.color.button_color)
+                        addCollectionButtons(collection, false, R.color.button_color)
                     }
                 }
             }   else {
                 container.removeAllViews()
                 for (collection in collections) {
                     if (MyUtils.readLineFromFile(collectionPath + "/" + collection + "/Properties.txt", 5) == "false" || MyUtils.readLineFromFile(collectionPath + "/" + collection + "/Properties.txt", 5) == "") {
-                        addCollectionButtons(collection.removePrefix("Collection_").toInt(), false)
+                        addCollectionButtons(collection, false)
                     }
                 }
 
@@ -86,11 +86,20 @@ class MainActivity : AppCompatActivity() {
         val sharedPref = getSharedPreferences("pref", MODE_PRIVATE)
         val editor = sharedPref.edit()
 
-        var indexOfTheNextCollectionToBeCreated = sharedPref.getInt("collection_count", 0)
+        val useDateAsCollectionIndex = sharedPref.getBoolean("use_date_as_collection_index", false)
+
+        var indexOfTheNextCollectionToBeCreated = ""
+        if (useDateAsCollectionIndex) {
+            indexOfTheNextCollectionToBeCreated = MyUtils.getCurrentDate()
+        }   else {
+            indexOfTheNextCollectionToBeCreated =
+                sharedPref.getString("index_of_next_collection_to_be_created", "Collection_0").toString()
+        }
+
         val nativeLanguage = sharedPref.getString("native_language", "German").toString()
         val foreignLanguage = sharedPref.getString("foreign_language", "Spanish").toString()
 
-        val folderName = "Collection_$indexOfTheNextCollectionToBeCreated"
+        val folderName = indexOfTheNextCollectionToBeCreated
         val folderPath = collectionPath + "/" + folderName
         val propertiesFileName = "Properties.txt"
         val flashcardsFileName = "Flashcards.txt"
@@ -100,7 +109,7 @@ class MainActivity : AppCompatActivity() {
             MyUtils.writeTextFile(folderPath + "/" + flashcardsFileName, 0, "-")
 
             MyUtils.createTextFile(folderPath, propertiesFileName)
-            MyUtils.writeTextFile(folderPath + "/" + propertiesFileName, 0, "Collection_$indexOfTheNextCollectionToBeCreated")
+            MyUtils.writeTextFile(folderPath + "/" + propertiesFileName, 0, indexOfTheNextCollectionToBeCreated)
             MyUtils.writeTextFile(folderPath + "/" + propertiesFileName, 1, nativeLanguage)
             MyUtils.writeTextFile(folderPath + "/" + propertiesFileName, 2, foreignLanguage)
             MyUtils.writeTextFile(folderPath + "/" + propertiesFileName, 3, "-")
@@ -111,12 +120,15 @@ class MainActivity : AppCompatActivity() {
             editor.putInt(folderPath, 0)
         }
 
-        indexOfTheNextCollectionToBeCreated++
-        editor.putInt("collection_count", indexOfTheNextCollectionToBeCreated)
-        editor.apply()
+        if (!useDateAsCollectionIndex) {
+            var currentIndexNumber = indexOfTheNextCollectionToBeCreated.removePrefix("Collection_").toInt()
+            currentIndexNumber++
+            editor.putString("index_of_next_collection_to_be_created", "Collection_$currentIndexNumber")
+            editor.apply()
+        }
     }
 
-    private fun addCollectionButtons(collectionId:Int, isNewCreated:Boolean, collectionButtonColor:Int = R.color.primary) {
+    private fun addCollectionButtons(collectionId:String, isNewCreated:Boolean, collectionButtonColor:Int = R.color.primary) {
 
         // Create a horizontal LinearLayout to hold the two buttons
         val rowLayout = LinearLayout(this).apply {
@@ -129,13 +141,13 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        val collectionName = MyUtils.readLineFromFile(collectionPath + "/Collection_$collectionId/Properties.txt", 0)
+        val collectionName = MyUtils.readLineFromFile(collectionPath + "/$collectionId/Properties.txt", 0)
 
         // Create the left button (wider)
         val collectionButton = Button(this).apply {
 
             if (isNewCreated) {
-                text = "Collection_$collectionId"
+                text = collectionId
             }   else {
                 text = collectionName
             }
@@ -154,7 +166,7 @@ class MainActivity : AppCompatActivity() {
             setOnClickListener {
                 intent = Intent(this@MainActivity, TrainingActivity::class.java)
                 val b = Bundle()
-                b.putInt("collectionId", collectionId)
+                b.putString("collectionId", collectionId)
                 intent.putExtras(b)
                 startActivity(intent)
                 finish()
@@ -163,7 +175,7 @@ class MainActivity : AppCompatActivity() {
 
         // Create the right button (square)
         val deleteCollectionButton = Button(this).apply {
-            contentDescription = "Collection_$collectionId"
+            contentDescription = collectionId
             maxLines = 1
             layoutParams = LinearLayout.LayoutParams(
                 collectionDisplayHeight.dpToPx(),  // Width in pixels

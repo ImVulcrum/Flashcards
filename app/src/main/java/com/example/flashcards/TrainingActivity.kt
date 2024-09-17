@@ -143,7 +143,7 @@ class TrainingActivity: AppCompatActivity() {
 
                 if (!audioMuted) {
                     MyUtils.stopAudio()
-                    MyUtils.playAudio(collectionPath + "/" + cardOrder[cardIndex].substring(2) + audioFile)
+                    MyUtils.playAudio(flashcardPath + "/" + cardOrder[cardIndex].substring(2) + audioFile)
                 }
 
                 flashcardButton.text = MyUtils.readLineFromFile(flashcardPath + "/" + cardOrder[cardIndex].substring(2) + "/Content.txt", line)

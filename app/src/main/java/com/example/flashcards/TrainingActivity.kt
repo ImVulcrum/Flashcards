@@ -7,6 +7,7 @@ import android.os.Bundle
 import android.util.Log
 import android.widget.Button
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -26,6 +27,7 @@ class TrainingActivity: AppCompatActivity() {
     private lateinit var flashcardCounter: TextView
     private lateinit var flashcardId: TextView
     private lateinit var muteAudioButton: FloatingActionButton
+    private lateinit var moveCardButton: FloatingActionButton
     private lateinit var collectionSettingButton: FloatingActionButton
     private lateinit var showAllCardsButton: FloatingActionButton
 
@@ -58,6 +60,7 @@ class TrainingActivity: AppCompatActivity() {
         flashcardCounter = findViewById(R.id.flashcard_counter)
         flashcardId = findViewById(R.id.flashcard_id)
         muteAudioButton = findViewById(R.id.b_mute_flashcards)
+        moveCardButton = findViewById(R.id.b_move_flashcards)
         collectionSettingButton = findViewById(R.id.b_settings_flashcards)
         showAllCardsButton = findViewById(R.id.b_show_flashcards)
 
@@ -76,7 +79,8 @@ class TrainingActivity: AppCompatActivity() {
 
         appPath = getExternalFilesDir(null).toString()
         flashcardPath = appPath + "/Cards"
-        val collectionPath = appPath + "/Collections/Collection_$collectionNumber"
+        val collectionsPath = appPath + "/Collections"
+        val collectionPath = collectionsPath + "/Collection_$collectionNumber"
         val propertiesPath = collectionPath + "/Properties.txt"
 
         if (MyUtils.readLineFromFile(propertiesPath, 4) != "") {
@@ -103,6 +107,8 @@ class TrainingActivity: AppCompatActivity() {
             }
         }
 
+        moveCardButton.isEnabled = false
+        moveCardButton.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.button_color))
         editCardButton.isEnabled = false
         editCardButton.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.button_color))
         flashcardCounter.text = cardOrder.size.toString() + " Cards"
@@ -110,8 +116,6 @@ class TrainingActivity: AppCompatActivity() {
         if (cardOrder.isEmpty()) {
             flashcardButton.isEnabled = false
             flashcardButton.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.button_color))
-            editCardButton.isEnabled = false
-            editCardButton.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.button_color))
             shuffleButton.isEnabled = false
             shuffleButton.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.button_color))
         }
@@ -162,6 +166,10 @@ class TrainingActivity: AppCompatActivity() {
                     editCardButton.isEnabled = true
                     editCardButton.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.highlight))
                 }
+                if (!moveCardButton.isEnabled) {
+                    moveCardButton.isEnabled = true
+                    moveCardButton.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.highlight))
+                }
 
                 var line = 1
                 var audioFile = "/foreign.mp3"
@@ -192,6 +200,39 @@ class TrainingActivity: AppCompatActivity() {
                 muteAudioButton.setImageResource(R.drawable.muted)
             }
             editor.apply()
+        }
+
+        moveCardButton.setOnClickListener {
+            MyUtils.stopAudio()
+
+            val cardString = flashcardButton.text.toString()
+
+            val collectionIds = MyUtils.getFoldersInDirectory(collectionsPath)
+            val collectionTupel = mutableListOf<MyUtils.SpinnerItem>()
+            for (collectionId in collectionIds) {
+                val collectionName = MyUtils.readLineFromFile(collectionsPath + "/" + collectionId + "/Properties.txt", 0)
+                collectionName?.let { it1 -> MyUtils.SpinnerItem(it1, collectionId) }
+                    ?.let { it2 -> collectionTupel.add(it2) }
+            }
+
+            MyUtils.showDropdownDialog(this,"Move Card: $cardString", "Chose the collection this card should be moved to", collectionTupel) { isConfirmed, selectedItem ->
+                if (isConfirmed) {
+                    if (selectedItem != null) {
+                        MyUtils.moveCardToCollection(context=this, oldCollectionPath = collectionPath, newCollectionPath = collectionsPath + "/" + selectedItem.description, cardName = cardOrder[cardIndex].substring(2), pathOfTheFlashcard = flashcardPath + "/" + cardOrder[cardIndex].substring(2))
+                        MyUtils.createShortToast(this, "Moved to collection: ${selectedItem.description}")
+                        // Create an intent to restart the current activity
+                        val intent = intent
+                        // Optional: You can add flags to clear the activity stack if needed
+                        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
+                        // Finish the current activity
+                        finish()
+                        // Start the activity again
+                        startActivity(intent)
+                    }
+                } else {
+                    MyUtils.createShortToast(this, "Cancelled")
+                }
+            }
         }
 
         nativeToForeignButton.setOnClickListener {

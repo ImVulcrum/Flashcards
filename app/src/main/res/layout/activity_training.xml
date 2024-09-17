@@ -41,10 +41,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="end"
-                android:layout_marginStart="5dp"
-                android:gravity="center_horizontal"
+                android:layout_marginStart="25dp"
+                android:gravity="left"
                 android:maxLines="1"
-                android:paddingStart="-45dp"
                 android:text="Collection Name"
                 android:textAppearance="@style/SpaceGroteskLarge"
                 android:textColor="@color/white" />

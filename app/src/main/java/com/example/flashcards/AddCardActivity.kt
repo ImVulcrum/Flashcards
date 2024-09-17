@@ -294,16 +294,16 @@ class AddCardActivity<IOException> : AppCompatActivity() {
         val sharedPref = getSharedPreferences("pref", MODE_PRIVATE)
         val editor = sharedPref.edit()
 
-        var flashcardIndexOfNextCard = sharedPref.getInt(collectionPath, 0)
+        var flashcardIndexOfNextCard = sharedPref.getInt("flashcard_index", 0)
         cardId.text = "Collection_" + collectionNumber.toString() + " (" + '"' + MyUtils.readLineFromFile(collectionPath + "/Properties.txt", 0) +'"'+ ")" + " - Card_#$flashcardIndexOfNextCard"
 
-        val pathOfCreatedFlashcard = "$flashcardPath/Flashcard_$flashcardIndexOfNextCard"
+        val pathOfCreatedFlashcard = "$flashcardPath/Card_$flashcardIndexOfNextCard"
 
-        MyUtils.createFolder(this, flashcardPath, "Flashcard_$flashcardIndexOfNextCard", "Flashcard created successfully", showMessage)
+        MyUtils.createFolder(this, flashcardPath, "Card_$flashcardIndexOfNextCard", "Flashcard created successfully", showMessage)
         MyUtils.createTextFile(pathOfCreatedFlashcard, "Content.txt")
 
         flashcardIndexOfNextCard++
-        editor.putInt(collectionPath, flashcardIndexOfNextCard)
+        editor.putInt("flashcard_index", flashcardIndexOfNextCard)
         editor.apply()
 
         return pathOfCreatedFlashcard

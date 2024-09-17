@@ -14,6 +14,7 @@ class SettingsActivity : AppCompatActivity() {
 
     private lateinit var backButton: FloatingActionButton
     private lateinit var setCollectionIndex: EditText
+    private lateinit var setFlashcardIndex: EditText
     private lateinit var nativeLanguagePrompt: EditText
     private lateinit var foreignLanguagePrompt: EditText
 
@@ -30,6 +31,7 @@ class SettingsActivity : AppCompatActivity() {
 
         backButton = findViewById(R.id.settings_back_button)
         setCollectionIndex = findViewById(R.id.collection_index)
+        setFlashcardIndex = findViewById(R.id.flashcard_index)
         nativeLanguagePrompt = findViewById(R.id.enter_native_language_name)
         foreignLanguagePrompt = findViewById(R.id.enter_foreign_language_name)
 
@@ -37,11 +39,13 @@ class SettingsActivity : AppCompatActivity() {
 
         val nativeLanguage = sharedPref.getString("native_language", "German").toString()
         val foreignLanguage = sharedPref.getString("foreign_language", "Spanish").toString()
-        val collectionCount = (sharedPref.getInt("collection_count", 0)+1).toString()
+        val collectionIndex = (sharedPref.getInt("collection_count", 0)).toString()
+        val flashcardIndex = (sharedPref.getInt("flashcard_index", 0)).toString()
 
         nativeLanguagePrompt.setText(nativeLanguage)
         foreignLanguagePrompt.setText(foreignLanguage)
-        setCollectionIndex.setText(collectionCount)
+        setCollectionIndex.setText(collectionIndex)
+        setFlashcardIndex.setText(flashcardIndex)
 
         //back button
         backButton.setOnClickListener {
@@ -55,12 +59,13 @@ class SettingsActivity : AppCompatActivity() {
 
         if (nativeLanguagePrompt.text.isNullOrEmpty() || foreignLanguagePrompt.text.isNullOrEmpty()) {
             MyUtils.createShortToast(this, "native or foreign language name cannot be empty")
-        }else if (setCollectionIndex.text.isNullOrEmpty()){
-            MyUtils.createShortToast(this, "collection index cannot be empty")
+        }else if (setCollectionIndex.text.isNullOrEmpty() || setFlashcardIndex.text.isNullOrEmpty()){
+            MyUtils.createShortToast(this, "collection or flashcard index cannot be empty")
         } else {
             editor.putString("native_language", nativeLanguagePrompt.text.toString())
             editor.putString("foreign_language", foreignLanguagePrompt.text.toString())
-            editor.putInt("collection_count", setCollectionIndex.text.toString().toInt()-1)
+            editor.putInt("collection_count", setCollectionIndex.text.toString().toInt())
+            editor.putInt("flashcard_index", setFlashcardIndex.text.toString().toInt())
             editor.apply()
 
             intent = Intent(this, MainActivity::class.java)

@@ -3,7 +3,6 @@ package com.example.flashcards
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.CheckBox
@@ -87,12 +86,11 @@ class MainActivity : AppCompatActivity() {
         val sharedPref = getSharedPreferences("pref", MODE_PRIVATE)
         val editor = sharedPref.edit()
 
-        var collectionCount = sharedPref.getInt("collection_count", 0)
+        var indexOfTheNextCollectionToBeCreated = sharedPref.getInt("collection_count", 0)
         val nativeLanguage = sharedPref.getString("native_language", "German").toString()
         val foreignLanguage = sharedPref.getString("foreign_language", "Spanish").toString()
 
-        collectionCount++
-        val folderName = "Collection_$collectionCount"
+        val folderName = "Collection_$indexOfTheNextCollectionToBeCreated"
         val folderPath = collectionPath + "/" + folderName
         val propertiesFileName = "Properties.txt"
         val flashcardsFileName = "Flashcards.txt"
@@ -102,18 +100,19 @@ class MainActivity : AppCompatActivity() {
             MyUtils.writeTextFile(folderPath + "/" + flashcardsFileName, 0, "-")
 
             MyUtils.createTextFile(folderPath, propertiesFileName)
-            MyUtils.writeTextFile(folderPath + "/" + propertiesFileName, 0, "Collection_$collectionCount")
+            MyUtils.writeTextFile(folderPath + "/" + propertiesFileName, 0, "Collection_$indexOfTheNextCollectionToBeCreated")
             MyUtils.writeTextFile(folderPath + "/" + propertiesFileName, 1, nativeLanguage)
             MyUtils.writeTextFile(folderPath + "/" + propertiesFileName, 2, foreignLanguage)
             MyUtils.writeTextFile(folderPath + "/" + propertiesFileName, 3, "-")
             MyUtils.writeTextFile(folderPath + "/" + propertiesFileName, 5, "false")
 
-            addCollectionButtons(collectionCount, true)
+            addCollectionButtons(indexOfTheNextCollectionToBeCreated, true)
 
             editor.putInt(folderPath, 0)
         }
 
-        editor.putInt("collection_count", collectionCount)
+        indexOfTheNextCollectionToBeCreated++
+        editor.putInt("collection_count", indexOfTheNextCollectionToBeCreated)
         editor.apply()
     }
 

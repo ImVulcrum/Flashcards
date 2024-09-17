@@ -10,9 +10,12 @@ import android.text.TextUtils
 import android.util.Log
 import android.view.Gravity
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
+import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.LinearLayout
+import android.widget.Spinner
 import android.widget.TextView
 import android.widget.Toast
 import androidx.core.content.ContextCompat
@@ -23,6 +26,34 @@ import java.io.FileReader
 import java.io.IOException
 
 object MyUtils {
+    data class SpinnerItem(val text: String, val description: String)
+    class CustomSpinnerAdapter(context: Context, items: List<SpinnerItem>) :
+        ArrayAdapter<SpinnerItem>(context, android.R.layout.simple_spinner_item, items) {
+
+        override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
+            val view = super.getView(position, convertView, parent) as TextView
+            val item = getItem(position)
+            view.text = item?.text
+            view.setTextColor(ContextCompat.getColor(context, R.color.white))
+            view.setBackgroundColor(ContextCompat.getColor(context, R.color.highlight))
+            view.setPadding(16, 16, 16, 16)
+            return view
+        }
+
+        override fun getDropDownView(position: Int, convertView: View?, parent: ViewGroup): View {
+            val view = super.getDropDownView(position, convertView, parent) as TextView
+            val item = getItem(position)
+            view.text = item?.text
+            view.setTextColor(ContextCompat.getColor(context, R.color.white))
+            view.setBackgroundColor(ContextCompat.getColor(context, R.color.highlight))
+            view.setPadding(16, 16, 16, 16)
+
+            // Add hidden description for accessibility purposes
+            view.contentDescription = item?.description
+
+            return view
+        }
+    }
 
     fun createShortToast(context: Context, message: String) {
         val toast = Toast.makeText(context, message, Toast.LENGTH_SHORT)
@@ -84,6 +115,72 @@ object MyUtils {
         }
     }
 
+    fun showDropdownDialog(context: Context, title: String, message: String, options: List<SpinnerItem>, callback: (Boolean, SpinnerItem?) -> Unit) {
+        val layout = LinearLayout(context).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(16, 16, 16, 16)
+            layoutParams = LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            )
+        }
+
+        val customTitleView = TextView(context).apply {
+            text = title
+            textSize = 17f
+            setTypeface(typeface, Typeface.BOLD)
+            setTextColor(ContextCompat.getColor(context, R.color.white))
+            maxLines = 1
+            ellipsize = TextUtils.TruncateAt.END
+            gravity = Gravity.CENTER
+            setPadding(16, 16, 16, 16)
+        }
+
+        val spinner = Spinner(context).apply {
+            layoutParams = LinearLayout.LayoutParams(
+                300.dpToPx(context),
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            ).apply {
+                gravity = Gravity.CENTER_HORIZONTAL
+            }
+        }
+
+        val adapter = CustomSpinnerAdapter(context, options)
+        spinner.adapter = adapter
+
+        spinner.setPopupBackgroundResource(R.color.dropdown_color)
+
+        val buttonsLayout = LayoutInflater.from(context).inflate(R.layout.dialog_buttons, null) as LinearLayout
+        val positiveButton = buttonsLayout.findViewById<Button>(R.id.positiveButton)
+        val negativeButton = buttonsLayout.findViewById<Button>(R.id.negativeButton)
+
+        val mainLayout = LinearLayout(context).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(16, 16, 16, 16)
+            addView(spinner)
+            addView(buttonsLayout)
+        }
+
+        val dialog1 = AlertDialog.Builder(context)
+            .setCustomTitle(customTitleView)
+            .setMessage(message)
+            .setView(mainLayout)
+            .create()
+
+        positiveButton.setOnClickListener {
+            val selectedItem = spinner.selectedItem as SpinnerItem
+            callback(true, selectedItem)
+            dialog1.dismiss()
+        }
+
+        negativeButton.setOnClickListener {
+            callback(false, null)
+            dialog1.dismiss()
+        }
+
+        dialog1.show()
+    }
+
     fun showConfirmationDialog(context: Context, title: String, message: String, callback: (Boolean) -> Unit) {
         val dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_buttons, null)
 
@@ -122,7 +219,6 @@ object MyUtils {
 
         dialog1.show()
     }
-
 
     fun createTextFile(folderLocation: String, fileName: String): File? {
         val folder = File(folderLocation)
@@ -182,6 +278,11 @@ object MyUtils {
             Log.e("writeTextFile", "Error writing to file: ${e.message}")
             e.printStackTrace()
         }
+    }
+
+    // Function to convert dp to pixels
+    private fun Int.dpToPx(context: Context): Int {
+        return (this * context.resources.displayMetrics.density).toInt()
     }
 
     private var mediaPlayer: MediaPlayer? = null

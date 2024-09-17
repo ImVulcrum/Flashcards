@@ -130,13 +130,15 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
+        val collectionName = MyUtils.readLineFromFile(collectionPath + "/Collection_$collectionId/Properties.txt", 0)
+
         // Create the left button (wider)
         val collectionButton = Button(this).apply {
 
             if (isNewCreated) {
                 text = "Collection_$collectionId"
             }   else {
-                text = MyUtils.readLineFromFile(collectionPath + "/Collection_$collectionId/Properties.txt", 0)
+                text = collectionName
             }
 
             isAllCaps = false
@@ -172,7 +174,7 @@ class MainActivity : AppCompatActivity() {
             }
             setBackgroundColor(ContextCompat.getColor(this@MainActivity, R.color.delete_highlight))
             setOnClickListener { button ->
-                MyUtils.showConfirmationDialog(this@MainActivity,"Delete Collection", "Are you sure you want to delete this collection?") {userChoice ->
+                MyUtils.showConfirmationDialog(this@MainActivity,"Delete Collection: $collectionName", "Are you sure you want to delete this collection?") {userChoice ->
                     if (userChoice) {
                         container.removeView(rowLayout)
                         MyUtils.deleteFolder(this@MainActivity, collectionPath + "/" + button.contentDescription.toString(), "Collection deleted successfully")

@@ -2,10 +2,18 @@ package com.example.flashcards.utils
 
 import android.app.AlertDialog
 import android.content.Context
+import android.graphics.Typeface
 import android.media.MediaPlayer
 import android.os.Handler
 import android.os.Looper
+import android.text.TextUtils
 import android.util.Log
+import android.view.Gravity
+import android.view.LayoutInflater
+import android.view.ViewGroup
+import android.widget.Button
+import android.widget.LinearLayout
+import android.widget.TextView
 import android.widget.Toast
 import androidx.core.content.ContextCompat
 import com.example.flashcards.R
@@ -77,32 +85,44 @@ object MyUtils {
     }
 
     fun showConfirmationDialog(context: Context, title: String, message: String, callback: (Boolean) -> Unit) {
+        val dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_buttons, null)
+
+        // Create a TextView programmatically for the title
+        val customTitleView = TextView(context).apply {
+            text = title
+            textSize = 17f
+            setTypeface(typeface, Typeface.BOLD)
+            setTextColor(ContextCompat.getColor(context, R.color.white))
+            maxLines = 1
+            ellipsize = TextUtils.TruncateAt.END
+            gravity = Gravity.CENTER
+            setPadding(30, 30, 30, 30)
+            layoutParams = LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            )
+        }
+
         val dialog1 = AlertDialog.Builder(context)
-            .setTitle(title)
+            .setCustomTitle(customTitleView)
             .setMessage(message)
-            .setPositiveButton("Yes") { dialog, which ->
-                callback(true)
-                dialog.dismiss()
-            }
-            .setNegativeButton("No") { dialog, which ->
-                callback(false)
-                dialog.dismiss()
-            }
+            .setView(dialogView) // Set the custom layout as the dialog view
             .create()
 
-        // Apply styles to the dialog buttons
-        dialog1.setOnShowListener {
-            dialog1.getButton(AlertDialog.BUTTON_POSITIVE)?.apply {
-                setTextColor(ContextCompat.getColor(context, R.color.white))
-                setBackgroundColor(ContextCompat.getColor(context, R.color.delete_highlight))
-            }
-            dialog1.getButton(AlertDialog.BUTTON_NEGATIVE)?.apply {
-                setTextColor(ContextCompat.getColor(context, R.color.white))
-                setBackgroundColor(ContextCompat.getColor(context, R.color.highlight))
-            }
+        // Set the button click listeners
+        dialogView.findViewById<Button>(R.id.positiveButton).setOnClickListener {
+            callback(true)
+            dialog1.dismiss()
         }
+
+        dialogView.findViewById<Button>(R.id.negativeButton).setOnClickListener {
+            callback(false)
+            dialog1.dismiss()
+        }
+
         dialog1.show()
     }
+
 
     fun createTextFile(folderLocation: String, fileName: String): File? {
         val folder = File(folderLocation)

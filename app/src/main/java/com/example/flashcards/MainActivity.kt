@@ -2,7 +2,9 @@ package com.example.flashcards
 
 import android.annotation.SuppressLint
 import android.content.Intent
+import android.graphics.PorterDuff
 import android.os.Bundle
+import android.view.Gravity
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.CheckBox
@@ -61,7 +63,7 @@ class MainActivity : AppCompatActivity() {
             if (isChecked) {
                 for (collection in collections) {
                     if (MyUtils.readLineFromFile(collectionPath + "/" + collection + "/Properties.txt", 5) == "true") {
-                        addCollectionButtons(collection, false, R.color.button_color)
+                        addCollectionButtons(collection, false, R.color.archived)
                     }
                 }
             }   else {
@@ -143,7 +145,74 @@ class MainActivity : AppCompatActivity() {
 
         val collectionName = MyUtils.readLineFromFile(collectionPath + "/$collectionId/Properties.txt", 0)
 
-        // Create the left button (wider)
+        // Create the selection button (square)
+        val selectionButton = Button(this).apply {
+
+            contentDescription = collectionId
+            maxLines = 1
+            layoutParams = LinearLayout.LayoutParams(
+                collectionDisplayHeight.dpToPx(),  // Width in pixels
+                collectionDisplayHeight.dpToPx()   // Height in pixels
+            ).apply {
+                setMargins(20, 0, 0, 4)
+            }
+
+            setBackgroundColor(ContextCompat.getColor(this@MainActivity, collectionButtonColor))
+
+            // Set the image on the button (without text)
+            contentDescription = ""
+            val drawable = ContextCompat.getDrawable(this@MainActivity, R.drawable.checkbox_unchecked) // Replace with your drawable
+            setCompoundDrawablesWithIntrinsicBounds(null, null, null, drawable)  // Set image (bottom)
+
+            // Apply color filter to the drawable
+            drawable?.setColorFilter(ContextCompat.getColor(this@MainActivity, R.color.highlight), PorterDuff.Mode.SRC_IN)
+
+            // Resize the drawable to fit the button
+            drawable?.setBounds(0, 0, (collectionDisplayHeight*3).toInt(), (collectionDisplayHeight*3).toInt())
+
+            // Set the scaled drawable on the button (e.g., centered without text)
+            setCompoundDrawables(null, null, null, drawable)  // Set image (bottom)
+
+            // Optionally adjust padding
+            setPadding(0, 0, 0, -5)
+
+            // Apply a vertical offset to manually adjust the position (negative to move up)
+            translationY = -27f  // Adjust this value to get the perfect alignment
+
+            setOnClickListener {
+                if (contentDescription == "") {
+                    contentDescription = "selected"
+
+                    val drawable = ContextCompat.getDrawable(this@MainActivity, R.drawable.checkbox_checked) // Replace with your drawable
+                    setCompoundDrawablesWithIntrinsicBounds(null, null, null, drawable)  // Set image (bottom)
+
+                    // Apply color filter to the drawable
+                    drawable?.setColorFilter(ContextCompat.getColor(this@MainActivity, R.color.highlight), PorterDuff.Mode.SRC_IN)
+
+                    // Resize the drawable to fit the button
+                    drawable?.setBounds(0, 0, (collectionDisplayHeight*3).toInt(), (collectionDisplayHeight*3).toInt())
+
+                    // Set the scaled drawable on the button (e.g., centered without text)
+                    setCompoundDrawables(null, null, null, drawable)
+                }   else {
+                    contentDescription = ""
+
+                    val drawable = ContextCompat.getDrawable(this@MainActivity, R.drawable.checkbox_unchecked) // Replace with your drawable
+                    setCompoundDrawablesWithIntrinsicBounds(null, null, null, drawable)  // Set image (bottom)
+
+                    // Apply color filter to the drawable
+                    drawable?.setColorFilter(ContextCompat.getColor(this@MainActivity, R.color.highlight), PorterDuff.Mode.SRC_IN)
+
+                    // Resize the drawable to fit the button
+                    drawable?.setBounds(0, 0, (collectionDisplayHeight*3).toInt(), (collectionDisplayHeight*3).toInt())
+
+                    // Set the scaled drawable on the button (e.g., centered without text)
+                    setCompoundDrawables(null, null, null, drawable)
+                }
+            }
+        }
+
+        //create the collection button (wider)
         val collectionButton = Button(this).apply {
 
             if (isNewCreated) {
@@ -157,10 +226,10 @@ class MainActivity : AppCompatActivity() {
             setTextColor(ContextCompat.getColor(this@MainActivity, R.color.white))
             maxLines = 1
             layoutParams = LinearLayout.LayoutParams(
-                (collectionDisplayWidth - collectionDisplayHeight).dpToPx(),  // Width in pixels
+                (collectionDisplayWidth - (2*collectionDisplayHeight)).dpToPx(),  // Width in pixels
                 collectionDisplayHeight.dpToPx()   // Height in pixels
             ).apply {
-                setMargins(20, 0, 0, 4)
+                setMargins(0,0, 0, 4)
             }
             setBackgroundColor(ContextCompat.getColor(this@MainActivity, collectionButtonColor))
             setOnClickListener {
@@ -173,7 +242,7 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        // Create the right button (square)
+        // Create the delete button (square)
         val deleteCollectionButton = Button(this).apply {
             contentDescription = collectionId
             maxLines = 1
@@ -183,7 +252,26 @@ class MainActivity : AppCompatActivity() {
             ).apply {
                 setMargins(0, 0, 20, 4)
             }
+
             setBackgroundColor(ContextCompat.getColor(this@MainActivity, R.color.delete_highlight))
+
+            // Set the image on the button (without text)
+            text = ""  // Optional: If you want no text
+            val drawable = ContextCompat.getDrawable(this@MainActivity, R.drawable.delete) // Replace with your drawable
+            setCompoundDrawablesWithIntrinsicBounds(null, null, null, drawable)  // Set image (bottom)
+
+            // Resize the drawable to fit the button
+            drawable?.setBounds(0, 0, (collectionDisplayHeight*2).toInt(), (collectionDisplayHeight*2).toInt())
+
+            // Set the scaled drawable on the button (e.g., centered without text)
+            setCompoundDrawables(null, null, null, drawable)  // Set image (bottom)
+
+            // Optionally adjust padding
+            setPadding(0, 0, 0, 13)
+
+            // Apply a vertical offset to manually adjust the position (negative to move up)
+            translationY = -27f  // Adjust this value to get the perfect alignment
+
             setOnClickListener { button ->
                 MyUtils.showConfirmationDialog(this@MainActivity,"Delete Collection: $collectionName", "Are you sure you want to delete this collection?") {userChoice ->
                     if (userChoice) {
@@ -195,6 +283,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         // Add buttons to the horizontal layout
+        rowLayout.addView(selectionButton)
         rowLayout.addView(collectionButton)
         rowLayout.addView(deleteCollectionButton)
 

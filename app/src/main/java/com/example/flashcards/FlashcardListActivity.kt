@@ -79,7 +79,36 @@ class FlashcardListActivity : AppCompatActivity() {
         }
 
         buttonMoveCard.setOnClickListener {
-            TODO()
+            val collectionsPath = collectionPath.removeSuffix("/$nameOfCurrentCollection")
+
+            val collectionIds = MyUtils.getFoldersInDirectory(collectionsPath)
+            val collectionTuple = mutableListOf<MyUtils.SpinnerItem>()
+            for (collectionId in collectionIds) {
+                val collectionName = MyUtils.readLineFromFile(collectionsPath + "/" + collectionId + "/Properties.txt", 0)
+                collectionName?.let { it1 -> MyUtils.SpinnerItem(it1, collectionId) }
+                    ?.let { it2 -> collectionTuple.add(it2) }
+            }
+
+            MyUtils.showDropdownDialog(this,"Move Cards", "Chose the collection this card should be moved to", collectionTuple) { isConfirmed, selectedItem ->
+                if (isConfirmed) {
+                    if (selectedItem != null) {
+                        for (buttonPair in buttonsCurrentlySelected) {
+                            val nameOfCurrentCard = buttonPair.getChildAt(1).contentDescription.toString()
+                            MyUtils.moveCardToCollection(context=this, oldCollectionPath = collectionPath, newCollectionPath = collectionsPath + "/" + selectedItem.description, cardName = nameOfCurrentCard, pathOfTheFlashcard = flashcardPath + "/" + nameOfCurrentCard)
+                        }
+
+                        MyUtils.createShortToast(this, "Moved Cards to collection: ${selectedItem.description}")
+
+                        //reload the activity
+                        val intent = intent
+                        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
+                        finish()
+                        startActivity(intent)
+                    }
+                } else {
+                    MyUtils.createShortToast(this, "Cancelled")
+                }
+            }
         }
 
         buttonEditCard.setOnClickListener {

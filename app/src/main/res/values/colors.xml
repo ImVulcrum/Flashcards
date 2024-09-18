@@ -8,6 +8,7 @@
     <color name="delete_highlight">#FF4040</color>
     <color name="button_color">#787878</color>
     <color name="recording">#158c00</color>
-    <color name="transparent">#00000000</color>"
+    <color name="transparent">#00000000</color>
     <color name="dropdown_color">#353535</color>
+    <color name="archived">#284356</color>
 </resources>

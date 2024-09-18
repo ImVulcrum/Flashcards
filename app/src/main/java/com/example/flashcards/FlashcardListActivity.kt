@@ -281,46 +281,5 @@ class FlashcardListActivity : AppCompatActivity() {
             deactivateEditButton()
             deactivateMoveButton()
         }
-
-        /*if (currentCard != leftButton.contentDescription && currentCard != "") { //if another button pair is currently selected
-
-            //reset the old button pair selected state visually
-            val oldFrontSideButton: Button = buttonsCurrentlySelected.getChildAt(0) as Button
-            val oldBackSideButton: Button = buttonsCurrentlySelected.getChildAt(1) as Button
-            (oldFrontSideButton.background as GradientDrawable).setStroke(4, ContextCompat.getColor(this@FlashcardListActivity, R.color.primary))
-            (oldBackSideButton.background as GradientDrawable).setStroke(4, ContextCompat.getColor(this@FlashcardListActivity, R.color.highlight))
-
-            //select the clicked button pair visually
-            val newStrokeColor = ContextCompat.getColor(this@FlashcardListActivity, R.color.white)
-            (leftButton.background as GradientDrawable).setStroke(4, newStrokeColor)
-            (rightButton.background as GradientDrawable).setStroke(4, newStrokeColor)
-
-            //select the clicked button pair
-            buttonsCurrentlySelected = rowLayout
-            currentCard = leftButton.contentDescription.toString()
-
-        } else if (currentCard == "") { //if nothing is selected currently
-
-            //select the clicked button pair visually
-            val newStrokeColor = ContextCompat.getColor(this@FlashcardListActivity, R.color.white)
-            (leftButton.background as GradientDrawable).setStroke(4, newStrokeColor)
-            (rightButton.background as GradientDrawable).setStroke(4, newStrokeColor)
-
-            //select the clicked button pair
-            buttonsCurrentlySelected = rowLayout
-            currentCard = leftButton.contentDescription.toString()
-
-            activateEditAndMoveButtons()
-        } else { //if the button currently selected is clicked again
-
-            //reset the current button pair selected state visually
-            (leftButton.background as GradientDrawable).setStroke(4, ContextCompat.getColor(this@FlashcardListActivity, R.color.primary))
-            (rightButton.background as GradientDrawable).setStroke(4, ContextCompat.getColor(this@FlashcardListActivity, R.color.highlight))
-
-            //reset the current button pair selected state
-            currentCard = ""
-
-            deactivateEditAndMoveButtons()
-        }*/
     }
 }

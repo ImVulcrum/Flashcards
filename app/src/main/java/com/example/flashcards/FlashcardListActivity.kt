@@ -5,12 +5,15 @@ import android.content.Intent
 import android.content.res.ColorStateList
 import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
+import android.util.Log
 import android.view.ViewGroup
-import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import com.example.flashcards.utils.MyDisplayingUtils
 import com.example.flashcards.utils.MyUtils
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 
@@ -20,17 +23,18 @@ class FlashcardListActivity : AppCompatActivity() {
     private lateinit var backButton: FloatingActionButton
     private lateinit var collectionNameHeader: TextView
     private lateinit var collectionIndexHeader: TextView
-
     private lateinit var buttonMoveCard: FloatingActionButton
     private lateinit var buttonEditCard: FloatingActionButton
     private lateinit var buttonAddCard: FloatingActionButton
 
+    private lateinit var flashcardAdapter: MyDisplayingUtils.FlashcardAdapter
+    private lateinit var flashcardRecyclerView: RecyclerView
 
     private var collectionDisplayHeight = 40
     private lateinit var nameOfCurrentCollection:String
 
     var currentCard:String = ""
-    private var buttonsCurrentlySelected = mutableListOf<LinearLayout>()
+    private var buttonsCurrentlySelected = mutableListOf<MyDisplayingUtils.Flashcard>()
 
     @Deprecated("Deprecated in Java")
     @SuppressLint("MissingSuperCall")
@@ -40,18 +44,20 @@ class FlashcardListActivity : AppCompatActivity() {
 
     @SuppressLint("SetTextI18n")
     override fun onCreate(savedInstanceState: Bundle?) {
+        val startTime = System.currentTimeMillis()
+
         //boilerplate
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_flashcard_list)
 
-        container = findViewById(R.id.container)
         backButton = findViewById(R.id.view_flashcards_back_button)
         collectionNameHeader = findViewById(R.id.show_flashcards_header)
         collectionIndexHeader = findViewById(R.id.collection_index_name)
-
         buttonMoveCard = findViewById(R.id.b_move_card)
         buttonEditCard = findViewById(R.id.b_edit_card)
         buttonAddCard = findViewById(R.id.b_add_card)
+
+        flashcardRecyclerView = findViewById(R.id.flashcard_recycler_view)
 
         val b = intent.extras
         val k:String? = b?.getString("flashcardPath")
@@ -71,12 +77,31 @@ class FlashcardListActivity : AppCompatActivity() {
 
         //scan for flashcards and add them to the list view
         val cards = MyUtils.getCardFolderNames(this, collectionPath)
+        val listOfCardsInCorrectFormat = mutableListOf<MyDisplayingUtils.Flashcard>()
+
+        var endTime = System.currentTimeMillis()
+        var duration = endTime - startTime
+        Log.e("TimeLogger", "Execution time for first segement: $duration ms")
 
         for (card in cards) {
             val frontSide:String = MyUtils.readLineFromFile(flashcardPath + "/" + card + "/Content.txt", 0).toString()
             val backSide:String = MyUtils.readLineFromFile(flashcardPath + "/" + card + "/Content.txt", 1).toString()
-            addFlashcardButton(frontSide, backSide, card)
+            listOfCardsInCorrectFormat.add(MyDisplayingUtils.Flashcard(frontSide, backSide, card, false))
         }
+
+        // Initialize the adapter with the flashcards and click handler
+        flashcardAdapter = MyDisplayingUtils.FlashcardAdapter(listOfCardsInCorrectFormat) { flashcard, position ->
+            onCardPairClicked(flashcard, position)
+        }
+
+        flashcardRecyclerView.apply {
+            layoutManager = LinearLayoutManager(this@FlashcardListActivity)
+            adapter = flashcardAdapter
+        }
+
+        endTime = System.currentTimeMillis()
+        duration = endTime - startTime
+        Log.e("TimeLogger", "Execution time for second segement: $duration ms")
 
         buttonMoveCard.setOnClickListener {
             val collectionsPath = collectionPath.removeSuffix("/$nameOfCurrentCollection")
@@ -93,7 +118,7 @@ class FlashcardListActivity : AppCompatActivity() {
                 if (isConfirmed) {
                     if (selectedItem != null) {
                         for (buttonPair in buttonsCurrentlySelected) {
-                            val nameOfCurrentCard = buttonPair.getChildAt(1).contentDescription.toString()
+                            val nameOfCurrentCard = currentCard
                             MyUtils.moveCardToCollection(context=this, oldCollectionPath = collectionPath, newCollectionPath = collectionsPath + "/" + selectedItem.description, cardName = nameOfCurrentCard, pathOfTheFlashcard = flashcardPath + "/" + nameOfCurrentCard)
                         }
 
@@ -150,89 +175,6 @@ class FlashcardListActivity : AppCompatActivity() {
         finish()
     }
 
-    // Function to convert dp to pixels
-    private fun Int.dpToPx(): Int {
-        return (this * resources.displayMetrics.density).toInt()
-    }
-
-    private fun addFlashcardButton(frontSide: String, backSide: String, cardName:String) {
-
-        // Create a horizontal LinearLayout to hold the two buttons
-        val rowLayout = LinearLayout(this).apply {
-            orientation = LinearLayout.HORIZONTAL
-            layoutParams = LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT
-            ).apply {
-                setMargins(16, 16, 16, 0)
-            }
-        }
-
-        // Create the left button
-        val leftButton = Button(this).apply {
-            text = frontSide
-            contentDescription = ""
-            isAllCaps = false
-            setTextColor(ContextCompat.getColor(this@FlashcardListActivity, R.color.white))
-            maxLines = 1
-
-            layoutParams = LinearLayout.LayoutParams(
-                (170).dpToPx(),  // Width in pixels
-                collectionDisplayHeight.dpToPx()   // Height in pixels
-            ).apply {
-                setMargins(20, 0, 0, 4)
-            }
-
-            // Create a drawable and set it as the background
-            val drawable = GradientDrawable().apply {
-                shape = GradientDrawable.RECTANGLE
-                setColor(ContextCompat.getColor(this@FlashcardListActivity, R.color.primary))
-                setStroke(4, ContextCompat.getColor(this@FlashcardListActivity, R.color.primary))
-            }
-            background = drawable
-        }
-
-        // Create the right button
-        val rightButton = Button(this).apply {
-
-            text = backSide
-            contentDescription = cardName
-            isAllCaps = false
-            setTextColor(ContextCompat.getColor(this@FlashcardListActivity, R.color.white))
-            maxLines = 1
-
-            layoutParams = LinearLayout.LayoutParams(
-                (170).dpToPx(),  // Width in pixels
-                collectionDisplayHeight.dpToPx()   // Height in pixels
-            ).apply {
-                setMargins(0, 0, 20, 4)
-            }
-
-            // Create a drawable and set it as the background
-            val drawable = GradientDrawable().apply {
-                shape = GradientDrawable.RECTANGLE
-                setColor(ContextCompat.getColor(this@FlashcardListActivity, R.color.highlight))
-                setStroke(4, ContextCompat.getColor(this@FlashcardListActivity, R.color.highlight))
-            }
-            background = drawable
-        }
-
-        leftButton.setOnClickListener{
-            onCardPairClicked(leftButton, rightButton, rowLayout)
-        }
-
-        rightButton.setOnClickListener{
-            onCardPairClicked(leftButton, rightButton, rowLayout)
-        }
-
-        // Add buttons to the horizontal layout
-        rowLayout.addView(leftButton)
-        rowLayout.addView(rightButton)
-
-        // Add the horizontal layout to the container
-        container.addView(rowLayout)
-    }
-
     private fun deactivateEditButton () {
         buttonEditCard.isEnabled = false
         buttonEditCard.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.button_color))
@@ -253,31 +195,28 @@ class FlashcardListActivity : AppCompatActivity() {
         buttonEditCard.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.highlight))
     }
 
-    private fun onCardPairClicked (leftButton:Button, rightButton:Button, rowLayout:LinearLayout) {
-        if (leftButton.contentDescription == ("selected")) {
-            leftButton.contentDescription = ""
-            buttonsCurrentlySelected.remove(rowLayout)
+    private fun onCardPairClicked(flashcard: MyDisplayingUtils.Flashcard, position: Int) {
 
-            (leftButton.background as GradientDrawable).setStroke(4, ContextCompat.getColor(this@FlashcardListActivity, R.color.primary))
-            (rightButton.background as GradientDrawable).setStroke(4, ContextCompat.getColor(this@FlashcardListActivity, R.color.highlight))
-        }   else {
-            leftButton.contentDescription = "selected"
-            buttonsCurrentlySelected.add(rowLayout)
-
-            (leftButton.background as GradientDrawable).setStroke(4, ContextCompat.getColor(this@FlashcardListActivity, R.color.white))
-            (rightButton.background as GradientDrawable).setStroke(4, ContextCompat.getColor(this@FlashcardListActivity, R.color.white))
+        // Update buttonsCurrentlySelected
+        if (flashcard.isSelected) {
+            buttonsCurrentlySelected.add(flashcard)
+        } else {
+            buttonsCurrentlySelected.remove(flashcard)
         }
 
+        // Notify the adapter to refresh the row layout for this item
+        flashcardAdapter.notifyItemChanged(position)
+
+        // Update move and edit buttons based on selection state
         if (buttonsCurrentlySelected.size >= 1) {
             activateMoveButton()
             if (buttonsCurrentlySelected.size == 1) {
-                val buttonCurrentlySelected = buttonsCurrentlySelected[0].getChildAt(1) as Button
-                    currentCard = buttonCurrentlySelected.contentDescription.toString()
+                currentCard = buttonsCurrentlySelected[0].cardName
                 activateEditButton()
-            }   else {
+            } else {
                 deactivateEditButton()
             }
-        }   else {
+        } else {
             deactivateEditButton()
             deactivateMoveButton()
         }

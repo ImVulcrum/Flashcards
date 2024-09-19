@@ -66,23 +66,17 @@
             android:gravity="center_horizontal"
             android:text="Collection Index" />
 
-        <ScrollView
-            android:id="@+id/scrollView2"
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/flashcard_recycler_view"
             android:layout_width="wrap_content"
             android:layout_height="@dimen/collection_display_area_height"
             android:layout_gravity="center_horizontal"
-            android:layout_marginTop="20dp"
+            android:layout_marginTop="30dp"
+            android:layout_margin="16dp"
+            android:scrollbars="vertical"
             android:fadeScrollbars="false"
-            android:fillViewport="true"
-            android:scrollbarThumbVertical="@color/highlight">
-
-            <LinearLayout
-                android:id="@+id/container"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical" />
-
-        </ScrollView>
+            android:scrollbarThumbVertical="@color/highlight"
+            tools:listitem="@layout/flashcard_list_view_normal"/>
 
         <LinearLayout
             android:layout_width="match_parent"

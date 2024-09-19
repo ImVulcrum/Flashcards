@@ -82,38 +82,56 @@
 
         </ScrollView>
 
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="25dp"
+            android:orientation="horizontal">
+
+            <CheckBox
+                android:id="@+id/show_archived_collections"
+                android:layout_width="170dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:layout_marginTop="-10dp"
+                android:background="@drawable/checkbox"
+                android:paddingLeft="5dp"
+                android:paddingBottom="1dp"
+                android:text="show archived collections"
+                android:textAppearance="@style/SpaceGroteskVerySmall"
+                android:textColor="@color/white"
+                app:buttonTint="@color/strong_highlight" />
+
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
+                android:id="@+id/b_merge_collections"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="40dp"
+                android:clickable="true"
+                android:src="@drawable/shuffle"
+                app:backgroundTint="@color/primary"
+                app:elevation="0dp"
+                app:maxImageSize="45dp"
+                app:shapeAppearance="@style/Widget.Material3.CircularProgressIndicator.Small"
+                app:tint="@color/white"
+                tools:ignore="ContentDescription,SpeakableTextPresentCheck" />
+
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
+                android:id="@+id/button_add"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="20dp"
+                android:clickable="true"
+                android:src="@drawable/plus"
+                app:backgroundTint="@color/primary"
+                app:elevation="0dp"
+                app:maxImageSize="40dp"
+                app:shapeAppearance="@style/Widget.Material3.CircularProgressIndicator.Small"
+                app:tint="@color/white"
+                tools:ignore="ContentDescription,SpeakableTextPresentCheck" />
+        </LinearLayout>
+
     </LinearLayout>
-
-    <Button
-        android:id="@+id/button_add"
-        android:layout_width="64dp"
-        android:layout_height="70dp"
-        android:layout_margin="16dp"
-        android:layout_marginEnd="10dp"
-        android:layout_marginBottom="10dp"
-        android:clickable="true"
-        android:maxLines="1"
-        android:paddingLeft="0dp"
-        android:paddingRight="0dp"
-        android:text="Add"
-        android:textAppearance="@style/SpaceGroteskSmall"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
-
-    <CheckBox
-        android:id="@+id/show_archived_collections"
-        android:layout_width="250dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="32dp"
-        android:layout_marginBottom="26dp"
-        android:background="@drawable/checkbox"
-        android:paddingLeft="5dp"
-        android:paddingBottom="1dp"
-        android:text="show archived collections"
-        android:textAppearance="@style/SpaceGroteskVerySmall"
-        android:textColor="@color/white"
-        app:buttonTint="@color/strong_highlight"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="@+id/linearLayout2" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

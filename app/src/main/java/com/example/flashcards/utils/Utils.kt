@@ -83,7 +83,7 @@ object MyUtils {
                 return false
             }
         } else {
-            //Toast.makeText(context, "Folder already exists", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, "Collection with same index already exists", Toast.LENGTH_SHORT).show()
             return false
         }
     }

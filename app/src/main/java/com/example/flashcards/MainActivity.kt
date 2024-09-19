@@ -20,7 +20,7 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
     private lateinit var settingsButton: FloatingActionButton
-    private lateinit var buttonAdd: Button
+    private lateinit var buttonAdd: FloatingActionButton
     private lateinit var container: ViewGroup
     private lateinit var showArchivedCollections: CheckBox
     private var collectionDisplayWidth = 320

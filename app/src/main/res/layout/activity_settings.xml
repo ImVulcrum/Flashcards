@@ -146,7 +146,7 @@
             android:orientation="horizontal">
 
             <TextView
-                android:id="@+id/textView"
+                android:id="@+id/collection_index_helper_text"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
@@ -156,22 +156,23 @@
 
             <EditText
                 android:id="@+id/collection_index"
-                android:layout_width="40dp"
+                android:layout_width="60dp"
                 android:layout_height="wrap_content"
                 android:ems="10"
                 android:gravity="center_horizontal"
                 android:inputType="number"
-                android:text="0" />
+                android:text="0"
+                android:textColor="@color/white" />
         </LinearLayout>
 
         <View
-            android:id="@+id/div"
-            android:layout_width="220dp"
+            android:id="@+id/collection_index_underscore"
+            android:layout_width="240dp"
             android:layout_height="1dp"
             android:layout_gravity="center_horizontal"
             android:layout_marginTop="-9dp"
             android:background="?android:attr/listDivider"
-            android:backgroundTint="#FFFFFF"
+            android:backgroundTint="@color/white"
             android:backgroundTintMode="add" />
 
         <LinearLayout
@@ -192,17 +193,18 @@
 
             <EditText
                 android:id="@+id/flashcard_index"
-                android:layout_width="40dp"
+                android:layout_width="60dp"
                 android:layout_height="wrap_content"
                 android:ems="10"
                 android:gravity="center_horizontal"
                 android:inputType="number"
-                android:text="0" />
+                android:text="0"
+                android:textColor="@color/white" />
         </LinearLayout>
 
         <View
             android:id="@+id/div2"
-            android:layout_width="220dp"
+            android:layout_width="240dp"
             android:layout_height="1dp"
             android:layout_gravity="center_horizontal"
             android:layout_marginTop="-9dp"

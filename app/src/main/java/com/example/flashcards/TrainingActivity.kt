@@ -154,7 +154,6 @@ class TrainingActivity: AppCompatActivity() {
                 }
 
                 MyUtils.writeTextFile(propertiesPath, 4, cardIndex.toString())
-
             } else{
                 flashcardShowsQuestion = true
 
@@ -203,6 +202,8 @@ class TrainingActivity: AppCompatActivity() {
         moveCardButton.setOnClickListener {
             MyUtils.stopAudio()
 
+            val currentCardIndex = getCorrectCardIndex(flashcardShowsQuestion, propertiesPath)
+
             val cardString = flashcardButton.text.toString()
 
             val collectionIds = MyUtils.getFoldersInDirectory(collectionsPath)
@@ -216,7 +217,7 @@ class TrainingActivity: AppCompatActivity() {
             MyUtils.showDropdownDialog(this,"Move Card: $cardString", "Chose the collection this card should be moved to", collectionTuple) { isConfirmed, selectedItem ->
                 if (isConfirmed) {
                     if (selectedItem != null) {
-                        MyUtils.moveCardToCollection(context=this, oldCollectionPath = collectionPath, newCollectionPath = collectionsPath + "/" + selectedItem.description, cardName = cardOrder[cardIndex].substring(2), pathOfTheFlashcard = flashcardPath + "/" + cardOrder[cardIndex].substring(2))
+                        MyUtils.moveCardToCollection(context=this, oldCollectionPath = collectionPath, newCollectionPath = collectionsPath + "/" + selectedItem.description, cardName = currentCardIndex, pathOfTheFlashcard = flashcardPath + "/" + currentCardIndex)
 
                         MyUtils.createShortToast(this, "Moved to collection: ${selectedItem.description}")
 
@@ -267,23 +268,15 @@ class TrainingActivity: AppCompatActivity() {
 
         editCardButton.setOnClickListener {
             MyUtils.stopAudio()
-            var currentCard = ""
-            if (!flashcardShowsQuestion && cardIndex != 0) {
-                currentCard = cardOrder[cardIndex-1]
-                MyUtils.writeTextFile(propertiesPath, 4, (cardIndex-1).toString())
-            }   else if (!flashcardShowsQuestion && cardIndex == 0) {
-                currentCard = cardOrder[cardOrder.size-1]
-                MyUtils.writeTextFile(propertiesPath, 4, (cardOrder.size-1).toString())
-            }   else if (flashcardShowsQuestion) {
-                currentCard = cardOrder[cardIndex]
-            }
+
+            val currentCard = getCorrectCardIndex(flashcardShowsQuestion, propertiesPath)
 
             intent = Intent(this, AddCardActivity::class.java)
             val b = Bundle()
             b.putString("collectionPath", collectionPath)
             b.putString("collectionId", nameOfCurrentCollection)
             b.putBoolean("calledFromAddCard", false)
-            b.putString("cardName", currentCard.substring(2))
+            b.putString("cardName", currentCard)
             b.putBoolean("calledFromList", false)
             intent.putExtras(b)
             startActivity(intent)
@@ -341,6 +334,20 @@ class TrainingActivity: AppCompatActivity() {
             startActivity(intent)
             finish()
         }
+    }
+
+    private fun getCorrectCardIndex(flashcardShowsQuestion:Boolean, propertiesPath:String):String {
+        var currentCard = ""
+        if (!flashcardShowsQuestion && cardIndex != 0) {
+            currentCard = cardOrder[cardIndex-1]
+            MyUtils.writeTextFile(propertiesPath, 4, (cardIndex-1).toString())
+        }   else if (!flashcardShowsQuestion && cardIndex == 0) {
+            currentCard = cardOrder[cardOrder.size-1]
+            MyUtils.writeTextFile(propertiesPath, 4, (cardOrder.size-1).toString())
+        }   else if (flashcardShowsQuestion) {
+            currentCard = cardOrder[cardIndex]
+        }
+        return currentCard.substring(2)
     }
 
     private fun backToMainMenu() {

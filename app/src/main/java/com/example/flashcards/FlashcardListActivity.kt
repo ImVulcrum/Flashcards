@@ -3,11 +3,8 @@ package com.example.flashcards
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.res.ColorStateList
-import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
 import android.util.Log
-import android.view.ViewGroup
-import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
@@ -19,7 +16,6 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton
 
 
 class FlashcardListActivity : AppCompatActivity() {
-    private lateinit var container: ViewGroup
     private lateinit var backButton: FloatingActionButton
     private lateinit var collectionNameHeader: TextView
     private lateinit var collectionIndexHeader: TextView
@@ -30,7 +26,6 @@ class FlashcardListActivity : AppCompatActivity() {
     private lateinit var flashcardAdapter: MyDisplayingUtils.FlashcardAdapter
     private lateinit var flashcardRecyclerView: RecyclerView
 
-    private var collectionDisplayHeight = 40
     private lateinit var nameOfCurrentCollection:String
 
     var currentCard:String = ""
@@ -118,7 +113,7 @@ class FlashcardListActivity : AppCompatActivity() {
                 if (isConfirmed) {
                     if (selectedItem != null) {
                         for (buttonPair in buttonsCurrentlySelected) {
-                            val nameOfCurrentCard = currentCard
+                            val nameOfCurrentCard = buttonPair.cardName
                             MyUtils.moveCardToCollection(context=this, oldCollectionPath = collectionPath, newCollectionPath = collectionsPath + "/" + selectedItem.description, cardName = nameOfCurrentCard, pathOfTheFlashcard = flashcardPath + "/" + nameOfCurrentCard)
                         }
 

@@ -412,6 +412,17 @@ object MyUtils {
         writeTextFile(collectionPath + "/Properties.txt", 3, cardOrder + space + "n_" + flashcardName)
     }
 
+    fun deleteCollection(context: Context, folderOfCollection:String, flashcardPath:String) {
+        val cards = getCardFolderNames(context, folderOfCollection)
+
+        for (card in cards) {
+            Log.e("ew", flashcardPath + "/" + card)
+            deleteFolder(context, flashcardPath + "/" + card, "Collection deleted successfully")
+        }
+
+        deleteFolder(context, folderOfCollection, "Collection deleted successfully")
+    }
+
     fun removeCardFromCollection(context: Context, collectionPath:String, cardName:String) {
         //remove the card from the flashcards file of the collection
         val cardStringInTheCollection = readLineFromFile(collectionPath + "/Flashcards.txt", 0)

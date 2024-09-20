@@ -143,6 +143,7 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
+        val flashcardPath = appPath + "/Cards"
         val collectionName = MyUtils.readLineFromFile(collectionPath + "/$collectionId/Properties.txt", 0)
 
         // Create the selection button (square)
@@ -276,7 +277,7 @@ class MainActivity : AppCompatActivity() {
                 MyUtils.showConfirmationDialog(this@MainActivity,"Delete Collection: $collectionName", "Are you sure you want to delete this collection?") {userChoice ->
                     if (userChoice) {
                         container.removeView(rowLayout)
-                        MyUtils.deleteFolder(this@MainActivity, collectionPath + "/" + button.contentDescription.toString(), "Collection deleted successfully")
+                        MyUtils.deleteCollection(context=this@MainActivity, folderOfCollection =collectionPath + "/" + button.contentDescription.toString(), flashcardPath=flashcardPath)
                     }
                 }
             }

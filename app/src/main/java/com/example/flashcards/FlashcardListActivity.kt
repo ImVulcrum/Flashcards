@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.res.ColorStateList
 import android.os.Bundle
-import android.util.Log
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
@@ -39,7 +38,6 @@ class FlashcardListActivity : AppCompatActivity() {
 
     @SuppressLint("SetTextI18n")
     override fun onCreate(savedInstanceState: Bundle?) {
-        val startTime = System.currentTimeMillis()
 
         //boilerplate
         super.onCreate(savedInstanceState)
@@ -74,10 +72,6 @@ class FlashcardListActivity : AppCompatActivity() {
         val cards = MyUtils.getCardFolderNames(this, collectionPath)
         val listOfCardsInCorrectFormat = mutableListOf<MyDisplayingUtils.Flashcard>()
 
-        var endTime = System.currentTimeMillis()
-        var duration = endTime - startTime
-        Log.e("TimeLogger", "Execution time for first segement: $duration ms")
-
         for (card in cards) {
             val frontSide:String = MyUtils.readLineFromFile(flashcardPath + "/" + card + "/Content.txt", 0).toString()
             val backSide:String = MyUtils.readLineFromFile(flashcardPath + "/" + card + "/Content.txt", 1).toString()
@@ -93,10 +87,6 @@ class FlashcardListActivity : AppCompatActivity() {
             layoutManager = LinearLayoutManager(this@FlashcardListActivity)
             adapter = flashcardAdapter
         }
-
-        endTime = System.currentTimeMillis()
-        duration = endTime - startTime
-        Log.e("TimeLogger", "Execution time for second segement: $duration ms")
 
         buttonMoveCard.setOnClickListener {
             val collectionsPath = collectionPath.removeSuffix("/$nameOfCurrentCollection")

@@ -105,8 +105,7 @@ class AddCardActivity<IOException> : AppCompatActivity() {
         val g:Boolean? = b?.getBoolean("calledFromList")
         val calledFromList:Boolean = g ?:false
 
-
-        var cardName:String = ""
+        var cardName:String
         val flashcardPath = getExternalFilesDir(null).toString() + "/Cards"
         val propertiesPath = collectionPath + "/Properties.txt"
 
@@ -159,6 +158,7 @@ class AddCardActivity<IOException> : AppCompatActivity() {
             if (calledFromList) {
                 intent = Intent(this, FlashcardListActivity::class.java)
                 val bu = Bundle()
+                bu.putString("flashcardPath", flashcardPath)
                 bu.putString("collectionPath", collectionPath)
                 bu.putString("collectionId", nameOfCurrentCollection)
                 intent.putExtras(bu)
@@ -166,9 +166,9 @@ class AddCardActivity<IOException> : AppCompatActivity() {
                 finish()
             } else {
                 intent = Intent(this, TrainingActivity::class.java)
-                val b = Bundle()
-                b.putString("collectionId", nameOfCurrentCollection)
-                intent.putExtras(b)
+                val bun = Bundle()
+                bun.putString("collectionId", nameOfCurrentCollection)
+                intent.putExtras(bun)
                 startActivity(intent)
                 finish()
             }
@@ -192,9 +192,9 @@ class AddCardActivity<IOException> : AppCompatActivity() {
                 finish()
             } else {
                 intent = Intent(this, TrainingActivity::class.java)
-                val b = Bundle()
-                b.putString("collectionId", nameOfCurrentCollection)
-                intent.putExtras(b)
+                val bun = Bundle()
+                bun.putString("collectionId", nameOfCurrentCollection)
+                intent.putExtras(bun)
                 startActivity(intent)
                 finish()
             }

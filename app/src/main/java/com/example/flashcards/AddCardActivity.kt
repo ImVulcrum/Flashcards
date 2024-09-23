@@ -326,7 +326,7 @@ class AddCardActivity<IOException> : AppCompatActivity() {
 
             //only when it is a new card it should be added to the orderline and the flashcards file and the collection reference should be added to the card
             if (creatingNewCard) {
-                MyUtils.addCardToCollectionAndReferenceCollection(collectionPath, flashcardName, pathOfTheCurrentFlashcard)
+                MyUtils.addCardToCollectionAndReferenceCollection(collectionPath, flashcardName, pathOfTheCurrentFlashcard, true)
             }
 
             MyUtils.createShortToast(this, "Card saved successfully")

@@ -1,5 +1,6 @@
 package com.example.flashcards.utils
 
+import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -142,6 +143,7 @@ object MyUtils {
         }
     }
 
+    @SuppressLint("InflateParams")
     fun showDropdownDialog(context: Context, title: String, message: String, options: List<SpinnerItem>, callback: (Boolean, SpinnerItem?) -> Unit) {
         val customTitleView = TextView(context).apply {
             text = title
@@ -413,7 +415,7 @@ object MyUtils {
         addCardToCollectionAndReferenceCollection(newCollectionPath, cardName, pathOfTheFlashcard)
     }
 
-    fun addCardToCollectionAndReferenceCollection(collectionPath:String, flashcardName:String, pathOfTheFlashcard:String) {
+    fun addCardToCollectionAndReferenceCollection(collectionPath:String, flashcardName:String, pathOfTheFlashcard:String, addCardAtCurrentIndex:Boolean=false) {
         //adding the collection reference to the flashcard
         writeTextFile(pathOfTheFlashcard + "/Content.txt", 2, collectionPath)
 
@@ -427,13 +429,22 @@ object MyUtils {
         writeTextFile(collectionPath + "/Flashcards.txt", 0, cardStringInTheCollection + space + flashcardName)
 
         //adding the card to the shuffle order line in the properties file of the corresponding collection
-        var cardOrder = readLineFromFile(collectionPath + "/Properties.txt", 3)
+        var cardOrder = readLineFromFile("$collectionPath/Properties.txt", 3)
         space = " "
         if (cardOrder == "-") {
             cardOrder = ""
             space = ""
+        }   else if (addCardAtCurrentIndex && cardOrder != null){
+            val currentIndexOfOrderLine = readLineFromFile("$collectionPath/Properties.txt", 4)?.toInt()
+                val cardList = mutableListOf<String>()
+                cardList.addAll(cardOrder.split(" "))
+                cardList.add(currentIndexOfOrderLine!!, "n_$flashcardName")
+                writeTextFile("$collectionPath/Properties.txt", 3, cardList.joinToString(" "))
         }
-        writeTextFile(collectionPath + "/Properties.txt", 3, cardOrder + space + "n_" + flashcardName)
+
+        if (!addCardAtCurrentIndex) {
+            writeTextFile("$collectionPath/Properties.txt", 3, cardOrder + space + "n_" + flashcardName)
+        }
     }
 
     fun deleteCollection(context: Context, folderOfCollection:String, flashcardPath:String) {

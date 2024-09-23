@@ -70,6 +70,13 @@
             android:gravity="center_horizontal"
             android:text="Card #0" />
 
+        <TextView
+            android:id="@+id/card_count"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
+            android:text="0 Card(s)" />
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

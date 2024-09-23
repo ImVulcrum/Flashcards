@@ -21,6 +21,7 @@ class FlashcardListActivity : AppCompatActivity() {
     private lateinit var buttonMoveCard: FloatingActionButton
     private lateinit var buttonEditCard: FloatingActionButton
     private lateinit var buttonAddCard: FloatingActionButton
+    private lateinit var cardCount: TextView
 
     private lateinit var flashcardAdapter: MyDisplayingUtils.FlashcardAdapter
     private lateinit var flashcardRecyclerView: RecyclerView
@@ -49,6 +50,7 @@ class FlashcardListActivity : AppCompatActivity() {
         buttonMoveCard = findViewById(R.id.b_move_card)
         buttonEditCard = findViewById(R.id.b_edit_card)
         buttonAddCard = findViewById(R.id.b_add_card)
+        cardCount = findViewById(R.id.card_count)
 
         flashcardRecyclerView = findViewById(R.id.flashcard_recycler_view)
 
@@ -67,6 +69,9 @@ class FlashcardListActivity : AppCompatActivity() {
         //deactivate the edit and move buttons cuz nothing can be selected yet
         deactivateEditButton()
         deactivateMoveButton()
+
+        //set the card count
+        cardCount.text = "${MyUtils.getCardCountForCollection(collectionPath)} Card(s)"
 
         //scan for flashcards and add them to the list view
         val cards = MyUtils.getCardFolderNames(this, collectionPath)

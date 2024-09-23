@@ -46,6 +46,7 @@ class AddCardActivity<IOException> : AppCompatActivity() {
     private lateinit var deleteButton: FloatingActionButton
     private lateinit var header: TextView
     private lateinit var cardId: TextView
+    private lateinit var cardCount: TextView
     private lateinit var actionBar: LinearLayout
     private lateinit var nativeLanguageText: TextView
     private lateinit var foreignLanguageText: TextView
@@ -80,6 +81,7 @@ class AddCardActivity<IOException> : AppCompatActivity() {
         deleteButton = findViewById(R.id.button_delete_card)
         header = findViewById(R.id.add_card_header)
         cardId = findViewById(R.id.card_id)
+        cardCount = findViewById(R.id.card_count)
         actionBar = findViewById(R.id.button_area)
         nativeLanguageText = findViewById(R.id.native_language)
         foreignLanguageText = findViewById(R.id.foreign_language)
@@ -112,6 +114,8 @@ class AddCardActivity<IOException> : AppCompatActivity() {
         //set the language labels
         nativeLanguageText.text = MyUtils.readLineFromFile(propertiesPath, 1)
         foreignLanguageText.text = MyUtils.readLineFromFile(propertiesPath, 2)
+
+        cardCount.text = "${MyUtils.getCardCountForCollection(collectionPath)} Card(s)"
 
         //prepare the page for adding a new card
         if (calledFromAddCard) {
@@ -231,6 +235,9 @@ class AddCardActivity<IOException> : AppCompatActivity() {
 
                 pathOfTheCurrentFlashcard = createCard(flashcardPath, collectionName=nameOfCurrentCollection, collectionPath=collectionPath)
                 cardName = pathOfTheCurrentFlashcard.removePrefix(flashcardPath+"/")
+
+                //update card count
+                cardCount.text = "${MyUtils.getCardCountForCollection(collectionPath)} Card(s)"
 
                 nativePlayButton.backgroundTintList = (ContextCompat.getColorStateList(this@AddCardActivity, R.color.button_color))
                 foreignPlayButton.backgroundTintList = (ContextCompat.getColorStateList(this@AddCardActivity, R.color.button_color))

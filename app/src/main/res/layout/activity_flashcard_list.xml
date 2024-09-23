@@ -66,6 +66,13 @@
             android:gravity="center_horizontal"
             android:text="Collection Index" />
 
+        <TextView
+            android:id="@+id/card_count"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
+            android:text="0 Card(s)" />
+
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/flashcard_recycler_view"
             android:layout_width="wrap_content"
@@ -81,7 +88,7 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="40dp"
+            android:layout_marginTop="30dp"
             android:orientation="horizontal">
 
             <com.google.android.material.floatingactionbutton.FloatingActionButton

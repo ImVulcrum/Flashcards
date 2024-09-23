@@ -2,6 +2,7 @@ package com.example.flashcards
 
 import android.annotation.SuppressLint
 import android.content.Intent
+import android.content.IntentFilter
 import android.content.res.ColorStateList
 import android.os.Bundle
 import android.util.Log
@@ -32,13 +33,21 @@ class TrainingActivity: AppCompatActivity() {
     private lateinit var appPath:String
     private lateinit var flashcardPath:String
 
-    var cardOrder = listOf<String>()
-    var cardIndex: Int = 0
+    private lateinit var screenReceiver: MyUtils.ScreenReceiver
+
+    private var cardOrder = listOf<String>()
+    private var cardIndex: Int = 0
 
     @Deprecated("Deprecated in Java")
     @SuppressLint("MissingSuperCall")
     override fun onBackPressed() {
         backToMainMenu()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        // Unregister the receiver to avoid memory leaks
+        unregisterReceiver(screenReceiver)
     }
 
     @SuppressLint("SetTextI18n")
@@ -62,6 +71,11 @@ class TrainingActivity: AppCompatActivity() {
         collectionSettingButton = findViewById(R.id.b_settings_flashcards)
         showAllCardsButton = findViewById(R.id.b_show_flashcards)
 
+        // Register the screen off receiver
+        screenReceiver = MyUtils.ScreenReceiver()
+        val filter = IntentFilter(Intent.ACTION_SCREEN_OFF)
+        registerReceiver(screenReceiver, filter)
+
         val sharedPref = getSharedPreferences("pref", MODE_PRIVATE)
         val editor = sharedPref.edit()
 
@@ -76,10 +90,10 @@ class TrainingActivity: AppCompatActivity() {
         val nameOfCurrentCollection = v ?:""
 
         appPath = getExternalFilesDir(null).toString()
-        flashcardPath = appPath + "/Cards"
-        val collectionsPath = appPath + "/Collections"
-        val collectionPath = collectionsPath + "/$nameOfCurrentCollection"
-        val propertiesPath = collectionPath + "/Properties.txt"
+        flashcardPath = "$appPath/Cards"
+        val collectionsPath = "$appPath/Collections"
+        val collectionPath = "$collectionsPath/$nameOfCurrentCollection"
+        val propertiesPath = "$collectionPath/Properties.txt"
 
         if (MyUtils.readLineFromFile(propertiesPath, 4) != "") {
             cardIndex = MyUtils.readLineFromFile(propertiesPath, 4)!!.toInt()
@@ -209,7 +223,7 @@ class TrainingActivity: AppCompatActivity() {
             val collectionIds = MyUtils.getFoldersInDirectory(collectionsPath)
             val collectionTuple = mutableListOf<MyUtils.SpinnerItem>()
             for (collectionId in collectionIds) {
-                val collectionName = MyUtils.readLineFromFile(collectionsPath + "/" + collectionId + "/Properties.txt", 0)
+                val collectionName = MyUtils.readLineFromFile("$collectionsPath/$collectionId/Properties.txt", 0)
                 collectionName?.let { it1 -> MyUtils.SpinnerItem(it1, collectionId) }
                     ?.let { it2 -> collectionTuple.add(it2) }
             }
@@ -217,7 +231,7 @@ class TrainingActivity: AppCompatActivity() {
             MyUtils.showDropdownDialog(this,"Move Card: $cardString", "Chose the collection this card should be moved to", collectionTuple) { isConfirmed, selectedItem ->
                 if (isConfirmed) {
                     if (selectedItem != null) {
-                        MyUtils.moveCardToCollection(context=this, oldCollectionPath = collectionPath, newCollectionPath = collectionsPath + "/" + selectedItem.description, cardName = currentCardIndex, pathOfTheFlashcard = flashcardPath + "/" + currentCardIndex)
+                        MyUtils.moveCardToCollection(context=this, oldCollectionPath = collectionPath, newCollectionPath = collectionsPath + "/" + selectedItem.description, cardName = currentCardIndex, pathOfTheFlashcard = "$flashcardPath/$currentCardIndex")
 
                         MyUtils.createShortToast(this, "Moved to collection: ${selectedItem.description}")
 
@@ -272,13 +286,13 @@ class TrainingActivity: AppCompatActivity() {
             val currentCard = getCorrectCardIndex(flashcardShowsQuestion, propertiesPath)
 
             intent = Intent(this, AddCardActivity::class.java)
-            val b = Bundle()
-            b.putString("collectionPath", collectionPath)
-            b.putString("collectionId", nameOfCurrentCollection)
-            b.putBoolean("calledFromAddCard", false)
-            b.putString("cardName", currentCard)
-            b.putBoolean("calledFromList", false)
-            intent.putExtras(b)
+            val bu = Bundle()
+            bu.putString("collectionPath", collectionPath)
+            bu.putString("collectionId", nameOfCurrentCollection)
+            bu.putBoolean("calledFromAddCard", false)
+            bu.putString("cardName", currentCard)
+            bu.putBoolean("calledFromList", false)
+            intent.putExtras(bu)
             startActivity(intent)
             finish()
         }
@@ -286,11 +300,11 @@ class TrainingActivity: AppCompatActivity() {
         showAllCardsButton.setOnClickListener {
             MyUtils.stopAudio()
             intent = Intent(this, FlashcardListActivity::class.java)
-            val b = Bundle()
-            b.putString("flashcardPath", flashcardPath)
-            b.putString("collectionPath", collectionPath)
-            b.putString("collectionId", nameOfCurrentCollection)
-            intent.putExtras(b)
+            val bu = Bundle()
+            bu.putString("flashcardPath", flashcardPath)
+            bu.putString("collectionPath", collectionPath)
+            bu.putString("collectionId", nameOfCurrentCollection)
+            intent.putExtras(bu)
             startActivity(intent)
             finish()
         }
@@ -298,12 +312,12 @@ class TrainingActivity: AppCompatActivity() {
         addCardButton.setOnClickListener {
             MyUtils.stopAudio()
             intent = Intent(this, AddCardActivity::class.java)
-            val b = Bundle()
-            b.putString("collectionPath", collectionPath)
-            b.putString("collectionId", nameOfCurrentCollection)
-            b.putBoolean("calledFromAddCard", true)
-            b.putBoolean("calledFromList", false)
-            intent.putExtras(b)
+            val bu = Bundle()
+            bu.putString("collectionPath", collectionPath)
+            bu.putString("collectionId", nameOfCurrentCollection)
+            bu.putBoolean("calledFromAddCard", true)
+            bu.putBoolean("calledFromList", false)
+            intent.putExtras(bu)
             startActivity(intent)
             finish()
         }
@@ -327,10 +341,10 @@ class TrainingActivity: AppCompatActivity() {
         collectionSettingButton.setOnClickListener {
             MyUtils.stopAudio()
             intent = Intent(this, CollectionSettingsActivity::class.java)
-            val b = Bundle()
-            b.putString("collectionPath", collectionPath)
-            b.putString("collectionId", nameOfCurrentCollection)
-            intent.putExtras(b)
+            val bu = Bundle()
+            bu.putString("collectionPath", collectionPath)
+            bu.putString("collectionId", nameOfCurrentCollection)
+            intent.putExtras(bu)
             startActivity(intent)
             finish()
         }
@@ -360,7 +374,7 @@ class TrainingActivity: AppCompatActivity() {
         val cards = MyUtils.getCardFolderNames(this, collectionPath)
         Log.e("cards", cards.size.toString())
         val prefixes = listOf("n_", "f_")
-        var shuffledCards = mutableListOf<String>()
+        val shuffledCards = mutableListOf<String>()
 
         if (nativeToForeign && !foreignToNative) {
             val prefix = prefixes[0]
@@ -382,13 +396,13 @@ class TrainingActivity: AppCompatActivity() {
         shuffledCards.shuffle()
 
         if (shuffledCards.isNotEmpty()) {
-            MyUtils.writeTextFile(collectionPath + "/Properties.txt", 3, shuffledCards.joinToString(" "))
+            MyUtils.writeTextFile("$collectionPath/Properties.txt", 3, shuffledCards.joinToString(" "))
         }   else {
-            MyUtils.writeTextFile(collectionPath + "/Properties.txt", 3, "-")
+            MyUtils.writeTextFile("$collectionPath/Properties.txt", 3, "-")
         }
 
         //set the index
-        MyUtils.writeTextFile(collectionPath + "/Properties.txt", 4, "0")
+        MyUtils.writeTextFile("$collectionPath/Properties.txt", 4, "0")
 
         return shuffledCards
     }

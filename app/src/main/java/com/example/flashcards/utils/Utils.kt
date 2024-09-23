@@ -1,7 +1,9 @@
 package com.example.flashcards.utils
 
 import android.app.AlertDialog
+import android.content.BroadcastReceiver
 import android.content.Context
+import android.content.Intent
 import android.graphics.Typeface
 import android.media.MediaPlayer
 import android.os.Handler
@@ -58,6 +60,14 @@ object MyUtils {
         }
     }
 
+    class ScreenReceiver : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            if (intent?.action == Intent.ACTION_SCREEN_OFF) {
+                stopAudio()
+            }
+        }
+    }
+
     fun createShortToast(context: Context, message: String) {
         val toast = Toast.makeText(context, message, Toast.LENGTH_SHORT)
         toast.show()
@@ -85,6 +95,20 @@ object MyUtils {
         } else {
             Toast.makeText(context, "Collection with same index already exists", Toast.LENGTH_SHORT).show()
             return false
+        }
+    }
+
+    fun getCardCountForCollection(collectionPath: String): Int {
+        val flashcardsString = readLineFromFile("$collectionPath/Flashcards.txt", 0)
+        if (flashcardsString == "-") {
+            return 0
+        }   else {
+            val flashcardsList = flashcardsString?.split(" ")
+            if (flashcardsList != null) {
+                return flashcardsList.size
+            } else {
+                return 0
+            }
         }
     }
 

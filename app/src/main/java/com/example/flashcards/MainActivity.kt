@@ -44,7 +44,9 @@ class MainActivity : AppCompatActivity() {
         //scan for collections
         val collections = MyUtils.getFoldersInDirectory(collectionPath)
 
-        for (collection in collections) {
+        val sortedCollections = MyUtils.sortCollectionStrings(collections)
+
+        for (collection in sortedCollections) {
             if (MyUtils.readLineFromFile(collectionPath + "/" + collection + "/Properties.txt", 5) == "false" || MyUtils.readLineFromFile(collectionPath + "/" + collection + "/Properties.txt", 5) == "") {
                 addCollectionButtons(collection, false)
             }

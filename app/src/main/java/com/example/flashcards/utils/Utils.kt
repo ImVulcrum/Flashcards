@@ -143,6 +143,39 @@ object MyUtils {
         }
     }
 
+    fun countLinesInFile(filePath: String): Int {
+        val file = File(filePath)
+        return file.readLines().size
+    }
+
+    fun sortCollectionStrings(inputList: List<String>): List<String> {
+        val dateFormat = SimpleDateFormat("dd.MM.yyyy", Locale.getDefault())
+
+        // Separate dates from other strings
+        val dates = mutableListOf<String>()
+        val nonDates = mutableListOf<String>()
+
+        for (item in inputList) {
+            val dateRegex = Regex("""\d{2}\.\d{2}\.\d{4}""")
+            if (dateRegex.matches(item)) {
+                dates.add(item)
+            } else {
+                nonDates.add(item)
+            }
+        }
+
+        // Sort the dates in descending order
+        val sortedDates = dates.sortedByDescending {
+            dateFormat.parse(it)
+        }
+
+        // Sort the non-date strings alphabetically
+        val sortedNonDates = nonDates.sorted()
+
+        // Combine both lists
+        return sortedDates + sortedNonDates
+    }
+
     @SuppressLint("InflateParams")
     fun showDropdownDialog(context: Context, title: String, message: String, options: List<SpinnerItem>, callback: (Boolean, SpinnerItem?) -> Unit) {
         val customTitleView = TextView(context).apply {

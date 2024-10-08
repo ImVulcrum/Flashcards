@@ -97,8 +97,10 @@ class FlashcardListActivity : AppCompatActivity() {
             val collectionsPath = collectionPath.removeSuffix("/$nameOfCurrentCollection")
 
             val collectionIds = MyUtils.getFoldersInDirectory(collectionsPath)
+            val sortedCollectionIds = MyUtils.sortCollectionStrings(collectionIds)
+
             val collectionTuple = mutableListOf<MyUtils.SpinnerItem>()
-            for (collectionId in collectionIds) {
+            for (collectionId in sortedCollectionIds) {
                 val collectionName = MyUtils.readLineFromFile(collectionsPath + "/" + collectionId + "/Properties.txt", 0)
                 collectionName?.let { it1 -> MyUtils.SpinnerItem(it1, collectionId) }
                     ?.let { it2 -> collectionTuple.add(it2) }

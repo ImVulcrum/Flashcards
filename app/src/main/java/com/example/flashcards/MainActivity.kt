@@ -63,14 +63,14 @@ class MainActivity : AppCompatActivity() {
 
         showArchivedCollections.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked) {
-                for (collection in collections) {
+                for (collection in sortedCollections) {
                     if (MyUtils.readLineFromFile(collectionPath + "/" + collection + "/Properties.txt", 5) == "true") {
                         addCollectionButtons(collection, false, R.color.archived)
                     }
                 }
             }   else {
                 container.removeAllViews()
-                for (collection in collections) {
+                for (collection in sortedCollections) {
                     if (MyUtils.readLineFromFile(collectionPath + "/" + collection + "/Properties.txt", 5) == "false" || MyUtils.readLineFromFile(collectionPath + "/" + collection + "/Properties.txt", 5) == "") {
                         addCollectionButtons(collection, false)
                     }

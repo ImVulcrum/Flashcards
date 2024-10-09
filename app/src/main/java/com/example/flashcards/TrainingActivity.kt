@@ -81,19 +81,32 @@ class TrainingActivity: AppCompatActivity() {
 
         var nativeToForeignActive = true
         var foreignToNativeActive = false
-
+        var scheduledMode = false
+        var scheduledCollections: List<String> = listOf("")
+        var scheduledCollectionIndex = 0
         var flashcardShowsQuestion = false
         var audioMuted = sharedPref.getBoolean("audio_muted", false)
-
-        val b = intent.extras
-        val v:String? = b?.getString("collectionId")
-        val nameOfCurrentCollection = v ?:""
 
         appPath = getExternalFilesDir(null).toString()
         flashcardPath = "$appPath/Cards"
         val collectionsPath = "$appPath/Collections"
-        val collectionPath = "$collectionsPath/$nameOfCurrentCollection"
-        val propertiesPath = "$collectionPath/Properties.txt"
+
+        val b = intent.extras
+        val v:String? = b?.getString("collectionId")
+        var nameOfCurrentCollection = v ?:""
+
+
+        if (nameOfCurrentCollection == "-") {
+            val s:String? = b?.getString("scheduledCollections")
+            scheduledCollections = s!!.split(" ")
+            nameOfCurrentCollection = scheduledCollections[scheduledCollectionIndex]
+            scheduledMode = true
+        }
+
+        var collectionPath = "$collectionsPath/$nameOfCurrentCollection"
+        var propertiesPath = "$collectionPath/Properties.txt"
+
+        setupNewCollection(propertiesPath, collectionPath, nativeToForeignActive, foreignToNativeActive, nameOfCurrentCollection)
 
         if (MyUtils.readLineFromFile(propertiesPath, 4) != "") {
             cardIndex = MyUtils.readLineFromFile(propertiesPath, 4)!!.toInt()
@@ -106,37 +119,6 @@ class TrainingActivity: AppCompatActivity() {
             muteAudioButton.setImageResource(R.drawable.unmuted)
         }
 
-        //read card order from file if exists, otherwise shuffle
-        val orderLine = MyUtils.readLineFromFile(propertiesPath, 3)
-        if (orderLine == "-") {
-            cardOrder = shuffleCards(collectionPath, nativeToForeignActive, foreignToNativeActive)
-            cardIndex = 0
-        }   else {
-            if (orderLine != null) {
-                cardOrder = orderLine.split(" ")
-            }   else {
-                Log.e("HUGE ERROR", "orderLine is null")
-            }
-        }
-
-        moveCardButton.isEnabled = false
-        moveCardButton.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.button_color))
-        editCardButton.isEnabled = false
-        editCardButton.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.button_color))
-        flashcardCounter.text = cardOrder.size.toString() + " Cards"
-
-        if (cardOrder.isEmpty()) {
-            flashcardButton.isEnabled = false
-            flashcardButton.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.button_color))
-            shuffleButton.isEnabled = false
-            shuffleButton.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.button_color))
-        }
-
-        collectionTitle.text = MyUtils.readLineFromFile(propertiesPath, 0)
-        collectionIndex.text = nameOfCurrentCollection
-
-        nativeToForeignButton.text = MyUtils.readLineFromFile(propertiesPath, 1) + " - " + MyUtils.readLineFromFile(propertiesPath, 2)
-        foreignToNativeButton.text = MyUtils.readLineFromFile(propertiesPath, 2) + " - " + MyUtils.readLineFromFile(propertiesPath, 1)
         foreignToNativeButton.setBackgroundColor(ContextCompat.getColor(this, R.color.button_color))
 
         flashcardButton.setOnClickListener{
@@ -162,6 +144,23 @@ class TrainingActivity: AppCompatActivity() {
                 flashcardId.text = cardOrder[cardIndex].substring(2)
 
                 if (cardIndex+1 == cardOrder.size) {
+                    if (scheduledMode == true) {
+                        MyUtils.showConfirmationDialog(context = this, "show cards of next queued collection", "you want to switch to the next collection?") { userChoice ->
+                            if (userChoice) {
+                                scheduledCollectionIndex += 1
+
+                                if (scheduledCollectionIndex == scheduledCollections.size) {
+                                    scheduledCollectionIndex = 0
+                                }
+
+                                nameOfCurrentCollection = scheduledCollections[scheduledCollectionIndex]
+                                collectionPath = "$collectionsPath/$nameOfCurrentCollection"
+                                propertiesPath = "$collectionPath/Properties.txt"
+
+                                setupNewCollection(propertiesPath, collectionPath, nativeToForeignActive, foreignToNativeActive, nameOfCurrentCollection)
+                            }
+                        }
+                    }
                     cardIndex = 0
                 }   else {
                     cardIndex++
@@ -349,6 +348,45 @@ class TrainingActivity: AppCompatActivity() {
             intent.putExtras(bu)
             startActivity(intent)
             finish()
+        }
+    }
+
+    @SuppressLint("SetTextI18n")
+    private fun setupNewCollection(propertiesPath: String, collectionPath: String, nativeToForeignActive: Boolean, foreignToNativeActive: Boolean, nameOfCurrentCollection: String) {
+        //read card order from file if exists, otherwise shuffle
+        getOrderLine(propertiesPath, collectionPath, nativeToForeignActive, foreignToNativeActive)
+
+        moveCardButton.isEnabled = false
+        moveCardButton.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.button_color))
+        editCardButton.isEnabled = false
+        editCardButton.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.button_color))
+        flashcardCounter.text = cardOrder.size.toString() + " Cards"
+
+        if (cardOrder.isEmpty()) {
+            flashcardButton.isEnabled = false
+            flashcardButton.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.button_color))
+            shuffleButton.isEnabled = false
+            shuffleButton.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.button_color))
+        }
+
+        collectionTitle.text = MyUtils.readLineFromFile(propertiesPath, 0)
+        collectionIndex.text = nameOfCurrentCollection
+        nativeToForeignButton.text = MyUtils.readLineFromFile(propertiesPath, 1) + " - " + MyUtils.readLineFromFile(propertiesPath, 2)
+        foreignToNativeButton.text = MyUtils.readLineFromFile(propertiesPath, 2) + " - " + MyUtils.readLineFromFile(propertiesPath, 1)
+    }
+
+    private fun getOrderLine(propertiesPath: String, collectionPath: String, nativeToForeignActive: Boolean, foreignToNativeActive: Boolean) {
+        //read card order from file if exists, otherwise shuffle
+        val orderLine = MyUtils.readLineFromFile(propertiesPath, 3)
+        if (orderLine == "-") {
+            cardOrder = shuffleCards(collectionPath, nativeToForeignActive, foreignToNativeActive)
+            cardIndex = 0
+        }   else {
+            if (orderLine != null) {
+                cardOrder = orderLine.split(" ")
+            }   else {
+                Log.e("HUGE ERROR", "orderLine is null")
+            }
         }
     }
 

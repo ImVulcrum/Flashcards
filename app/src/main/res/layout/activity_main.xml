@@ -91,14 +91,14 @@
 
             <CheckBox
                 android:id="@+id/show_archived_collections"
-                android:layout_width="170dp"
+                android:layout_width="120dp"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
                 android:layout_marginTop="-17dp"
                 android:background="@drawable/checkbox"
                 android:paddingLeft="5dp"
                 android:paddingBottom="1dp"
-                android:text="show archived collections"
+                android:text="show archived"
                 android:textAppearance="@style/SpaceGroteskVerySmall"
                 android:textColor="@color/white"
                 app:buttonTint="@color/strong_highlight" />
@@ -107,7 +107,7 @@
                 android:id="@+id/b_merge_collections"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="40dp"
+                android:layout_marginStart="30dp"
                 android:clickable="true"
                 android:src="@drawable/merge"
                 app:backgroundTint="@color/primary"
@@ -118,10 +118,24 @@
                 tools:ignore="ContentDescription,SpeakableTextPresentCheck" />
 
             <com.google.android.material.floatingactionbutton.FloatingActionButton
+                android:id="@+id/b_play_scheduled"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="15dp"
+                android:clickable="true"
+                android:src="@drawable/play"
+                app:backgroundTint="@color/primary"
+                app:elevation="0dp"
+                app:maxImageSize="35dp"
+                app:shapeAppearance="@style/Widget.Material3.CircularProgressIndicator.Small"
+                app:tint="@color/white"
+                tools:ignore="ContentDescription,SpeakableTextPresentCheck" />
+
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
                 android:id="@+id/button_add"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="20dp"
+                android:layout_marginStart="15dp"
                 android:clickable="true"
                 android:src="@drawable/plus"
                 app:backgroundTint="@color/primary"

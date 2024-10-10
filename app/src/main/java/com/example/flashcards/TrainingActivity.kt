@@ -82,8 +82,10 @@ class TrainingActivity: AppCompatActivity() {
         var nativeToForeignActive = true
         var foreignToNativeActive = false
         var scheduledMode = false
+        var showSwitchDialog = false
         var scheduledCollections: List<String> = listOf("")
         var scheduledCollectionIndex = 0
+        var scheduledCollectionsString = ""
         var flashcardShowsQuestion = false
         var audioMuted = sharedPref.getBoolean("audio_muted", false)
 
@@ -93,12 +95,16 @@ class TrainingActivity: AppCompatActivity() {
 
         val b = intent.extras
         val v:String? = b?.getString("collectionId")
+        val queuedMode:Boolean = b?.getBoolean("queuedMode") ?: false
         var nameOfCurrentCollection = v ?:""
 
 
-        if (nameOfCurrentCollection == "-") {
-            val s:String? = b?.getString("scheduledCollections")
-            scheduledCollections = s!!.split(" ")
+        if (queuedMode) {
+            scheduledCollectionsString = b?.getString("scheduledCollections").toString()
+            scheduledCollections = scheduledCollectionsString.split(" ")
+            val p:Int = sharedPref.getInt("scheduledCollectionIndex",0)
+            scheduledCollectionIndex = p
+
             nameOfCurrentCollection = scheduledCollections[scheduledCollectionIndex]
             scheduledMode = true
         }
@@ -106,7 +112,7 @@ class TrainingActivity: AppCompatActivity() {
         var collectionPath = "$collectionsPath/$nameOfCurrentCollection"
         var propertiesPath = "$collectionPath/Properties.txt"
 
-        setupNewCollection(propertiesPath, collectionPath, nativeToForeignActive, foreignToNativeActive, nameOfCurrentCollection)
+        setupNewCollection(propertiesPath, collectionPath, nativeToForeignActive, foreignToNativeActive, nameOfCurrentCollection, queuedMode)
 
         if (MyUtils.readLineFromFile(propertiesPath, 4) != "") {
             cardIndex = MyUtils.readLineFromFile(propertiesPath, 4)!!.toInt()
@@ -123,78 +129,36 @@ class TrainingActivity: AppCompatActivity() {
 
         flashcardButton.setOnClickListener{
             if (flashcardShowsQuestion) {
-                flashcardShowsQuestion = false
+                val (temp_flashcardShowsQuestion, temp_showSwitchDialog) = showAnswer(audioMuted = audioMuted, scheduledMode = scheduledMode, propertiesPath = propertiesPath)
+                flashcardShowsQuestion = temp_flashcardShowsQuestion
+                showSwitchDialog = temp_showSwitchDialog
+            } else{
+                if (showSwitchDialog) {
+                    showSwitchDialog = false
 
-                flashcardButton.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.highlight))
-                //flashcardButton.text = "backside"
+                    MyUtils.showConfirmationDialog(context = this, "Queue Next Collection", "You want to switch to the next collection?") { userChoice ->
+                        if (userChoice) {
+                            scheduledCollectionIndex += 1
 
-                var line = 0
-                var audioFile = "/native.mp3"
-                if (cardOrder[cardIndex].first() == 'n') {
-                    line = 1
-                    audioFile = "/foreign.mp3"
-                }
-
-                if (!audioMuted) {
-                    MyUtils.stopAudio()
-                    MyUtils.playAudio(flashcardPath + "/" + cardOrder[cardIndex].substring(2) + audioFile)
-                }
-
-                flashcardButton.text = MyUtils.readLineFromFile(flashcardPath + "/" + cardOrder[cardIndex].substring(2) + "/Content.txt", line)
-                flashcardId.text = cardOrder[cardIndex].substring(2)
-
-                if (cardIndex+1 == cardOrder.size) {
-                    if (scheduledMode == true) {
-                        MyUtils.showConfirmationDialog(context = this, "show cards of next queued collection", "you want to switch to the next collection?") { userChoice ->
-                            if (userChoice) {
-                                scheduledCollectionIndex += 1
-
-                                if (scheduledCollectionIndex == scheduledCollections.size) {
-                                    scheduledCollectionIndex = 0
-                                }
-
-                                nameOfCurrentCollection = scheduledCollections[scheduledCollectionIndex]
-                                collectionPath = "$collectionsPath/$nameOfCurrentCollection"
-                                propertiesPath = "$collectionPath/Properties.txt"
-
-                                setupNewCollection(propertiesPath, collectionPath, nativeToForeignActive, foreignToNativeActive, nameOfCurrentCollection)
+                            if (scheduledCollectionIndex == scheduledCollections.size) {
+                                scheduledCollectionIndex = 0
                             }
+
+                            nameOfCurrentCollection = scheduledCollections[scheduledCollectionIndex]
+                            collectionPath = "$collectionsPath/$nameOfCurrentCollection"
+                            propertiesPath = "$collectionPath/Properties.txt"
+
+                            setupNewCollection(propertiesPath, collectionPath, nativeToForeignActive, foreignToNativeActive, nameOfCurrentCollection, queuedMode)
+
+                            editor.putInt("scheduledCollectionIndex", scheduledCollectionIndex)
+                            editor.apply()
+                        } else {
+                            flashcardShowsQuestion = showQuestion(audioMuted = audioMuted)
                         }
                     }
-                    cardIndex = 0
-                }   else {
-                    cardIndex++
+                } else {
+                    flashcardShowsQuestion = showQuestion(audioMuted = audioMuted)
                 }
-
-                MyUtils.writeTextFile(propertiesPath, 4, cardIndex.toString())
-            } else{
-                flashcardShowsQuestion = true
-
-                flashcardButton.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.primary))
-                //flashcardButton.text = "frontside"
-                if (!editCardButton.isEnabled) {
-                    editCardButton.isEnabled = true
-                    editCardButton.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.highlight))
-                }
-                if (!moveCardButton.isEnabled) {
-                    moveCardButton.isEnabled = true
-                    moveCardButton.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.highlight))
-                }
-
-                var line = 1
-                var audioFile = "/foreign.mp3"
-                if (cardOrder[cardIndex].first() == 'n') {
-                    line = 0
-                    audioFile = "/native.mp3"
-                }
-
-                if (!audioMuted) {
-                    MyUtils.stopAudio()
-                    MyUtils.playAudio(flashcardPath + "/" + cardOrder[cardIndex].substring(2) + audioFile)
-                }
-
-                flashcardButton.text = MyUtils.readLineFromFile(flashcardPath + "/" + cardOrder[cardIndex].substring(2) + "/Content.txt", line)
-                flashcardId.text = cardOrder[cardIndex].substring(2)
             }
         }
 
@@ -229,7 +193,7 @@ class TrainingActivity: AppCompatActivity() {
                     ?.let { it2 -> collectionTuple.add(it2) }
             }
 
-            MyUtils.showDropdownDialog(this,"Move Card: $cardString", "Chose the collection this card should be moved to", collectionTuple) { isConfirmed, selectedItem ->
+            MyUtils.showDropdownDialog(this,"Move Card: $cardString", "Choose the collection this card should be moved to", collectionTuple) { isConfirmed, selectedItem ->
                 if (isConfirmed) {
                     if (selectedItem != null) {
                         MyUtils.moveCardToCollection(context=this, oldCollectionPath = collectionPath, newCollectionPath = collectionsPath + "/" + selectedItem.description, cardName = currentCardIndex, pathOfTheFlashcard = "$flashcardPath/$currentCardIndex")
@@ -281,7 +245,7 @@ class TrainingActivity: AppCompatActivity() {
             backToMainMenu()
         }
 
-        editCardButton.setOnClickListener {
+        editCardButton.setOnClickListener { //activity switch
             MyUtils.stopAudio()
 
             val currentCard = getCorrectCardIndex(flashcardShowsQuestion, propertiesPath)
@@ -293,24 +257,15 @@ class TrainingActivity: AppCompatActivity() {
             bu.putBoolean("calledFromAddCard", false)
             bu.putString("cardName", currentCard)
             bu.putBoolean("calledFromList", false)
+
+            bu.putBoolean("queuedMode", queuedMode)
+            bu.putString("scheduledCollections", scheduledCollectionsString)
             intent.putExtras(bu)
             startActivity(intent)
             finish()
         }
 
-        showAllCardsButton.setOnClickListener {
-            MyUtils.stopAudio()
-            intent = Intent(this, FlashcardListActivity::class.java)
-            val bu = Bundle()
-            bu.putString("flashcardPath", flashcardPath)
-            bu.putString("collectionPath", collectionPath)
-            bu.putString("collectionId", nameOfCurrentCollection)
-            intent.putExtras(bu)
-            startActivity(intent)
-            finish()
-        }
-
-        addCardButton.setOnClickListener {
+        addCardButton.setOnClickListener { //activity switch
             MyUtils.stopAudio()
             intent = Intent(this, AddCardActivity::class.java)
             val bu = Bundle()
@@ -318,6 +273,24 @@ class TrainingActivity: AppCompatActivity() {
             bu.putString("collectionId", nameOfCurrentCollection)
             bu.putBoolean("calledFromAddCard", true)
             bu.putBoolean("calledFromList", false)
+
+            bu.putBoolean("queuedMode", queuedMode)
+            bu.putString("scheduledCollections", scheduledCollectionsString)
+            intent.putExtras(bu)
+            startActivity(intent)
+            finish()
+        }
+
+        showAllCardsButton.setOnClickListener { //activity switch
+            MyUtils.stopAudio()
+            intent = Intent(this, FlashcardListActivity::class.java)
+            val bu = Bundle()
+            bu.putString("flashcardPath", flashcardPath)
+            bu.putString("collectionPath", collectionPath)
+            bu.putString("collectionId", nameOfCurrentCollection)
+
+            bu.putBoolean("queuedMode", queuedMode)
+            bu.putString("scheduledCollections", scheduledCollectionsString)
             intent.putExtras(bu)
             startActivity(intent)
             finish()
@@ -345,14 +318,80 @@ class TrainingActivity: AppCompatActivity() {
             val bu = Bundle()
             bu.putString("collectionPath", collectionPath)
             bu.putString("collectionId", nameOfCurrentCollection)
+
+            bu.putBoolean("queuedMode", queuedMode)
+            bu.putString("scheduledCollections", scheduledCollectionsString)
             intent.putExtras(bu)
             startActivity(intent)
             finish()
         }
     }
 
+    private fun showQuestion(audioMuted: Boolean):Boolean {
+
+        flashcardButton.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.primary))
+        if (!editCardButton.isEnabled) {
+            editCardButton.isEnabled = true
+            editCardButton.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.highlight))
+        }
+        if (!moveCardButton.isEnabled) {
+            moveCardButton.isEnabled = true
+            moveCardButton.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.highlight))
+        }
+
+        var line = 1
+        var audioFile = "/foreign.mp3"
+        if (cardOrder[cardIndex].first() == 'n') {
+            line = 0
+            audioFile = "/native.mp3"
+        }
+
+        if (!audioMuted) {
+            MyUtils.stopAudio()
+            MyUtils.playAudio(flashcardPath + "/" + cardOrder[cardIndex].substring(2) + audioFile)
+        }
+
+        flashcardButton.text = MyUtils.readLineFromFile(flashcardPath + "/" + cardOrder[cardIndex].substring(2) + "/Content.txt", line)
+        flashcardId.text = cardOrder[cardIndex].substring(2)
+
+        return true
+    }
+
+    private fun showAnswer(audioMuted:Boolean, scheduledMode:Boolean, propertiesPath: String):Pair<Boolean, Boolean> {
+        var showSwitchDialog = false
+
+        flashcardButton.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.highlight))
+
+        var line = 0
+        var audioFile = "/native.mp3"
+        if (cardOrder[cardIndex].first() == 'n') {
+            line = 1
+            audioFile = "/foreign.mp3"
+        }
+
+        if (!audioMuted) {
+            MyUtils.stopAudio()
+            MyUtils.playAudio(flashcardPath + "/" + cardOrder[cardIndex].substring(2) + audioFile)
+        }
+
+        flashcardButton.text = MyUtils.readLineFromFile(flashcardPath + "/" + cardOrder[cardIndex].substring(2) + "/Content.txt", line)
+        flashcardId.text = cardOrder[cardIndex].substring(2)
+
+        if (cardIndex+1 == cardOrder.size) {
+            if (scheduledMode == true) {
+                showSwitchDialog = true
+            }
+            cardIndex = 0
+        }   else {
+            cardIndex++
+        }
+
+        MyUtils.writeTextFile(propertiesPath, 4, cardIndex.toString())
+        return Pair(false, showSwitchDialog)
+    }
+
     @SuppressLint("SetTextI18n")
-    private fun setupNewCollection(propertiesPath: String, collectionPath: String, nativeToForeignActive: Boolean, foreignToNativeActive: Boolean, nameOfCurrentCollection: String) {
+    private fun setupNewCollection(propertiesPath: String, collectionPath: String, nativeToForeignActive: Boolean, foreignToNativeActive: Boolean, nameOfCurrentCollection: String, queuedMode:Boolean) {
         //read card order from file if exists, otherwise shuffle
         getOrderLine(propertiesPath, collectionPath, nativeToForeignActive, foreignToNativeActive)
 
@@ -362,6 +401,9 @@ class TrainingActivity: AppCompatActivity() {
         editCardButton.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.button_color))
         flashcardCounter.text = cardOrder.size.toString() + " Cards"
 
+        flashcardButton.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.primary))
+        flashcardButton.text = "Start"
+
         if (cardOrder.isEmpty()) {
             flashcardButton.isEnabled = false
             flashcardButton.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.button_color))
@@ -369,8 +411,13 @@ class TrainingActivity: AppCompatActivity() {
             shuffleButton.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.button_color))
         }
 
+
         collectionTitle.text = MyUtils.readLineFromFile(propertiesPath, 0)
-        collectionIndex.text = nameOfCurrentCollection
+        if (queuedMode) {
+            collectionIndex.text = "Q: $nameOfCurrentCollection"
+        }   else {
+            collectionIndex.text = nameOfCurrentCollection
+        }
         nativeToForeignButton.text = MyUtils.readLineFromFile(propertiesPath, 1) + " - " + MyUtils.readLineFromFile(propertiesPath, 2)
         foreignToNativeButton.text = MyUtils.readLineFromFile(propertiesPath, 2) + " - " + MyUtils.readLineFromFile(propertiesPath, 1)
     }

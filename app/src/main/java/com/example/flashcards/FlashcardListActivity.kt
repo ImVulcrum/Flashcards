@@ -28,8 +28,11 @@ class FlashcardListActivity : AppCompatActivity() {
 
     private lateinit var nameOfCurrentCollection:String
 
-    var currentCard:String = ""
+    private var currentCard:String = ""
     private var buttonsCurrentlySelected = mutableListOf<MyDisplayingUtils.Flashcard>()
+
+    private var queuedMode = false
+    private var scheduledCollectionsString = ""
 
     @Deprecated("Deprecated in Java")
     @SuppressLint("MissingSuperCall")
@@ -61,6 +64,11 @@ class FlashcardListActivity : AppCompatActivity() {
         val collectionPath:String = v ?:""
         val i:String? = b?.getString("collectionId")
         nameOfCurrentCollection = i ?:""
+
+        val f:Boolean? = b?.getBoolean("queuedMode")
+        queuedMode = f ?:false
+        val c:String? = b?.getString("scheduledCollections")
+        scheduledCollectionsString = c ?:""
 
         //set title and index hint
         collectionNameHeader.text = MyUtils.readLineFromFile(collectionPath + "/Properties.txt", 0)
@@ -136,6 +144,8 @@ class FlashcardListActivity : AppCompatActivity() {
             n.putBoolean("calledFromAddCard", false)
             n.putString("cardName", currentCard)
             n.putBoolean("calledFromList", true)
+            n.putBoolean("queuedMode", queuedMode)
+            n.putString("scheduledCollections", scheduledCollectionsString)
             intent.putExtras(n)
             startActivity(intent)
             finish()
@@ -148,6 +158,8 @@ class FlashcardListActivity : AppCompatActivity() {
             bun.putString("collectionId", nameOfCurrentCollection)
             bun.putBoolean("calledFromAddCard", true)
             bun.putBoolean("calledFromList", true)
+            bun.putBoolean("queuedMode", queuedMode)
+            bun.putString("scheduledCollections", scheduledCollectionsString)
             intent.putExtras(bun)
             startActivity(intent)
             finish()
@@ -162,6 +174,8 @@ class FlashcardListActivity : AppCompatActivity() {
         intent = Intent(this, TrainingActivity::class.java)
         val b = Bundle()
         b.putString("collectionId", nameOfCurrentCollection)
+        b.putBoolean("queuedMode", queuedMode)
+        b.putString("scheduledCollections", scheduledCollectionsString)
         intent.putExtras(b)
         startActivity(intent)
         finish()

@@ -2,6 +2,7 @@ package com.example.flashcards
 
 import android.annotation.SuppressLint
 import android.content.Intent
+import android.content.res.ColorStateList
 import android.graphics.PorterDuff
 import android.os.Bundle
 import android.view.Gravity
@@ -23,10 +24,12 @@ class MainActivity : AppCompatActivity() {
     private lateinit var buttonAdd: FloatingActionButton
     private lateinit var container: ViewGroup
     private lateinit var showArchivedCollections: CheckBox
+    private lateinit var buttonPlayScheduled: FloatingActionButton
     private var collectionDisplayWidth = 320
     private var collectionDisplayHeight = 40
     lateinit var appPath: String
     lateinit var collectionPath: String
+    val scheduledCollections = mutableListOf<String>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -37,9 +40,17 @@ class MainActivity : AppCompatActivity() {
         container = findViewById(R.id.container)
         buttonAdd = findViewById(R.id.button_add)
         showArchivedCollections = findViewById(R.id.show_archived_collections)
+        buttonPlayScheduled = findViewById(R.id.b_play_scheduled)
 
         appPath = getExternalFilesDir(null).toString()
         collectionPath = appPath + "/Collections"
+
+        //reset any queues and deactivate the queue play button
+        val sharedPref = getSharedPreferences("pref", MODE_PRIVATE)
+        val editor = sharedPref.edit()
+        editor.putInt("scheduledCollectionIndex", 0)
+        editor.apply()
+        deactivateSchedulePlayButton()
 
         //scan for collections
         val collections = MyUtils.getFoldersInDirectory(collectionPath)
@@ -54,6 +65,17 @@ class MainActivity : AppCompatActivity() {
 
         buttonAdd.setOnClickListener {
             addCollection()
+        }
+
+        buttonPlayScheduled.setOnClickListener {
+            intent = Intent(this@MainActivity, TrainingActivity::class.java)
+            val b = Bundle()
+            b.putString("collectionId", "-")
+            b.putBoolean("queuedMode", true)
+            b.putString("scheduledCollections", scheduledCollections.joinToString(" "))
+            intent.putExtras(b)
+            startActivity(intent)
+            finish()
         }
 
         settingsButton.setOnClickListener {
@@ -83,6 +105,16 @@ class MainActivity : AppCompatActivity() {
     // Function to convert dp to pixels
     private fun Int.dpToPx(): Int {
         return (this * resources.displayMetrics.density).toInt()
+    }
+
+    private fun deactivateSchedulePlayButton () {
+        buttonPlayScheduled.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.button_color))
+        buttonPlayScheduled.isEnabled = false
+    }
+
+    private fun activateSchedulePlayButton () {
+        buttonPlayScheduled.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.primary))
+        buttonPlayScheduled.isEnabled = true
     }
 
     @SuppressLint("SetTextI18n")
@@ -151,7 +183,7 @@ class MainActivity : AppCompatActivity() {
         // Create the selection button (square)
         val selectionButton = Button(this).apply {
 
-            contentDescription = collectionId
+            contentDescription = ""
             maxLines = 1
             layoutParams = LinearLayout.LayoutParams(
                 collectionDisplayHeight.dpToPx(),  // Width in pixels
@@ -162,8 +194,6 @@ class MainActivity : AppCompatActivity() {
 
             setBackgroundColor(ContextCompat.getColor(this@MainActivity, collectionButtonColor))
 
-            // Set the image on the button (without text)
-            contentDescription = ""
             val drawable = ContextCompat.getDrawable(this@MainActivity, R.drawable.checkbox_unchecked) // Replace with your drawable
             setCompoundDrawablesWithIntrinsicBounds(null, null, null, drawable)  // Set image (bottom)
 
@@ -186,6 +216,8 @@ class MainActivity : AppCompatActivity() {
                 if (contentDescription == "") {
                     contentDescription = "selected"
 
+                    scheduledCollections.add(collectionId)
+
                     val drawable = ContextCompat.getDrawable(this@MainActivity, R.drawable.checkbox_checked) // Replace with your drawable
                     setCompoundDrawablesWithIntrinsicBounds(null, null, null, drawable)  // Set image (bottom)
 
@@ -200,6 +232,8 @@ class MainActivity : AppCompatActivity() {
                 }   else {
                     contentDescription = ""
 
+                    scheduledCollections.remove(collectionId)
+
                     val drawable = ContextCompat.getDrawable(this@MainActivity, R.drawable.checkbox_unchecked) // Replace with your drawable
                     setCompoundDrawablesWithIntrinsicBounds(null, null, null, drawable)  // Set image (bottom)
 
@@ -211,6 +245,12 @@ class MainActivity : AppCompatActivity() {
 
                     // Set the scaled drawable on the button (e.g., centered without text)
                     setCompoundDrawables(null, null, null, drawable)
+                }
+
+                if (scheduledCollections.isEmpty()) {
+                    deactivateSchedulePlayButton()
+                }   else if (scheduledCollections.size == 1) {
+                    activateSchedulePlayButton()
                 }
             }
         }

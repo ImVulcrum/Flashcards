@@ -107,6 +107,11 @@ class AddCardActivity<IOException> : AppCompatActivity() {
         val g:Boolean? = b?.getBoolean("calledFromList")
         val calledFromList:Boolean = g ?:false
 
+        val f:Boolean? = b?.getBoolean("queuedMode")
+        val queuedMode = f ?:false
+        val c:String? = b?.getString("scheduledCollections")
+        val scheduledCollectionsString = c ?:""
+
         var cardName:String
         val flashcardPath = getExternalFilesDir(null).toString() + "/Cards"
         val propertiesPath = collectionPath + "/Properties.txt"
@@ -165,6 +170,9 @@ class AddCardActivity<IOException> : AppCompatActivity() {
                 bu.putString("flashcardPath", flashcardPath)
                 bu.putString("collectionPath", collectionPath)
                 bu.putString("collectionId", nameOfCurrentCollection)
+
+                bu.putBoolean("queuedMode", queuedMode)
+                bu.putString("scheduledCollections", scheduledCollectionsString)
                 intent.putExtras(bu)
                 startActivity(intent)
                 finish()
@@ -172,6 +180,8 @@ class AddCardActivity<IOException> : AppCompatActivity() {
                 intent = Intent(this, TrainingActivity::class.java)
                 val bun = Bundle()
                 bun.putString("collectionId", nameOfCurrentCollection)
+                bun.putBoolean("queuedMode", queuedMode)
+                bun.putString("scheduledCollections", scheduledCollectionsString)
                 intent.putExtras(bun)
                 startActivity(intent)
                 finish()
@@ -191,6 +201,9 @@ class AddCardActivity<IOException> : AppCompatActivity() {
                 bu.putString("flashcardPath", flashcardPath)
                 bu.putString("collectionPath", collectionPath)
                 bu.putString("collectionId", nameOfCurrentCollection)
+
+                bu.putBoolean("queuedMode", queuedMode)
+                bu.putString("scheduledCollections", scheduledCollectionsString)
                 intent.putExtras(bu)
                 startActivity(intent)
                 finish()
@@ -198,6 +211,8 @@ class AddCardActivity<IOException> : AppCompatActivity() {
                 intent = Intent(this, TrainingActivity::class.java)
                 val bun = Bundle()
                 bun.putString("collectionId", nameOfCurrentCollection)
+                bun.putBoolean("queuedMode", queuedMode)
+                bun.putString("scheduledCollections", scheduledCollectionsString)
                 intent.putExtras(bun)
                 startActivity(intent)
                 finish()
@@ -212,6 +227,9 @@ class AddCardActivity<IOException> : AppCompatActivity() {
                     bu.putString("flashcardPath", flashcardPath)
                     bu.putString("collectionPath", collectionPath)
                     bu.putString("collectionId", nameOfCurrentCollection)
+
+                    bu.putBoolean("queuedMode", queuedMode)
+                    bu.putString("scheduledCollections", scheduledCollectionsString)
                     intent.putExtras(bu)
                     startActivity(intent)
                     finish()
@@ -219,6 +237,8 @@ class AddCardActivity<IOException> : AppCompatActivity() {
                     intent = Intent(this, TrainingActivity::class.java)
                     val bun = Bundle()
                     bun.putString("collectionId", nameOfCurrentCollection)
+                    bun.putBoolean("queuedMode", queuedMode)
+                    bun.putString("scheduledCollections", scheduledCollectionsString)
                     intent.putExtras(bun)
                     startActivity(intent)
                     finish()

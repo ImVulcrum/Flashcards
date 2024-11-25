@@ -114,7 +114,7 @@ class TrainingActivity: AppCompatActivity() {
 
         setupNewCollection(propertiesPath, collectionPath, nativeToForeignActive, foreignToNativeActive, nameOfCurrentCollection, queuedMode)
 
-        if (MyUtils.readLineFromFile(propertiesPath, 4) != "") {
+        if (MyUtils.readLineFromFile(propertiesPath, 4) != "" && !queuedMode) {
             cardIndex = MyUtils.readLineFromFile(propertiesPath, 4)!!.toInt()
         }
 
@@ -129,9 +129,9 @@ class TrainingActivity: AppCompatActivity() {
 
         flashcardButton.setOnClickListener{
             if (flashcardShowsQuestion) {
-                val (temp_flashcardShowsQuestion, temp_showSwitchDialog) = showAnswer(audioMuted = audioMuted, scheduledMode = scheduledMode, propertiesPath = propertiesPath)
-                flashcardShowsQuestion = temp_flashcardShowsQuestion
-                showSwitchDialog = temp_showSwitchDialog
+                val (tempFlashcardShowQuestion, tempShowSwitchDialog) = showAnswer(audioMuted = audioMuted, scheduledMode = scheduledMode, propertiesPath = propertiesPath)
+                flashcardShowsQuestion = tempFlashcardShowQuestion
+                showSwitchDialog = tempShowSwitchDialog
             } else{
                 if (showSwitchDialog) {
                     showSwitchDialog = false

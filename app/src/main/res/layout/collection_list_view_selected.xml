@@ -1,0 +1,43 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:layout_marginTop="0dp"
+    android:layout_marginBottom="0dp"
+    android:layout_marginStart="16dp"
+    android:layout_marginEnd="16dp">
+
+    <Button
+        android:id="@+id/selectionButton"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:background="@color/primary"
+        android:drawablePadding="4dp"
+        android:foreground="@drawable/checkbox_checked"
+        android:foregroundTint="@color/highlight"
+        android:gravity="center" />
+
+
+    <Button
+        android:id="@+id/collectionButton"
+        android:layout_width="240dp"
+        android:layout_height="wrap_content"
+        android:backgroundTint="@color/primary"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp"
+        android:text="Collection Name"
+        app:cornerRadius="0dp" />
+
+    <Button
+        android:id="@+id/deleteCollectionButton"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:foreground="@drawable/delete_button"
+        android:drawablePadding="4dp"
+        android:gravity="center"
+        />
+
+</LinearLayout>

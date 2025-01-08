@@ -46,7 +46,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="start"
                 android:layout_marginEnd="110dp"
-                android:text="Settings"
+                android:text="Tab1"
                 android:textAppearance="@style/SpaceGroteskLarge"
                 android:textColor="#FFFFFF" />
 
@@ -211,6 +211,17 @@
             android:background="?android:attr/listDivider"
             android:backgroundTint="#FFFFFF"
             android:backgroundTintMode="add" />
+
+
+        <Button
+            android:id="@+id/delete_tab"
+            android:layout_width="150dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="60dp"
+            android:backgroundTint="@color/primary"
+            android:text="delete tab"
+            app:cornerRadius="10dp" />
 
     </LinearLayout>
 

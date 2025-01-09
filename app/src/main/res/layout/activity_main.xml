@@ -25,31 +25,19 @@
             android:orientation="horizontal">
 
             <com.google.android.material.tabs.TabLayout
+                android:id="@+id/tabLayout"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="-6dp"
                 android:layout_weight="1"
                 android:background="#00FFFFFF"
+                android:contentDescription="-"
                 app:tabGravity="fill"
                 app:tabIndicatorColor="@color/highlight"
                 app:tabIndicatorGravity="bottom"
                 app:tabPaddingBottom="-10dp"
                 app:tabTextColor="@color/white">
 
-                <com.google.android.material.tabs.TabItem
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Monday" />
-
-                <com.google.android.material.tabs.TabItem
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Tuesday" />
-
-                <com.google.android.material.tabs.TabItem
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Wednesday" />
             </com.google.android.material.tabs.TabLayout>
 
             <com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -108,7 +96,7 @@
             android:layout_width="wrap_content"
             android:layout_height="@dimen/collection_display_area_height"
             android:layout_gravity="center_horizontal"
-            android:layout_marginTop="50dp"
+            android:layout_marginTop="10dp"
             android:fadeScrollbars="false"
             android:fillViewport="true"
             android:scrollbarThumbVertical="@color/highlight">
@@ -149,7 +137,7 @@
                 android:layout_marginStart="30dp"
                 android:clickable="true"
                 android:src="@drawable/merge"
-                app:backgroundTint="@color/primary"
+                app:backgroundTint="@color/button_color"
                 app:elevation="0dp"
                 app:maxImageSize="45dp"
                 app:shapeAppearance="@style/Widget.Material3.CircularProgressIndicator.Small"

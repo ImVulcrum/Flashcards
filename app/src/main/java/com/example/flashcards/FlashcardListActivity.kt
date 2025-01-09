@@ -114,7 +114,7 @@ class FlashcardListActivity : AppCompatActivity() {
                     ?.let { it2 -> collectionTuple.add(it2) }
             }
 
-            MyUtils.showDropdownDialog(this,"Move Cards", "Chose the collection this card should be moved to", collectionTuple) { isConfirmed, selectedItem ->
+            MyUtils.showDropdownDialog(this,"Move Cards", "Choose the collection this card should be moved to", collectionTuple) { isConfirmed, selectedItem ->
                 if (isConfirmed) {
                     if (selectedItem != null) {
                         for (buttonPair in buttonsCurrentlySelected) {

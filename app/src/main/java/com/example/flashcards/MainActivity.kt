@@ -25,11 +25,13 @@ class MainActivity : AppCompatActivity() {
     private lateinit var container: ViewGroup
     private lateinit var showArchivedCollections: CheckBox
     private lateinit var buttonPlayScheduled: FloatingActionButton
+    private lateinit var tabLayout: com.google.android.material.tabs.TabLayout
     private var collectionDisplayWidth = 320
     private var collectionDisplayHeight = 40
-    lateinit var appPath: String
+    lateinit var tabPath: String
     lateinit var collectionPath: String
     val scheduledCollections = mutableListOf<String>()
+    var sortedCollections = mutableListOf<String>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -41,26 +43,35 @@ class MainActivity : AppCompatActivity() {
         buttonAdd = findViewById(R.id.button_add)
         showArchivedCollections = findViewById(R.id.show_archived_collections)
         buttonPlayScheduled = findViewById(R.id.b_play_scheduled)
+        tabLayout = findViewById(R.id.tabLayout)
 
-        appPath = getExternalFilesDir(null).toString()
-        collectionPath = appPath + "/Collections"
+        resetQueues()
 
-        //reset any queues and deactivate the queue play button
-        val sharedPref = getSharedPreferences("pref", MODE_PRIVATE)
-        val editor = sharedPref.edit()
-        editor.putInt("scheduledCollectionIndex", 0)
-        editor.apply()
-        deactivateSchedulePlayButton()
+        val appPath = getExternalFilesDir(null).toString()
+        val tabs = MyUtils.getFoldersInDirectory(appPath)
 
-        //scan for collections
-        val collections = MyUtils.getFoldersInDirectory(collectionPath)
+        if (!tabs.isEmpty()) {
 
-        val sortedCollections = MyUtils.sortCollectionStrings(collections)
 
-        for (collection in sortedCollections) {
-            if (MyUtils.readLineFromFile(collectionPath + "/" + collection + "/Properties.txt", 5) == "false" || MyUtils.readLineFromFile(collectionPath + "/" + collection + "/Properties.txt", 5) == "") {
-                addCollectionButtons(collection, false)
+            for (tab in tabs) {
+                addTabButton(tabLayout, MyUtils.readLineFromFile(appPath + "/" + tab + "/" + "/Settings.txt", 0)!!, appPath, tabs)
             }
+
+            val sharedPref = getSharedPreferences("pref", MODE_PRIVATE)
+            val tabIndex = sharedPref.getString("currentTabIndex", tabs[0])
+
+            if (tabIndex in tabs) {
+                tabPath = appPath + "/" + tabIndex
+                setTab(tabIndex!!)
+                setTabViewByName(tabLayout, MyUtils.readLineFromFile(tabPath + "/Settings.txt", 0)!!)
+            }   else {
+                tabPath = appPath + "/" + tabs[0]
+                setTab(tabs[0])
+            }
+            collectionPath = tabPath + "/Collections"
+            init()
+        }   else {
+            deactivateAllButtons()
         }
 
         buttonAdd.setOnClickListener {
@@ -97,9 +108,50 @@ class MainActivity : AppCompatActivity() {
                         addCollectionButtons(collection, false)
                     }
                 }
-
             }
         }
+    }
+
+    private fun init(){
+        //scan for collections
+        val collections = MyUtils.getFoldersInDirectory(collectionPath)
+
+        sortedCollections = MyUtils.sortCollectionStrings(collections).toMutableList()
+
+        container.removeAllViews()
+        for (collection in sortedCollections) {
+            if (MyUtils.readLineFromFile(collectionPath + "/" + collection + "/Properties.txt", 5) == "false" || MyUtils.readLineFromFile(collectionPath + "/" + collection + "/Properties.txt", 5) == "") {
+                addCollectionButtons(collection, false)
+            }
+        }
+        activateAllButtons()
+    }
+
+    fun setTabViewByName(tabLayout: com.google.android.material.tabs.TabLayout, tabName: String) {
+        for (i in 0 until tabLayout.tabCount) {
+            val tab = tabLayout.getTabAt(i)
+            if (tab?.text == tabName) {
+                tab.select() // Select the tab
+                break
+            }
+        }
+    }
+
+    private fun setTab(tabIndex: String) {
+        val sharedPref = getSharedPreferences("pref", MODE_PRIVATE)
+        val editor = sharedPref.edit()
+        editor.putString("currentTabIndex", tabIndex)
+        editor.apply()
+    }
+
+    private fun resetQueues() {
+        //reset any queues and deactivate the queue play button
+        val sharedPref = getSharedPreferences("pref", MODE_PRIVATE)
+        val editor = sharedPref.edit()
+        editor.putInt("scheduledCollectionIndex", 0)
+        editor.apply()
+        deactivateSchedulePlayButton()
+        scheduledCollections.clear()
     }
 
     // Function to convert dp to pixels
@@ -117,23 +169,71 @@ class MainActivity : AppCompatActivity() {
         buttonPlayScheduled.isEnabled = true
     }
 
+    private fun deactivateAllButtons() {
+        deactivateSchedulePlayButton()
+        settingsButton.isEnabled = false
+        settingsButton.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.button_color))
+        buttonAdd.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.button_color))
+        buttonAdd.isEnabled = false
+        showArchivedCollections.isEnabled = false
+        showArchivedCollections.setBackgroundColor(ContextCompat.getColor(this, R.color.button_color))
+    }
+
+    private fun activateAllButtons() {
+        settingsButton.isEnabled = true
+        settingsButton.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.highlight))
+        buttonAdd.isEnabled = true
+        buttonAdd.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.primary))
+        showArchivedCollections.isEnabled = true
+        showArchivedCollections.setBackgroundColor(ContextCompat.getColor(this, R.color.primary))
+    }
+
+    private fun addTabButton(tabLayout: com.google.android.material.tabs.TabLayout, tabName: String, appPath:String, tabs:List<String>) {
+        val tab = tabLayout.newTab()
+        tab.text = tabName
+
+        tabLayout.addTab(tab)
+
+        tabLayout.addOnTabSelectedListener(object : com.google.android.material.tabs.TabLayout.OnTabSelectedListener {
+            override fun onTabSelected(tab: com.google.android.material.tabs.TabLayout.Tab?) {
+                val tabIndex = tab?.position ?: 0
+
+                tabPath = appPath + "/" + tabs[tabIndex]
+                collectionPath = tabPath + "/Collections"
+                init()
+                setTab(tabs[tabIndex])
+
+                //clear queued collections
+                resetQueues()
+            }
+
+            override fun onTabUnselected(tab: com.google.android.material.tabs.TabLayout.Tab?) {
+            }
+
+            override fun onTabReselected(tab: com.google.android.material.tabs.TabLayout.Tab?) {
+            }
+        })
+    }
+
     @SuppressLint("SetTextI18n")
     private fun addCollection() {
-        val sharedPref = getSharedPreferences("pref", MODE_PRIVATE)
-        val editor = sharedPref.edit()
+        val tabSettingsPath = tabPath + "/Settings.txt"
 
-        val useDateAsCollectionIndex = sharedPref.getBoolean("use_date_as_collection_index", false)
+        val useDateAsCollectionIndexString = MyUtils.readLineFromFile(tabSettingsPath,3)
+        var useDateAsCollectionIndex = false
+        if (useDateAsCollectionIndexString == "true") {
+            useDateAsCollectionIndex = true
+        }
 
         var indexOfTheNextCollectionToBeCreated = ""
         if (useDateAsCollectionIndex) {
             indexOfTheNextCollectionToBeCreated = MyUtils.getCurrentDate()
         }   else {
-            indexOfTheNextCollectionToBeCreated =
-                sharedPref.getString("index_of_next_collection_to_be_created", "Collection_0").toString()
+            indexOfTheNextCollectionToBeCreated = MyUtils.readLineFromFile(tabSettingsPath, 4)!!
         }
 
-        val nativeLanguage = sharedPref.getString("native_language", "German").toString()
-        val foreignLanguage = sharedPref.getString("foreign_language", "Spanish").toString()
+        val nativeLanguage = MyUtils.readLineFromFile(tabSettingsPath, 1)!!
+        val foreignLanguage = MyUtils.readLineFromFile(tabSettingsPath, 2)!!
 
         val folderName = indexOfTheNextCollectionToBeCreated
         val folderPath = collectionPath + "/" + folderName
@@ -152,15 +252,12 @@ class MainActivity : AppCompatActivity() {
             MyUtils.writeTextFile(folderPath + "/" + propertiesFileName, 5, "false")
 
             addCollectionButtons(indexOfTheNextCollectionToBeCreated, true)
-
-            editor.putInt(folderPath, 0)
         }
 
         if (!useDateAsCollectionIndex) {
             var currentIndexNumber = indexOfTheNextCollectionToBeCreated.removePrefix("Collection_").toInt()
             currentIndexNumber++
-            editor.putString("index_of_next_collection_to_be_created", "Collection_$currentIndexNumber")
-            editor.apply()
+            MyUtils.writeTextFile(tabSettingsPath, 4,"Collection_$currentIndexNumber")
         }
     }
 
@@ -177,7 +274,7 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        val flashcardPath = appPath + "/Cards"
+        val flashcardPath = tabPath + "/Cards"
         val collectionName = MyUtils.readLineFromFile(collectionPath + "/$collectionId/Properties.txt", 0)
 
         // Create the selection button (square)

@@ -16,6 +16,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton
 class SettingsActivity : AppCompatActivity() {
 
     private lateinit var backButton: FloatingActionButton
+    private lateinit var tabNameEditText: EditText
     private lateinit var setCollectionIndex: EditText
     private lateinit var collectionIndexText: TextView
     private lateinit var setFlashcardIndex: EditText
@@ -23,6 +24,7 @@ class SettingsActivity : AppCompatActivity() {
     private lateinit var foreignLanguagePrompt: EditText
     private lateinit var useDateCheckbox: CheckBox
     private lateinit var divider: View
+    private lateinit var tabSettingsPath: String
 
     @Deprecated("Deprecated in Java")
     @SuppressLint("MissingSuperCall")
@@ -31,11 +33,11 @@ class SettingsActivity : AppCompatActivity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        //boilerplate
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_settings)
 
         backButton = findViewById(R.id.settings_back_button)
+        tabNameEditText = findViewById(R.id.tab_name)
         setCollectionIndex = findViewById(R.id.collection_index)
         collectionIndexText = findViewById(R.id.collection_index_helper_text)
         setFlashcardIndex = findViewById(R.id.flashcard_index)
@@ -45,12 +47,20 @@ class SettingsActivity : AppCompatActivity() {
         divider = findViewById(R.id.collection_index_underscore)
 
         val sharedPref = getSharedPreferences("pref", MODE_PRIVATE)
+        val currentTabIndex = sharedPref.getString("currentTabIndex", "ERROR")
+        val tabPath = getExternalFilesDir(null).toString() + "/" + currentTabIndex
+        tabSettingsPath = "$tabPath/Settings.txt"
 
-        val nativeLanguage = sharedPref.getString("native_language", "German").toString()
-        val foreignLanguage = sharedPref.getString("foreign_language", "Spanish").toString()
-        val flashcardIndex = (sharedPref.getInt("flashcard_index", 0)).toString()
-        val collectionIndexName = (sharedPref.getString("index_of_next_collection_to_be_created", "Collection_0"))
-        val useDateAsCollectionIndex = sharedPref.getBoolean("use_date_as_collection_index", false)
+        val tabName = MyUtils.readLineFromFile(tabSettingsPath, 0)
+        val nativeLanguage = MyUtils.readLineFromFile(tabSettingsPath, 1)
+        val foreignLanguage = MyUtils.readLineFromFile(tabSettingsPath, 2)
+        val useDateAsCollectionIndexString = MyUtils.readLineFromFile(tabSettingsPath, 3)
+        var useDateAsCollectionIndex = false
+        if (useDateAsCollectionIndexString == "true") {
+            useDateAsCollectionIndex = true
+        }
+        val collectionIndexName = MyUtils.readLineFromFile(tabSettingsPath, 4)
+        val flashcardIndex = MyUtils.readLineFromFile(tabSettingsPath, 5)
 
         val collectionIndexNumber = collectionIndexName?.removePrefix("Collection_")
 
@@ -60,6 +70,7 @@ class SettingsActivity : AppCompatActivity() {
             enableCollectionIndexEditing()
         }
 
+        tabNameEditText.setText(tabName)
         nativeLanguagePrompt.setText(nativeLanguage)
         foreignLanguagePrompt.setText(foreignLanguage)
         setCollectionIndex.setText(collectionIndexNumber)
@@ -79,10 +90,7 @@ class SettingsActivity : AppCompatActivity() {
                 enableCollectionIndexEditing()
             }
 
-
-            val editor = sharedPref.edit()
-            editor.putBoolean("use_date_as_collection_index", useDateCheckbox.isChecked)
-            editor.apply()
+            MyUtils.writeTextFile(tabSettingsPath, 3, useDateCheckbox.isChecked.toString())
         }
     }
 
@@ -101,19 +109,16 @@ class SettingsActivity : AppCompatActivity() {
     }
 
     private fun saveSettings() {
-        val sharedPref = getSharedPreferences("pref", MODE_PRIVATE)
-        val editor = sharedPref.edit()
-
         if (nativeLanguagePrompt.text.isNullOrEmpty() || foreignLanguagePrompt.text.isNullOrEmpty()) {
             MyUtils.createShortToast(this, "native or foreign language name cannot be empty")
         }else if (setCollectionIndex.text.isNullOrEmpty() || setFlashcardIndex.text.isNullOrEmpty()){
             MyUtils.createShortToast(this, "collection or flashcard index cannot be empty")
         } else {
-            editor.putString("native_language", nativeLanguagePrompt.text.toString())
-            editor.putString("foreign_language", foreignLanguagePrompt.text.toString())
-            editor.putString("index_of_next_collection_to_be_created", "Collection_" + setCollectionIndex.text.toString())
-            editor.putInt("flashcard_index", setFlashcardIndex.text.toString().toInt())
-            editor.apply()
+            MyUtils.writeTextFile(tabSettingsPath, 0, tabNameEditText.text.toString())
+            MyUtils.writeTextFile(tabSettingsPath, 1, nativeLanguagePrompt.text.toString())
+            MyUtils.writeTextFile(tabSettingsPath, 2, foreignLanguagePrompt.text.toString())
+            MyUtils.writeTextFile(tabSettingsPath, 4,"Collection_" + setCollectionIndex.text.toString())
+            MyUtils.writeTextFile(tabSettingsPath, 5, setFlashcardIndex.text.toString())
 
             intent = Intent(this, MainActivity::class.java)
             startActivity(intent)

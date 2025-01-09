@@ -30,7 +30,7 @@ class TrainingActivity: AppCompatActivity() {
     private lateinit var collectionSettingButton: FloatingActionButton
     private lateinit var showAllCardsButton: FloatingActionButton
 
-    private lateinit var appPath:String
+    private lateinit var tabPath:String
     private lateinit var flashcardPath:String
 
     private lateinit var screenReceiver: MyUtils.ScreenReceiver
@@ -89,15 +89,15 @@ class TrainingActivity: AppCompatActivity() {
         var flashcardShowsQuestion = false
         var audioMuted = sharedPref.getBoolean("audio_muted", false)
 
-        appPath = getExternalFilesDir(null).toString()
-        flashcardPath = "$appPath/Cards"
-        val collectionsPath = "$appPath/Collections"
+        val currentTabIndex = sharedPref.getString("currentTabIndex", "ERROR")
+        tabPath = getExternalFilesDir(null).toString() + "/" + currentTabIndex
+        flashcardPath = "$tabPath/Cards"
+        val collectionsPath = "$tabPath/Collections"
 
         val b = intent.extras
         val v:String? = b?.getString("collectionId")
         val queuedMode:Boolean = b?.getBoolean("queuedMode") ?: false
         var nameOfCurrentCollection = v ?:""
-
 
         if (queuedMode) {
             scheduledCollectionsString = b?.getString("scheduledCollections").toString()

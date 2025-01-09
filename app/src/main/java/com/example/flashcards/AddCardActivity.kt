@@ -112,9 +112,13 @@ class AddCardActivity<IOException> : AppCompatActivity() {
         val c:String? = b?.getString("scheduledCollections")
         val scheduledCollectionsString = c ?:""
 
-        var cardName:String
-        val flashcardPath = getExternalFilesDir(null).toString() + "/Cards"
         val propertiesPath = collectionPath + "/Properties.txt"
+        var cardName:String
+
+        val sharedPref = getSharedPreferences("pref", MODE_PRIVATE)
+        val currentTabIndex = sharedPref.getString("currentTabIndex", "ERROR")
+        val tabPath = getExternalFilesDir(null).toString() + "/" + currentTabIndex
+        val flashcardPath = tabPath + "/Cards"
 
         //set the language labels
         nativeLanguageText.text = MyUtils.readLineFromFile(propertiesPath, 1)
@@ -126,7 +130,7 @@ class AddCardActivity<IOException> : AppCompatActivity() {
         if (calledFromAddCard) {
             actionBar.removeView(deleteButton)
 
-            pathOfTheCurrentFlashcard = createCard(flashcardPath= flashcardPath, collectionName=nameOfCurrentCollection, collectionPath=collectionPath)
+            pathOfTheCurrentFlashcard = createCard(flashcardPath= flashcardPath, collectionName=nameOfCurrentCollection, collectionPath=collectionPath, tabPath = tabPath)
 
             cardName = pathOfTheCurrentFlashcard.removePrefix(flashcardPath+"/")
 
@@ -253,7 +257,7 @@ class AddCardActivity<IOException> : AppCompatActivity() {
                 nativeLanguageTexbox.text.clear()
                 foreignLanguageTextbox.text.clear()
 
-                pathOfTheCurrentFlashcard = createCard(flashcardPath, collectionName=nameOfCurrentCollection, collectionPath=collectionPath)
+                pathOfTheCurrentFlashcard = createCard(flashcardPath, collectionName=nameOfCurrentCollection, collectionPath=collectionPath, tabPath = tabPath)
                 cardName = pathOfTheCurrentFlashcard.removePrefix(flashcardPath+"/")
 
                 //update card count
@@ -318,11 +322,11 @@ class AddCardActivity<IOException> : AppCompatActivity() {
         }
     }
 
-    private fun createCard(flashcardPath: String, showMessage:Boolean =false, collectionName:String, collectionPath:String):String{
-        val sharedPref = getSharedPreferences("pref", MODE_PRIVATE)
-        val editor = sharedPref.edit()
+    @SuppressLint("SetTextI18n")
+    private fun createCard(flashcardPath: String, showMessage:Boolean =false, collectionName:String, collectionPath:String, tabPath:String):String{
+        val tabSettingsPath = tabPath + "/Settings.txt"
 
-        var flashcardIndexOfNextCard = sharedPref.getInt("flashcard_index", 0)
+        var flashcardIndexOfNextCard = MyUtils.readLineFromFile(tabSettingsPath, 5)!!.toInt()
         cardId.text = collectionName + " (" + '"' + MyUtils.readLineFromFile(collectionPath + "/Properties.txt", 0) +'"'+ ")" + " - Card_#$flashcardIndexOfNextCard"
 
         val pathOfCreatedFlashcard = "$flashcardPath/Card_$flashcardIndexOfNextCard"
@@ -331,8 +335,7 @@ class AddCardActivity<IOException> : AppCompatActivity() {
         MyUtils.createTextFile(pathOfCreatedFlashcard, "Content.txt")
 
         flashcardIndexOfNextCard++
-        editor.putInt("flashcard_index", flashcardIndexOfNextCard)
-        editor.apply()
+        MyUtils.writeTextFile(tabSettingsPath, 5, flashcardIndexOfNextCard.toString())
 
         return pathOfCreatedFlashcard
     }

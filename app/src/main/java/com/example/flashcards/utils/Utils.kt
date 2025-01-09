@@ -409,13 +409,14 @@ object MyUtils {
         if (directory.exists() && directory.isDirectory) {
             val files = directory.listFiles()
             if (files != null) {
-                for (file in files) {
+                val sortedFiles = files.sortedBy { it.name } // Sort files alphabetically
+                for (file in sortedFiles) {
                     if (file.isDirectory) {
                         folderNames.add(file.name)
                     }
                 }
             }
-        } else {
+    } else {
             // Handle case where directory does not exist or is not a directory
             Log.e("getFoldersInDirectory", "Directory does not exist or is not a directory: $directoryToSearchIn")
         }

@@ -1,0 +1,15 @@
+Tab Name 	Name of Tab
+German 		native_language
+Spanish 	foreign_language
+false		use_date_as_collection_index
+Collection_78	index_of_next_collection_to_be_created
+1491		flashcard_index
+
+sharedPref
+currentTabIndex --> 		gibt an welcher Tab gerade geöffnet ist, verändert sich nur über das wechseln eines Tabs im Startmenü
+scheduledCollectionIndex --> 	wird genutzt um zu Speichern in welcher collection aus der collection queue man im queued mode gerade ist, wenn etwa zwischen trainings modus und list oder card edit gewechselt wird; wird in main zurückgesetzt aber nicht sicher ob das nötig ist (benutzt von Main und Training)
+audio_muted -->			wird ausschließlich von der TrainingsActivity genutzt um den Zustand der Audioausgabe zu speichern
+
+add functionality for add tab button
+add functionality for deleting tab button
+add

@@ -248,7 +248,7 @@
             android:orientation="horizontal">
 
             <Button
-                android:id="@+id/native_to_foreign"
+                android:id="@+id/front_to_back"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
@@ -257,7 +257,7 @@
                 app:cornerRadius="0dp" />
 
             <Button
-                android:id="@+id/foreign_to_native"
+                android:id="@+id/back_to_front"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="10dp"

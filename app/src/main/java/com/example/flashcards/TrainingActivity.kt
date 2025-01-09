@@ -18,8 +18,8 @@ class TrainingActivity: AppCompatActivity() {
     private lateinit var flashcardButton: Button
     private lateinit var collectionTitle: TextView
     private lateinit var collectionIndex: TextView
-    private lateinit var nativeToForeignButton: Button
-    private lateinit var foreignToNativeButton: Button
+    private lateinit var frontToBackButton: Button
+    private lateinit var backToFrontButton: Button
     private lateinit var addCardButton: FloatingActionButton
     private lateinit var editCardButton: FloatingActionButton
     private lateinit var shuffleButton: FloatingActionButton
@@ -59,8 +59,8 @@ class TrainingActivity: AppCompatActivity() {
         flashcardButton = findViewById(R.id.b_flashcard)
         collectionTitle = findViewById(R.id.collection_title)
         collectionIndex = findViewById(R.id.collection_index_name)
-        nativeToForeignButton = findViewById(R.id.native_to_foreign)
-        foreignToNativeButton = findViewById(R.id.foreign_to_native)
+        frontToBackButton = findViewById(R.id.front_to_back)
+        backToFrontButton = findViewById(R.id.back_to_front)
         addCardButton = findViewById(R.id.b_add_card_flashcards)
         editCardButton = findViewById(R.id.b_edit_flashcards)
         shuffleButton = findViewById(R.id.b_shuffle_flashcards)
@@ -125,7 +125,7 @@ class TrainingActivity: AppCompatActivity() {
             muteAudioButton.setImageResource(R.drawable.unmuted)
         }
 
-        foreignToNativeButton.setBackgroundColor(ContextCompat.getColor(this, R.color.button_color))
+        backToFrontButton.setBackgroundColor(ContextCompat.getColor(this, R.color.button_color))
 
         flashcardButton.setOnClickListener{
             if (flashcardShowsQuestion) {
@@ -212,31 +212,31 @@ class TrainingActivity: AppCompatActivity() {
             }
         }
 
-        nativeToForeignButton.setOnClickListener {
+        frontToBackButton.setOnClickListener {
             if (nativeToForeignActive) { //deactivate button
                 nativeToForeignActive = false
-                nativeToForeignButton.setBackgroundColor(ContextCompat.getColor(this, R.color.button_color))
+                frontToBackButton.setBackgroundColor(ContextCompat.getColor(this, R.color.button_color))
                 if (!foreignToNativeActive) {
                     foreignToNativeActive = true
-                    foreignToNativeButton.setBackgroundColor(ContextCompat.getColor(this, R.color.primary))
+                    backToFrontButton.setBackgroundColor(ContextCompat.getColor(this, R.color.primary))
                 }
             }   else {
                 nativeToForeignActive = true
-                nativeToForeignButton.setBackgroundColor(ContextCompat.getColor(this, R.color.primary))
+                frontToBackButton.setBackgroundColor(ContextCompat.getColor(this, R.color.primary))
             }
         }
 
-        foreignToNativeButton.setOnClickListener {
+        backToFrontButton.setOnClickListener {
             if (foreignToNativeActive) { //deactivate button
                 foreignToNativeActive = false
-                foreignToNativeButton.setBackgroundColor(ContextCompat.getColor(this, R.color.button_color))
+                backToFrontButton.setBackgroundColor(ContextCompat.getColor(this, R.color.button_color))
                 if (!nativeToForeignActive) {
                     nativeToForeignActive = true
-                    nativeToForeignButton.setBackgroundColor(ContextCompat.getColor(this, R.color.primary))
+                    frontToBackButton.setBackgroundColor(ContextCompat.getColor(this, R.color.primary))
                 }
             }   else {
                 foreignToNativeActive = true
-                foreignToNativeButton.setBackgroundColor(ContextCompat.getColor(this, R.color.primary))
+                backToFrontButton.setBackgroundColor(ContextCompat.getColor(this, R.color.primary))
             }
         }
 
@@ -418,8 +418,8 @@ class TrainingActivity: AppCompatActivity() {
         }   else {
             collectionIndex.text = nameOfCurrentCollection
         }
-        nativeToForeignButton.text = MyUtils.readLineFromFile(propertiesPath, 1) + " - " + MyUtils.readLineFromFile(propertiesPath, 2)
-        foreignToNativeButton.text = MyUtils.readLineFromFile(propertiesPath, 2) + " - " + MyUtils.readLineFromFile(propertiesPath, 1)
+        frontToBackButton.text = MyUtils.readLineFromFile(propertiesPath, 1) + " - " + MyUtils.readLineFromFile(propertiesPath, 2)
+        backToFrontButton.text = MyUtils.readLineFromFile(propertiesPath, 2) + " - " + MyUtils.readLineFromFile(propertiesPath, 1)
     }
 
     private fun getOrderLine(propertiesPath: String, collectionPath: String, nativeToForeignActive: Boolean, foreignToNativeActive: Boolean) {

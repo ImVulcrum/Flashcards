@@ -100,7 +100,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:layout_marginTop="30dp"
-            android:text="Native Language Name"
+            android:text="Front Side Name"
             android:textAppearance="@style/SpaceGroteskSmall"
             android:textColor="@color/white" />
 
@@ -120,7 +120,7 @@
             android:layout_gravity="center_horizontal"
             android:layout_marginTop="5dp"
             android:ems="12"
-            android:hint="enter native language name"
+            android:hint="enter front side name"
             android:inputType="text"
             android:maxLength="10"
             android:singleLine="true"
@@ -133,7 +133,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:layout_marginTop="30dp"
-            android:text="Foreign Language Name"
+            android:text="Back Side Name"
             android:textAppearance="@style/SpaceGroteskSmall"
             android:textColor="@color/white" />
 
@@ -153,7 +153,7 @@
             android:layout_gravity="center_horizontal"
             android:layout_marginTop="5dp"
             android:ems="12"
-            android:hint="enter foreign language name"
+            android:hint="enter back side name"
             android:inputType="text"
             android:maxLength="10"
             android:singleLine="true"

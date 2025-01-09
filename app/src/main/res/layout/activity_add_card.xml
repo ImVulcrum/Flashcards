@@ -84,13 +84,13 @@
             android:orientation="horizontal">
 
             <TextView
-                android:id="@+id/native_language"
+                android:id="@+id/front_text"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:layout_marginStart="10dp"
                 android:layout_weight="1"
-                android:text="Native Language"
+                android:text="Front Side"
                 android:textAppearance="@style/SpaceGroteskSmall"
                 android:textColor="@color/white" />
 
@@ -100,7 +100,7 @@
                 android:layout_weight="1" />
 
             <com.google.android.material.floatingactionbutton.FloatingActionButton
-                android:id="@+id/b_delete_native_audio"
+                android:id="@+id/b_delete_front_audio"
                 android:layout_width="40dp"
                 android:layout_height="40dp"
                 android:layout_gravity="center|end"
@@ -113,7 +113,7 @@
                 tools:ignore="ContentDescription,SpeakableTextPresentCheck,TouchTargetSizeCheck" />
 
             <com.google.android.material.floatingactionbutton.FloatingActionButton
-                android:id="@+id/b_play_native_audio"
+                android:id="@+id/b_play_front_audio"
                 android:layout_width="40dp"
                 android:layout_height="40dp"
                 android:layout_gravity="center|end"
@@ -126,7 +126,7 @@
                 tools:ignore="ContentDescription,SpeakableTextPresentCheck,TouchTargetSizeCheck" />
 
             <com.example.flashcards.MyFloatingActionButton
-                android:id="@+id/b_record_native_audio"
+                android:id="@+id/b_record_front_audio"
                 android:layout_width="40dp"
                 android:layout_height="40dp"
                 android:layout_gravity="center|end"
@@ -150,13 +150,13 @@
             android:backgroundTintMode="add" />
 
         <EditText
-            android:id="@+id/enter_native"
+            android:id="@+id/enter_front"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:layout_marginTop="5dp"
             android:ems="12"
-            android:hint='enter native language phrase'
+            android:hint='enter front side phrase'
             android:inputType="text"
             android:singleLine="true"
             android:textColor="@color/white"
@@ -169,13 +169,13 @@
             android:orientation="horizontal">
 
             <TextView
-                android:id="@+id/foreign_language"
+                android:id="@+id/back_text"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:layout_marginStart="10dp"
                 android:layout_weight="1"
-                android:text="Foreign Language"
+                android:text="Back Side"
                 android:textAppearance="@style/SpaceGroteskSmall"
                 android:textColor="@color/white" />
 
@@ -185,7 +185,7 @@
                 android:layout_weight="1" />
 
             <com.google.android.material.floatingactionbutton.FloatingActionButton
-                android:id="@+id/b_delete_foreign_audio"
+                android:id="@+id/b_delete_back_audio"
                 android:layout_width="40dp"
                 android:layout_height="40dp"
                 android:layout_gravity="center|end"
@@ -198,7 +198,7 @@
                 tools:ignore="ContentDescription,SpeakableTextPresentCheck,TouchTargetSizeCheck" />
 
             <com.google.android.material.floatingactionbutton.FloatingActionButton
-                android:id="@+id/b_play_foreign_audio"
+                android:id="@+id/b_play_back_audio"
                 android:layout_width="40dp"
                 android:layout_height="40dp"
                 android:layout_gravity="center|end"
@@ -211,7 +211,7 @@
                 tools:ignore="ContentDescription,SpeakableTextPresentCheck,TouchTargetSizeCheck" />
 
             <com.example.flashcards.MyFloatingActionButton
-                android:id="@+id/b_record_foreign_audio"
+                android:id="@+id/b_record_back_audio"
                 android:layout_width="40dp"
                 android:layout_height="40dp"
                 android:layout_gravity="center|end"
@@ -235,13 +235,13 @@
             android:backgroundTintMode="add" />
 
         <EditText
-            android:id="@+id/enter_collection_name"
+            android:id="@+id/enter_back"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:layout_marginTop="5dp"
             android:ems="12"
-            android:hint="enter foreign language phrase"
+            android:hint="enter back side phrase"
             android:inputType="text"
             android:singleLine="true"
             android:textColor="@color/white"

@@ -33,14 +33,14 @@ class MyFloatingActionButton(context: Context, attrs: AttributeSet) : FloatingAc
 class AddCardActivity<IOException> : AppCompatActivity() {
 
     private lateinit var confirmCardButton: FloatingActionButton
-    private lateinit var nativeLanguageTexbox: EditText
-    private lateinit var foreignLanguageTextbox: EditText
-    private lateinit var nativeRecordButton: MyFloatingActionButton
-    private lateinit var nativePlayButton: FloatingActionButton
-    private lateinit var nativeDeleteButton: FloatingActionButton
-    private lateinit var foreignRecordButton: MyFloatingActionButton
-    private lateinit var foreignPlayButton: FloatingActionButton
-    private lateinit var foreignDeleteButton: FloatingActionButton
+    private lateinit var frontsideTextbox: EditText
+    private lateinit var backsideTextbox: EditText
+    private lateinit var frontRecordButton: MyFloatingActionButton
+    private lateinit var frontPlayButton: FloatingActionButton
+    private lateinit var frontDeleteButton: FloatingActionButton
+    private lateinit var backRecordButton: MyFloatingActionButton
+    private lateinit var backPlayButton: FloatingActionButton
+    private lateinit var backDeleteButton: FloatingActionButton
     private lateinit var closeButton: FloatingActionButton
     private lateinit var addAnotherCardButton: FloatingActionButton
     private lateinit var deleteButton: FloatingActionButton
@@ -48,8 +48,8 @@ class AddCardActivity<IOException> : AppCompatActivity() {
     private lateinit var cardId: TextView
     private lateinit var cardCount: TextView
     private lateinit var actionBar: LinearLayout
-    private lateinit var nativeLanguageText: TextView
-    private lateinit var foreignLanguageText: TextView
+    private lateinit var frontSideText: TextView
+    private lateinit var backSideText: TextView
 
     private var mediaRecorder: MediaRecorder? = null
     private var recordFile: File? = null
@@ -68,14 +68,14 @@ class AddCardActivity<IOException> : AppCompatActivity() {
         setContentView(R.layout.activity_add_card)
 
         confirmCardButton = findViewById(R.id.button_finish_card)
-        nativeLanguageTexbox = findViewById(R.id.enter_native)
-        foreignLanguageTextbox = findViewById(R.id.enter_collection_name)
-        nativeRecordButton = findViewById(R.id.b_record_native_audio)
-        nativePlayButton = findViewById(R.id.b_play_native_audio)
-        nativeDeleteButton = findViewById(R.id.b_delete_native_audio)
-        foreignRecordButton = findViewById(R.id.b_record_foreign_audio)
-        foreignPlayButton = findViewById(R.id.b_play_foreign_audio)
-        foreignDeleteButton = findViewById(R.id.b_delete_foreign_audio)
+        frontsideTextbox = findViewById(R.id.enter_front)
+        backsideTextbox = findViewById(R.id.enter_back)
+        frontRecordButton = findViewById(R.id.b_record_front_audio)
+        frontPlayButton = findViewById(R.id.b_play_front_audio)
+        frontDeleteButton = findViewById(R.id.b_delete_front_audio)
+        backRecordButton = findViewById(R.id.b_record_back_audio)
+        backPlayButton = findViewById(R.id.b_play_back_audio)
+        backDeleteButton = findViewById(R.id.b_delete_back_audio)
         closeButton = findViewById(R.id.b_close_add_card)
         addAnotherCardButton = findViewById(R.id.button_add_card)
         deleteButton = findViewById(R.id.button_delete_card)
@@ -83,8 +83,8 @@ class AddCardActivity<IOException> : AppCompatActivity() {
         cardId = findViewById(R.id.card_id)
         cardCount = findViewById(R.id.card_count)
         actionBar = findViewById(R.id.button_area)
-        nativeLanguageText = findViewById(R.id.native_language)
-        foreignLanguageText = findViewById(R.id.foreign_language)
+        frontSideText = findViewById(R.id.front_text)
+        backSideText = findViewById(R.id.back_text)
 
         // Request necessary permissions
         if (!hasPermissions()) {
@@ -121,8 +121,8 @@ class AddCardActivity<IOException> : AppCompatActivity() {
         val flashcardPath = tabPath + "/Cards"
 
         //set the language labels
-        nativeLanguageText.text = MyUtils.readLineFromFile(propertiesPath, 1)
-        foreignLanguageText.text = MyUtils.readLineFromFile(propertiesPath, 2)
+        frontSideText.text = MyUtils.readLineFromFile(propertiesPath, 1)
+        backSideText.text = MyUtils.readLineFromFile(propertiesPath, 2)
 
         cardCount.text = "${MyUtils.getCardCountForCollection(collectionPath)} Card(s)"
 
@@ -135,8 +135,8 @@ class AddCardActivity<IOException> : AppCompatActivity() {
             cardName = pathOfTheCurrentFlashcard.removePrefix(flashcardPath+"/")
 
             //grey out audio buttons
-            nativePlayButton.backgroundTintList = (ContextCompat.getColorStateList(this@AddCardActivity, R.color.button_color))
-            foreignPlayButton.backgroundTintList = (ContextCompat.getColorStateList(this@AddCardActivity, R.color.button_color))
+            frontPlayButton.backgroundTintList = (ContextCompat.getColorStateList(this@AddCardActivity, R.color.button_color))
+            backPlayButton.backgroundTintList = (ContextCompat.getColorStateList(this@AddCardActivity, R.color.button_color))
 
         //prepare the page for editing an existing card
         }   else {
@@ -154,14 +154,14 @@ class AddCardActivity<IOException> : AppCompatActivity() {
 
             pathOfTheCurrentFlashcard = "$flashcardPath/$cardName"
 
-            nativeLanguageTexbox.setText(MyUtils.readLineFromFile(pathOfTheCurrentFlashcard + "/Content.txt", 0))
-            foreignLanguageTextbox.setText(MyUtils.readLineFromFile(pathOfTheCurrentFlashcard + "/Content.txt", 1))
+            frontsideTextbox.setText(MyUtils.readLineFromFile(pathOfTheCurrentFlashcard + "/Content.txt", 0))
+            backsideTextbox.setText(MyUtils.readLineFromFile(pathOfTheCurrentFlashcard + "/Content.txt", 1))
 
             if (!MyUtils.fileExists(pathOfTheCurrentFlashcard + "/native.mp3")) {
-                nativePlayButton.backgroundTintList = (ContextCompat.getColorStateList(this@AddCardActivity, R.color.button_color))
+                frontPlayButton.backgroundTintList = (ContextCompat.getColorStateList(this@AddCardActivity, R.color.button_color))
             }
             if (!MyUtils.fileExists(pathOfTheCurrentFlashcard + "/foreign.mp3")) {
-                foreignPlayButton.backgroundTintList = (ContextCompat.getColorStateList(this@AddCardActivity, R.color.button_color))
+                backPlayButton.backgroundTintList = (ContextCompat.getColorStateList(this@AddCardActivity, R.color.button_color))
             }
         }
 
@@ -224,7 +224,7 @@ class AddCardActivity<IOException> : AppCompatActivity() {
         }
 
         confirmCardButton.setOnClickListener { //visble when adding a new card AND editing an old one
-            if (confirmCard(creatingNewCard = calledFromAddCard,collectionPath= collectionPath, flashcardName = cardName, nativeLanguagePrompt = nativeLanguageTexbox.text.toString(), foreignLanguagePrompt = foreignLanguageTextbox.text.toString()))   {
+            if (confirmCard(creatingNewCard = calledFromAddCard,collectionPath= collectionPath, flashcardName = cardName, nativeLanguagePrompt = frontsideTextbox.text.toString(), foreignLanguagePrompt = backsideTextbox.text.toString()))   {
                 if (calledFromList) {
                     intent = Intent(this, FlashcardListActivity::class.java)
                     val bu = Bundle()
@@ -248,14 +248,14 @@ class AddCardActivity<IOException> : AppCompatActivity() {
                     finish()
                 }
             }   else {
-                MyUtils.createShortToast(this,"native or foreign language cannot be empty")
+                MyUtils.createShortToast(this,"front or back side cannot be empty")
             }
         }
 
         addAnotherCardButton.setOnClickListener { //only visible when adding a new card
-            if (confirmCard(creatingNewCard = true, collectionPath=collectionPath, flashcardName = cardName, nativeLanguagePrompt = nativeLanguageTexbox.text.toString(), foreignLanguagePrompt = foreignLanguageTextbox.text.toString()))   {
-                nativeLanguageTexbox.text.clear()
-                foreignLanguageTextbox.text.clear()
+            if (confirmCard(creatingNewCard = true, collectionPath=collectionPath, flashcardName = cardName, nativeLanguagePrompt = frontsideTextbox.text.toString(), foreignLanguagePrompt = backsideTextbox.text.toString()))   {
+                frontsideTextbox.text.clear()
+                backsideTextbox.text.clear()
 
                 pathOfTheCurrentFlashcard = createCard(flashcardPath, collectionName=nameOfCurrentCollection, collectionPath=collectionPath, tabPath = tabPath)
                 cardName = pathOfTheCurrentFlashcard.removePrefix(flashcardPath+"/")
@@ -263,62 +263,62 @@ class AddCardActivity<IOException> : AppCompatActivity() {
                 //update card count
                 cardCount.text = "${MyUtils.getCardCountForCollection(collectionPath)} Card(s)"
 
-                nativePlayButton.backgroundTintList = (ContextCompat.getColorStateList(this@AddCardActivity, R.color.button_color))
-                foreignPlayButton.backgroundTintList = (ContextCompat.getColorStateList(this@AddCardActivity, R.color.button_color))
+                frontPlayButton.backgroundTintList = (ContextCompat.getColorStateList(this@AddCardActivity, R.color.button_color))
+                backPlayButton.backgroundTintList = (ContextCompat.getColorStateList(this@AddCardActivity, R.color.button_color))
             }   else {
-                MyUtils.createShortToast(this,"native or foreign language cannot be empty")
+                MyUtils.createShortToast(this,"front or back side cannot be empty")
             }
 
         }
 
-        nativeRecordButton.setOnTouchListener { view, event ->
+        frontRecordButton.setOnTouchListener { view, event ->
             when (event.action) {
                 MotionEvent.ACTION_DOWN -> {
-                    startRecording(pathOfTheCurrentFlashcard, "native", nativeRecordButton)
+                    startRecording(pathOfTheCurrentFlashcard, "native", frontRecordButton)
                 }
                 MotionEvent.ACTION_UP -> {
-                    stopRecording(nativeRecordButton)
-                    nativePlayButton.backgroundTintList = (ContextCompat.getColorStateList(this@AddCardActivity, R.color.primary))
+                    stopRecording(frontRecordButton)
+                    frontPlayButton.backgroundTintList = (ContextCompat.getColorStateList(this@AddCardActivity, R.color.primary))
                     view.performClick()
                 }
             }
             true
         }
 
-        foreignRecordButton.setOnTouchListener { view, event ->
+        backRecordButton.setOnTouchListener { view, event ->
             when (event.action) {
                 MotionEvent.ACTION_DOWN -> {
-                    startRecording(pathOfTheCurrentFlashcard, "foreign", foreignRecordButton)
+                    startRecording(pathOfTheCurrentFlashcard, "foreign", backRecordButton)
                 }
                 MotionEvent.ACTION_UP -> {
-                    stopRecording(foreignRecordButton)
-                    foreignPlayButton.backgroundTintList = (ContextCompat.getColorStateList(this@AddCardActivity, R.color.primary))
+                    stopRecording(backRecordButton)
+                    backPlayButton.backgroundTintList = (ContextCompat.getColorStateList(this@AddCardActivity, R.color.primary))
                     view.performClick()
                 }
             }
             true
         }
 
-        nativePlayButton.setOnClickListener {
+        frontPlayButton.setOnClickListener {
             if (!MyUtils.playAudio("$pathOfTheCurrentFlashcard/native.mp3")) {
-                MyUtils.createShortToast(this, "Native audio does not exist")
+                MyUtils.createShortToast(this, "Front audio does not exist")
             }
         }
 
-        foreignPlayButton.setOnClickListener {
+        backPlayButton.setOnClickListener {
             if (!MyUtils.playAudio("$pathOfTheCurrentFlashcard/foreign.mp3")) {
-                MyUtils.createShortToast(this, "Foreign audio does not exist")
+                MyUtils.createShortToast(this, "Back audio does not exist")
             }
         }
 
-        nativeDeleteButton.setOnClickListener {
+        frontDeleteButton.setOnClickListener {
             MyUtils.deleteFile(this, "$pathOfTheCurrentFlashcard/native.mp3", "Audio deleted successfully")
-            nativePlayButton.backgroundTintList = (ContextCompat.getColorStateList(this@AddCardActivity, R.color.button_color))
+            frontPlayButton.backgroundTintList = (ContextCompat.getColorStateList(this@AddCardActivity, R.color.button_color))
         }
 
-        foreignDeleteButton.setOnClickListener {
+        backDeleteButton.setOnClickListener {
             MyUtils.deleteFile(this, "$pathOfTheCurrentFlashcard/foreign.mp3", "Audio deleted successfully")
-            foreignPlayButton.backgroundTintList = (ContextCompat.getColorStateList(this@AddCardActivity, R.color.button_color))
+            backPlayButton.backgroundTintList = (ContextCompat.getColorStateList(this@AddCardActivity, R.color.button_color))
         }
     }
 

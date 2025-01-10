@@ -13,7 +13,10 @@ import android.widget.CheckBox
 import android.widget.LinearLayout
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.example.flashcards.databinding.ActivityMainBinding
+import com.example.flashcards.utils.MyDisplayingUtils
 import com.example.flashcards.utils.MyUtils
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 
@@ -23,10 +26,14 @@ class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     private lateinit var settingsButton: FloatingActionButton
     private lateinit var buttonAdd: FloatingActionButton
-    private lateinit var container: ViewGroup
     private lateinit var showArchivedCollections: CheckBox
     private lateinit var buttonPlayScheduled: FloatingActionButton
     private lateinit var tabLayout: com.google.android.material.tabs.TabLayout
+
+    private lateinit var collectionAdapter: MyDisplayingUtils.CollectionAdapter
+    private lateinit var collectionRecyclerView: RecyclerView
+    private lateinit var listOfCollectionsInCorrectFormat: MutableList<MyDisplayingUtils.Collection>
+
     private var collectionDisplayWidth = 320
     private var collectionDisplayHeight = 40
     lateinit var tabPath: String
@@ -40,13 +47,15 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         settingsButton = findViewById(R.id.b_settings)
-        container = findViewById(R.id.container)
         buttonAdd = findViewById(R.id.button_add)
         showArchivedCollections = findViewById(R.id.show_archived_collections)
         buttonPlayScheduled = findViewById(R.id.b_play_scheduled)
         tabLayout = findViewById(R.id.tabLayout)
 
-        resetQueues()
+        collectionRecyclerView = findViewById(R.id.collection_recycler_view)
+        listOfCollectionsInCorrectFormat = mutableListOf<MyDisplayingUtils.Collection>()
+
+        resetQueues() //REVIEW probably not neccesary
 
         val appPath = getExternalFilesDir(null).toString()
         val tabs = MyUtils.getFoldersInDirectory(appPath)
@@ -62,14 +71,13 @@ class MainActivity : AppCompatActivity() {
 
             if (tabIndex in tabs) {
                 tabPath = appPath + "/" + tabIndex
-                setTab(tabIndex!!)
+                setTabToSharedPref(tabIndex!!)
                 setTabViewByName(tabLayout, MyUtils.readLineFromFile(tabPath + "/Settings.txt", 0)!!)
             }   else {
                 tabPath = appPath + "/" + tabs[0]
-                setTab(tabs[0])
+                setTabToSharedPref(tabs[0])
             }
             collectionPath = tabPath + "/Collections"
-
 
             init()
         }   else {
@@ -98,18 +106,11 @@ class MainActivity : AppCompatActivity() {
 
         showArchivedCollections.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked) {
-                for (collection in sortedCollections) {
-                    if (MyUtils.readLineFromFile(collectionPath + "/" + collection + "/Properties.txt", 5) == "true") {
-                        addCollectionButtons(collection, false, R.color.archived)
-                    }
-                }
-            }   else {
-                container.removeAllViews()
-                for (collection in sortedCollections) {
-                    if (MyUtils.readLineFromFile(collectionPath + "/" + collection + "/Properties.txt", 5) == "false" || MyUtils.readLineFromFile(collectionPath + "/" + collection + "/Properties.txt", 5) == "") {
-                        addCollectionButtons(collection, false)
-                    }
-                }
+                addToCollectionList(true)
+                updateCollectionView()
+            } else {
+                removeArchivedFromCollectionList()
+                updateCollectionView()
             }
         }
     }
@@ -121,19 +122,83 @@ class MainActivity : AppCompatActivity() {
         }   else {
             sortedCollections = MyUtils.getFoldersInDirectory(collectionPath, true)
         }
+        listOfCollectionsInCorrectFormat.clear()
+        addToCollectionList(false)
+        createCollectionAdapter()
+        updateCollectionView()
 
-        container.removeAllViews()
-        var i = 0
-        for (collection in sortedCollections) {
-//            i = i +1
-//            if (i <5) {
-                if (MyUtils.readLineFromFile(collectionPath + "/" + collection + "/Properties.txt", 5) == "false" || MyUtils.readLineFromFile(collectionPath + "/" + collection + "/Properties.txt", 5) == "") {
-                        addCollectionButtons(collection, false)
-                }
-//            }
-
-        }
         activateAllButtons()
+    }
+
+    private fun createCollectionAdapter() {
+        collectionAdapter = MyDisplayingUtils.CollectionAdapter(
+            listOfCollectionsInCorrectFormat,
+            { collection, position -> onCollectionSelected(collection, position) },
+            { collection, _ -> onCollectionClicked(collection) },
+            { collection, position -> onCollectionDeleted(collection, position) }
+        )
+    }
+
+    private fun addToCollectionList(addArchivedCollections: Boolean) {
+        for (collectionId in sortedCollections) {
+            if (MyUtils.readLineFromFile(collectionPath + "/" + collectionId + "/Properties.txt", 5) == addArchivedCollections.toString()) {
+                val collectionName = MyUtils.readLineFromFile(collectionPath + "/$collectionId/Properties.txt", 0)
+                listOfCollectionsInCorrectFormat.add(MyDisplayingUtils.Collection(collectionId, collectionName!!, false, addArchivedCollections))
+            }
+        }
+    }
+
+    private fun removeArchivedFromCollectionList() {
+        val archivedCollections = mutableListOf<MyDisplayingUtils.Collection>()
+        for (collection in listOfCollectionsInCorrectFormat) {
+            if (collection.isArchived) {
+                archivedCollections.add(collection)
+            }
+        }
+        listOfCollectionsInCorrectFormat.removeAll(archivedCollections)
+    }
+
+    private fun updateCollectionView() {
+        collectionRecyclerView.apply {
+            layoutManager = LinearLayoutManager(this@MainActivity)
+            adapter = collectionAdapter
+        }
+    }
+
+    private fun onCollectionSelected(collection: MyDisplayingUtils.Collection, position: Int) {
+        if (collection.isSelected) {
+            scheduledCollections.add(collection.collectionId)
+        } else {
+            scheduledCollections.remove(collection.collectionId)
+        }
+
+        collectionAdapter.notifyItemChanged(position)
+
+        if (scheduledCollections.size >= 2) { // Update move and edit buttons based on selection state
+            activateSchedulePlayButton()
+        } else {
+            deactivateSchedulePlayButton()
+        }
+    }
+
+    private fun onCollectionClicked(collection: MyDisplayingUtils.Collection) {
+        intent = Intent(this@MainActivity, TrainingActivity::class.java)
+        val b = Bundle()
+        b.putString("collectionId", collection.collectionId)
+        intent.putExtras(b)
+        startActivity(intent)
+        finish()
+    }
+
+    private fun onCollectionDeleted(collection: MyDisplayingUtils.Collection, position: Int) {
+        val collectionName = collection.collectionName
+        MyUtils.showConfirmationDialog(this@MainActivity,"Delete Collection: $collectionName", "Are you sure you want to delete this collection?") {userChoice ->
+            if (userChoice) {
+                listOfCollectionsInCorrectFormat.removeAt(position)
+                MyUtils.deleteCollection(context=this@MainActivity, folderOfCollection =collectionPath + "/" + collection.collectionId, flashcardPath= tabPath + "/Cards")
+                updateCollectionView()
+            }
+        }
     }
 
     fun setTabViewByName(tabLayout: com.google.android.material.tabs.TabLayout, tabName: String) {
@@ -146,26 +211,20 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun setTab(tabIndex: String) {
+    private fun setTabToSharedPref(tabIndex: String) {
         val sharedPref = getSharedPreferences("pref", MODE_PRIVATE)
         val editor = sharedPref.edit()
         editor.putString("currentTabIndex", tabIndex)
         editor.apply()
     }
 
-    private fun resetQueues() {
-        //reset any queues and deactivate the queue play button
+    private fun resetQueues() { //reset any queues and deactivate the queue play button
         val sharedPref = getSharedPreferences("pref", MODE_PRIVATE)
         val editor = sharedPref.edit()
         editor.putInt("scheduledCollectionIndex", 0)
         editor.apply()
         deactivateSchedulePlayButton()
         scheduledCollections.clear()
-    }
-
-    // Function to convert dp to pixels
-    private fun Int.dpToPx(): Int {
-        return (this * resources.displayMetrics.density).toInt()
     }
 
     private fun deactivateSchedulePlayButton () {
@@ -210,7 +269,7 @@ class MainActivity : AppCompatActivity() {
                 tabPath = appPath + "/" + tabs[tabIndex]
                 collectionPath = tabPath + "/Collections"
                 init()
-                setTab(tabs[tabIndex])
+                setTabToSharedPref(tabs[tabIndex])
 
                 //clear queued collections
                 resetQueues()
@@ -224,27 +283,25 @@ class MainActivity : AppCompatActivity() {
         })
     }
 
-    @SuppressLint("SetTextI18n")
     private fun addCollection() {
         val tabSettingsPath = tabPath + "/Settings.txt"
 
-        val useDateAsCollectionIndexString = MyUtils.readLineFromFile(tabSettingsPath,3)
-        var useDateAsCollectionIndex = false
-        if (useDateAsCollectionIndexString == "true") {
-            useDateAsCollectionIndex = true
-        }
-
-        var indexOfTheNextCollectionToBeCreated = ""
+        var indexOfCollection: String
+        val useDateAsCollectionIndex = MyUtils.readLineFromFile(tabSettingsPath,3).toBoolean()
         if (useDateAsCollectionIndex) {
-            indexOfTheNextCollectionToBeCreated = MyUtils.getCurrentDate()
+            indexOfCollection = MyUtils.getCurrentDate()
         }   else {
-            indexOfTheNextCollectionToBeCreated = MyUtils.readLineFromFile(tabSettingsPath, 4)!!
+            indexOfCollection = MyUtils.readLineFromFile(tabSettingsPath, 4)!!
+
+            var currentIndexNumber = indexOfCollection.removePrefix("Collection_").toInt()
+            currentIndexNumber++
+            MyUtils.writeTextFile(tabSettingsPath, 4,"Collection_$currentIndexNumber")
         }
 
         val nativeLanguage = MyUtils.readLineFromFile(tabSettingsPath, 1)!!
         val foreignLanguage = MyUtils.readLineFromFile(tabSettingsPath, 2)!!
 
-        val folderName = indexOfTheNextCollectionToBeCreated
+        val folderName = indexOfCollection
         val folderPath = collectionPath + "/" + folderName
         val propertiesFileName = "Properties.txt"
         val flashcardsFileName = "Flashcards.txt"
@@ -254,189 +311,14 @@ class MainActivity : AppCompatActivity() {
             MyUtils.writeTextFile(folderPath + "/" + flashcardsFileName, 0, "-")
 
             MyUtils.createTextFile(folderPath, propertiesFileName)
-            MyUtils.writeTextFile(folderPath + "/" + propertiesFileName, 0, indexOfTheNextCollectionToBeCreated)
+            MyUtils.writeTextFile(folderPath + "/" + propertiesFileName, 0, indexOfCollection)
             MyUtils.writeTextFile(folderPath + "/" + propertiesFileName, 1, nativeLanguage)
             MyUtils.writeTextFile(folderPath + "/" + propertiesFileName, 2, foreignLanguage)
             MyUtils.writeTextFile(folderPath + "/" + propertiesFileName, 3, "-")
             MyUtils.writeTextFile(folderPath + "/" + propertiesFileName, 5, "false")
 
-            addCollectionButtons(indexOfTheNextCollectionToBeCreated, true)
+            listOfCollectionsInCorrectFormat.add(0, MyDisplayingUtils.Collection(indexOfCollection, indexOfCollection, false, false))
+            updateCollectionView()
         }
-
-        if (!useDateAsCollectionIndex) {
-            var currentIndexNumber = indexOfTheNextCollectionToBeCreated.removePrefix("Collection_").toInt()
-            currentIndexNumber++
-            MyUtils.writeTextFile(tabSettingsPath, 4,"Collection_$currentIndexNumber")
-        }
-    }
-
-    private fun addCollectionButtons(collectionId:String, isNewCreated:Boolean, collectionButtonColor:Int = R.color.primary) {
-
-        // Create a horizontal LinearLayout to hold the two buttons
-        val rowLayout = LinearLayout(this).apply {
-            orientation = LinearLayout.HORIZONTAL
-            layoutParams = LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT
-            ).apply {
-                setMargins(16, 16, 16, 0)
-            }
-        }
-
-        val flashcardPath = tabPath + "/Cards"
-        val collectionName = MyUtils.readLineFromFile(collectionPath + "/$collectionId/Properties.txt", 0)
-
-        // Create the selection button (square)
-        val selectionButton = Button(this).apply {
-
-            contentDescription = ""
-            maxLines = 1
-            layoutParams = LinearLayout.LayoutParams(
-                collectionDisplayHeight.dpToPx(),  // Width in pixels
-                collectionDisplayHeight.dpToPx()   // Height in pixels
-            ).apply {
-                setMargins(20, 0, 0, 4)
-            }
-
-            setBackgroundColor(ContextCompat.getColor(this@MainActivity, collectionButtonColor))
-
-            val drawable = ContextCompat.getDrawable(this@MainActivity, R.drawable.checkbox_unchecked) // Replace with your drawable
-            setCompoundDrawablesWithIntrinsicBounds(null, null, null, drawable)  // Set image (bottom)
-
-            // Apply color filter to the drawable
-            drawable?.setColorFilter(ContextCompat.getColor(this@MainActivity, R.color.highlight), PorterDuff.Mode.SRC_IN)
-
-            // Resize the drawable to fit the button
-            drawable?.setBounds(0, 0, (collectionDisplayHeight*3).toInt(), (collectionDisplayHeight*3).toInt())
-
-            // Set the scaled drawable on the button (e.g., centered without text)
-            setCompoundDrawables(null, null, null, drawable)  // Set image (bottom)
-
-            // Optionally adjust padding
-            setPadding(0, 0, 0, -5)
-
-            // Apply a vertical offset to manually adjust the position (negative to move up)
-            translationY = -27f  // Adjust this value to get the perfect alignment
-
-            setOnClickListener {
-                if (contentDescription == "") {
-                    contentDescription = "selected"
-
-                    scheduledCollections.add(collectionId)
-
-                    val drawable = ContextCompat.getDrawable(this@MainActivity, R.drawable.checkbox_checked) // Replace with your drawable
-                    setCompoundDrawablesWithIntrinsicBounds(null, null, null, drawable)  // Set image (bottom)
-
-                    // Apply color filter to the drawable
-                    drawable?.setColorFilter(ContextCompat.getColor(this@MainActivity, R.color.highlight), PorterDuff.Mode.SRC_IN)
-
-                    // Resize the drawable to fit the button
-                    drawable?.setBounds(0, 0, (collectionDisplayHeight*3).toInt(), (collectionDisplayHeight*3).toInt())
-
-                    // Set the scaled drawable on the button (e.g., centered without text)
-                    setCompoundDrawables(null, null, null, drawable)
-                }   else {
-                    contentDescription = ""
-
-                    scheduledCollections.remove(collectionId)
-
-                    val drawable = ContextCompat.getDrawable(this@MainActivity, R.drawable.checkbox_unchecked) // Replace with your drawable
-                    setCompoundDrawablesWithIntrinsicBounds(null, null, null, drawable)  // Set image (bottom)
-
-                    // Apply color filter to the drawable
-                    drawable?.setColorFilter(ContextCompat.getColor(this@MainActivity, R.color.highlight), PorterDuff.Mode.SRC_IN)
-
-                    // Resize the drawable to fit the button
-                    drawable?.setBounds(0, 0, (collectionDisplayHeight*3).toInt(), (collectionDisplayHeight*3).toInt())
-
-                    // Set the scaled drawable on the button (e.g., centered without text)
-                    setCompoundDrawables(null, null, null, drawable)
-                }
-
-                if (scheduledCollections.isEmpty()) {
-                    deactivateSchedulePlayButton()
-                }   else if (scheduledCollections.size == 1) {
-                    activateSchedulePlayButton()
-                }
-            }
-        }
-
-        //create the collection button (wider)
-        val collectionButton = Button(this).apply {
-
-            if (isNewCreated) {
-                text = collectionId
-            }   else {
-                text = collectionName
-            }
-
-            isAllCaps = false
-
-            setTextColor(ContextCompat.getColor(this@MainActivity, R.color.white))
-            maxLines = 1
-            layoutParams = LinearLayout.LayoutParams(
-                (collectionDisplayWidth - (2*collectionDisplayHeight)).dpToPx(),  // Width in pixels
-                collectionDisplayHeight.dpToPx()   // Height in pixels
-            ).apply {
-                setMargins(0,0, 0, 4)
-            }
-            setBackgroundColor(ContextCompat.getColor(this@MainActivity, collectionButtonColor))
-            setOnClickListener {
-                intent = Intent(this@MainActivity, TrainingActivity::class.java)
-                val b = Bundle()
-                b.putString("collectionId", collectionId)
-                intent.putExtras(b)
-                startActivity(intent)
-                finish()
-            }
-        }
-
-        // Create the delete button (square)
-        val deleteCollectionButton = Button(this).apply {
-            contentDescription = collectionId
-            maxLines = 1
-            layoutParams = LinearLayout.LayoutParams(
-                collectionDisplayHeight.dpToPx(),  // Width in pixels
-                collectionDisplayHeight.dpToPx()   // Height in pixels
-            ).apply {
-                setMargins(0, 0, 20, 4)
-            }
-
-            setBackgroundColor(ContextCompat.getColor(this@MainActivity, R.color.delete_highlight))
-
-            // Set the image on the button (without text)
-            text = ""  // Optional: If you want no text
-            val drawable = ContextCompat.getDrawable(this@MainActivity, R.drawable.delete) // Replace with your drawable
-            setCompoundDrawablesWithIntrinsicBounds(null, null, null, drawable)  // Set image (bottom)
-
-            // Resize the drawable to fit the button
-            drawable?.setBounds(0, 0, (collectionDisplayHeight*2).toInt(), (collectionDisplayHeight*2).toInt())
-
-            // Set the scaled drawable on the button (e.g., centered without text)
-            setCompoundDrawables(null, null, null, drawable)  // Set image (bottom)
-
-            // Optionally adjust padding
-            setPadding(0, 0, 0, 13)
-
-            // Apply a vertical offset to manually adjust the position (negative to move up)
-            translationY = -27f  // Adjust this value to get the perfect alignment
-
-            setOnClickListener { button ->
-                MyUtils.showConfirmationDialog(this@MainActivity,"Delete Collection: $collectionName", "Are you sure you want to delete this collection?") {userChoice ->
-                    if (userChoice) {
-                        container.removeView(rowLayout)
-                        MyUtils.deleteCollection(context=this@MainActivity, folderOfCollection =collectionPath + "/" + button.contentDescription.toString(), flashcardPath=flashcardPath)
-                    }
-                }
-            }
-        }
-
-        // Add buttons to the horizontal layout
-        rowLayout.addView(selectionButton)
-        rowLayout.addView(collectionButton)
-        rowLayout.addView(deleteCollectionButton)
-
-        // Add the horizontal layout to the container
-        container.addView(rowLayout)
     }
 }

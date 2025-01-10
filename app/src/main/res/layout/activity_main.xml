@@ -91,23 +91,16 @@
                 tools:ignore="ContentDescription,SpeakableTextPresentCheck" />
         </LinearLayout>
 
-        <ScrollView
-            android:id="@+id/scrollView2"
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/collection_recycler_view"
             android:layout_width="wrap_content"
             android:layout_height="@dimen/collection_display_area_height"
             android:layout_gravity="center_horizontal"
             android:layout_marginTop="10dp"
             android:fadeScrollbars="false"
-            android:fillViewport="true"
-            android:scrollbarThumbVertical="@color/highlight">
-
-            <LinearLayout
-                android:id="@+id/container"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical" />
-
-        </ScrollView>
+            android:scrollbarThumbVertical="@color/highlight"
+            android:scrollbars="vertical"
+            tools:listitem="@layout/collection_list_view_normal" />
 
         <LinearLayout
             android:layout_width="wrap_content"

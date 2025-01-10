@@ -1,4 +1,14 @@
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Background color layer -->
     <item android:drawable="@color/delete_highlight" />
-    <item android:drawable="@drawable/delete" />
+
+    <!-- Delete drawable with insets to control size -->
+    <item>
+        <inset
+            android:drawable="@drawable/delete"
+            android:insetLeft="6dp"
+            android:insetTop="6dp"
+            android:insetRight="6dp"
+            android:insetBottom="6dp" />
+    </item>
 </layer-list>

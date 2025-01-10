@@ -149,32 +149,26 @@ object MyUtils {
     }
 
     fun sortCollectionStrings(inputList: List<String>): List<String> {
+        val dateRegex = Regex("""\d{2}\.\d{2}\.\d{4}""")
         val dateFormat = SimpleDateFormat("dd.MM.yyyy", Locale.getDefault())
 
-        // Separate dates from other strings
-        val dates = mutableListOf<String>()
-        val nonDates = mutableListOf<String>()
+        // Precompute date values or mark invalid for normal strings
+        val parsedItems = inputList.map { item ->
+            val parsedDate = if (dateRegex.matches(item)) dateFormat.parse(item) else null
+            item to parsedDate
+        }
 
-        for (item in inputList) {
-            val dateRegex = Regex("""\d{2}\.\d{2}\.\d{4}""")
-            if (dateRegex.matches(item)) {
-                dates.add(item)
-            } else {
-                nonDates.add(item)
+        // Sort in a single pass using a custom comparator
+        return parsedItems.sortedWith { a, b ->
+            when {
+                a.second != null && b.second != null -> b.second!!.compareTo(a.second!!) // Sort dates descending
+                a.second != null -> -1 // Dates come before non-dates
+                b.second != null -> 1
+                else -> a.first.compareTo(b.first) // Sort non-dates alphabetically
             }
-        }
-
-        // Sort the dates in descending order
-        val sortedDates = dates.sortedByDescending {
-            dateFormat.parse(it)
-        }
-
-        // Sort the non-date strings alphabetically
-        val sortedNonDates = nonDates.sorted()
-
-        // Combine both lists
-        return sortedDates + sortedNonDates
+        }.map { it.first } // Extract the original strings
     }
+
 
     @SuppressLint("InflateParams")
     fun showDropdownDialog(context: Context, title: String, message: String, options: List<SpinnerItem>, callback: (Boolean, SpinnerItem?) -> Unit) {
@@ -413,7 +407,7 @@ object MyUtils {
                 if (sortInAscendingOrder) {
                     sortedFiles = files.sortedBy { it.name }
                 }   else {
-                    sortedFiles = files.sortedByDescending { it.name }
+                    sortedFiles = files.toList()
                 }
                 for (file in sortedFiles) {
                     if (file.isDirectory) {

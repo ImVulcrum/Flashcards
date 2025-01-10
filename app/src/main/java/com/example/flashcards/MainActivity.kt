@@ -116,17 +116,22 @@ class MainActivity : AppCompatActivity() {
 
     private fun init(){
         //scan for collections
-        sortedCollections = MyUtils.getFoldersInDirectory(collectionPath, true)
-
         if (MyUtils.readLineFromFile(tabPath + "/Settings.txt",6).toBoolean() == false) {
-            sortedCollections = MyUtils.sortCollectionStrings(sortedCollections)
+            sortedCollections = MyUtils.sortCollectionStrings(MyUtils.getFoldersInDirectory(collectionPath, false))
+        }   else {
+            sortedCollections = MyUtils.getFoldersInDirectory(collectionPath, true)
         }
 
         container.removeAllViews()
+        var i = 0
         for (collection in sortedCollections) {
-            if (MyUtils.readLineFromFile(collectionPath + "/" + collection + "/Properties.txt", 5) == "false" || MyUtils.readLineFromFile(collectionPath + "/" + collection + "/Properties.txt", 5) == "") {
-                addCollectionButtons(collection, false)
-            }
+//            i = i +1
+//            if (i <5) {
+                if (MyUtils.readLineFromFile(collectionPath + "/" + collection + "/Properties.txt", 5) == "false" || MyUtils.readLineFromFile(collectionPath + "/" + collection + "/Properties.txt", 5) == "") {
+                        addCollectionButtons(collection, false)
+                }
+//            }
+
         }
         activateAllButtons()
     }

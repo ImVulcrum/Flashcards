@@ -69,6 +69,17 @@ object MyUtils {
         }
     }
 
+    fun startTimer():Long {
+        val startTime = System.currentTimeMillis()
+        return startTime
+    }
+
+    fun endTimer(startTime: Long) {
+        val endTime = System.currentTimeMillis()
+        val duration = endTime - startTime
+        Log.e("output", "Execution time: $duration ms")
+    }
+
     fun createShortToast(context: Context, message: String) {
         val toast = Toast.makeText(context, message, Toast.LENGTH_SHORT)
         toast.show()

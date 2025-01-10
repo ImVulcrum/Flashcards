@@ -60,14 +60,16 @@ class MainActivity : AppCompatActivity() {
         val appPath = getExternalFilesDir(null).toString()
         val tabs = MyUtils.getFoldersInDirectory(appPath)
 
+
         if (tabs.isNotEmpty()) {
-
-            for (tab in tabs) {
-                addTabButton(tabLayout, MyUtils.readLineFromFile(appPath + "/" + tab + "/" + "/Settings.txt", 0)!!, appPath, tabs)
-            }
-
             val sharedPref = getSharedPreferences("pref", MODE_PRIVATE)
             val tabIndex = sharedPref.getString("currentTabIndex", tabs[0])
+
+            setupTabLayout(tabLayout, appPath, tabs)
+
+            for (tab in tabs) {
+                addTabButton(tabLayout, MyUtils.readLineFromFile(appPath + "/" + tab + "/" + "/Settings.txt", 0)!!)
+            }
 
             if (tabIndex in tabs) {
                 tabPath = appPath + "/" + tabIndex
@@ -122,11 +124,12 @@ class MainActivity : AppCompatActivity() {
         }   else {
             sortedCollections = MyUtils.getFoldersInDirectory(collectionPath, true)
         }
+
         listOfCollectionsInCorrectFormat.clear()
         addToCollectionList(false)
+
         createCollectionAdapter()
         updateCollectionView()
-
         activateAllButtons()
     }
 
@@ -140,11 +143,14 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun addToCollectionList(addArchivedCollections: Boolean) {
+//        var i = 0
         for (collectionId in sortedCollections) {
-            if (MyUtils.readLineFromFile(collectionPath + "/" + collectionId + "/Properties.txt", 5) == addArchivedCollections.toString()) {
-                val collectionName = MyUtils.readLineFromFile(collectionPath + "/$collectionId/Properties.txt", 0)
-                listOfCollectionsInCorrectFormat.add(MyDisplayingUtils.Collection(collectionId, collectionName!!, false, addArchivedCollections))
-            }
+//            i = i + 1
+//            if (i < 5) {
+                if (MyUtils.readLineFromFile(collectionPath + "/" + collectionId + "/Properties.txt", 5) == addArchivedCollections.toString()) {
+                    listOfCollectionsInCorrectFormat.add(MyDisplayingUtils.Collection(collectionId, MyUtils.readLineFromFile(collectionPath + "/$collectionId/Properties.txt", 0)!!, false, addArchivedCollections))
+                }
+//            }
         }
     }
 
@@ -256,14 +262,10 @@ class MainActivity : AppCompatActivity() {
         showArchivedCollections.setBackgroundColor(ContextCompat.getColor(this, R.color.primary))
     }
 
-    private fun addTabButton(tabLayout: com.google.android.material.tabs.TabLayout, tabName: String, appPath:String, tabs:List<String>) {
-        val tab = tabLayout.newTab()
-        tab.text = tabName
-
-        tabLayout.addTab(tab)
-
+    private fun setupTabLayout(tabLayout: com.google.android.material.tabs.TabLayout, appPath: String, tabs: List<String>) {
         tabLayout.addOnTabSelectedListener(object : com.google.android.material.tabs.TabLayout.OnTabSelectedListener {
             override fun onTabSelected(tab: com.google.android.material.tabs.TabLayout.Tab?) {
+                val s = MyUtils.startTimer()
                 val tabIndex = tab?.position ?: 0
 
                 tabPath = appPath + "/" + tabs[tabIndex]
@@ -271,8 +273,9 @@ class MainActivity : AppCompatActivity() {
                 init()
                 setTabToSharedPref(tabs[tabIndex])
 
-                //clear queued collections
+                // Clear queued collections
                 resetQueues()
+                MyUtils.endTimer(s)
             }
 
             override fun onTabUnselected(tab: com.google.android.material.tabs.TabLayout.Tab?) {
@@ -282,6 +285,40 @@ class MainActivity : AppCompatActivity() {
             }
         })
     }
+
+    private fun addTabButton(tabLayout: com.google.android.material.tabs.TabLayout, tabName: String) {
+        val tab = tabLayout.newTab()
+        tab.text = tabName
+        tabLayout.addTab(tab)
+    }
+
+//    private fun addTabButton(tabLayout: com.google.android.material.tabs.TabLayout, tabName: String, appPath:String, tabs:List<String>) {
+//        val tab = tabLayout.newTab()
+//        tab.text = tabName
+//
+//        tabLayout.addTab(tab)
+//
+//        tabLayout.addOnTabSelectedListener(object : com.google.android.material.tabs.TabLayout.OnTabSelectedListener {
+//            override fun onTabSelected(tab: com.google.android.material.tabs.TabLayout.Tab?) {
+//                Log.e("f", "tab selected")
+//                val tabIndex = tab?.position ?: 0
+//
+//                tabPath = appPath + "/" + tabs[tabIndex]
+//                collectionPath = tabPath + "/Collections"
+//                init()
+//                setTabToSharedPref(tabs[tabIndex])
+//
+//                //clear queued collections
+//                resetQueues()
+//            }
+//
+//            override fun onTabUnselected(tab: com.google.android.material.tabs.TabLayout.Tab?) {
+//            }
+//
+//            override fun onTabReselected(tab: com.google.android.material.tabs.TabLayout.Tab?) {
+//            }
+//        })
+//    }
 
     private fun addCollection() {
         val tabSettingsPath = tabPath + "/Settings.txt"

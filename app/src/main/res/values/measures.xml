@@ -3,7 +3,7 @@
     <dimen name="collection_display_width">320dp</dimen>
     <dimen name="collection_display_height">40dp</dimen>
     <dimen name="collection_display_area_height">550dp</dimen>
-    <dimen name="flashcard_height">270dp</dimen>
+    <dimen name="flashcard_height">320dp</dimen>
     <dimen name="flashcard_width">350dp</dimen>
 
 </resources>

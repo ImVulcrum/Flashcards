@@ -402,14 +402,19 @@ object MyUtils {
         return ""
     }
 
-    fun getFoldersInDirectory (directoryToSearchIn: String): List<String> {
+    fun getFoldersInDirectory (directoryToSearchIn: String, sortInAscendingOrder: Boolean = true): List<String> {
         val directory = File(directoryToSearchIn)
         val folderNames = mutableListOf<String>()
 
         if (directory.exists() && directory.isDirectory) {
             val files = directory.listFiles()
             if (files != null) {
-                val sortedFiles = files.sortedBy { it.name } // Sort files alphabetically
+                val sortedFiles: List<File>
+                if (sortInAscendingOrder) {
+                    sortedFiles = files.sortedBy { it.name }
+                }   else {
+                    sortedFiles = files.sortedByDescending { it.name }
+                }
                 for (file in sortedFiles) {
                     if (file.isDirectory) {
                         folderNames.add(file.name)

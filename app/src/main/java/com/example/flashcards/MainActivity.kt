@@ -5,6 +5,7 @@ import android.content.Intent
 import android.content.res.ColorStateList
 import android.graphics.PorterDuff
 import android.os.Bundle
+import android.util.Log
 import android.view.Gravity
 import android.view.ViewGroup
 import android.widget.Button
@@ -31,7 +32,7 @@ class MainActivity : AppCompatActivity() {
     lateinit var tabPath: String
     lateinit var collectionPath: String
     val scheduledCollections = mutableListOf<String>()
-    var sortedCollections = mutableListOf<String>()
+    var sortedCollections = listOf<String>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -50,8 +51,7 @@ class MainActivity : AppCompatActivity() {
         val appPath = getExternalFilesDir(null).toString()
         val tabs = MyUtils.getFoldersInDirectory(appPath)
 
-        if (!tabs.isEmpty()) {
-
+        if (tabs.isNotEmpty()) {
 
             for (tab in tabs) {
                 addTabButton(tabLayout, MyUtils.readLineFromFile(appPath + "/" + tab + "/" + "/Settings.txt", 0)!!, appPath, tabs)
@@ -69,6 +69,8 @@ class MainActivity : AppCompatActivity() {
                 setTab(tabs[0])
             }
             collectionPath = tabPath + "/Collections"
+
+
             init()
         }   else {
             deactivateAllButtons()
@@ -114,9 +116,11 @@ class MainActivity : AppCompatActivity() {
 
     private fun init(){
         //scan for collections
-        val collections = MyUtils.getFoldersInDirectory(collectionPath)
+        sortedCollections = MyUtils.getFoldersInDirectory(collectionPath, true)
 
-        sortedCollections = MyUtils.sortCollectionStrings(collections).toMutableList()
+        if (MyUtils.readLineFromFile(tabPath + "/Settings.txt",6).toBoolean() == false) {
+            sortedCollections = MyUtils.sortCollectionStrings(sortedCollections)
+        }
 
         container.removeAllViews()
         for (collection in sortedCollections) {

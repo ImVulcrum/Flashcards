@@ -22,6 +22,7 @@ class SettingsActivity : AppCompatActivity() {
     private lateinit var setFlashcardIndex: EditText
     private lateinit var nativeLanguagePrompt: EditText
     private lateinit var foreignLanguagePrompt: EditText
+    private lateinit var orderAscendinglyCheckbox: CheckBox
     private lateinit var useDateCheckbox: CheckBox
     private lateinit var divider: View
     private lateinit var tabSettingsPath: String
@@ -43,6 +44,7 @@ class SettingsActivity : AppCompatActivity() {
         setFlashcardIndex = findViewById(R.id.flashcard_index)
         nativeLanguagePrompt = findViewById(R.id.enter_native_language_name)
         foreignLanguagePrompt = findViewById(R.id.enter_foreign_language_name)
+        orderAscendinglyCheckbox = findViewById(R.id.order_collections_asc)
         useDateCheckbox = findViewById(R.id.use_date_as_collection_index)
         divider = findViewById(R.id.collection_index_underscore)
 
@@ -58,6 +60,11 @@ class SettingsActivity : AppCompatActivity() {
         var useDateAsCollectionIndex = false
         if (useDateAsCollectionIndexString == "true") {
             useDateAsCollectionIndex = true
+        }
+        val orderAscString = MyUtils.readLineFromFile(tabSettingsPath, 6)
+        var orderAsc = false
+        if (orderAscString == "true") {
+            orderAsc = true
         }
         val collectionIndexName = MyUtils.readLineFromFile(tabSettingsPath, 4)
         val flashcardIndex = MyUtils.readLineFromFile(tabSettingsPath, 5)
@@ -77,6 +84,7 @@ class SettingsActivity : AppCompatActivity() {
         setFlashcardIndex.setText(flashcardIndex)
 
         useDateCheckbox.isChecked = useDateAsCollectionIndex
+        orderAscendinglyCheckbox.isChecked = orderAsc
 
         //back button
         backButton.setOnClickListener {
@@ -91,6 +99,10 @@ class SettingsActivity : AppCompatActivity() {
             }
 
             MyUtils.writeTextFile(tabSettingsPath, 3, useDateCheckbox.isChecked.toString())
+        }
+
+        orderAscendinglyCheckbox.setOnClickListener {
+            MyUtils.writeTextFile(tabSettingsPath, 6, orderAscendinglyCheckbox.isChecked.toString())
         }
     }
 

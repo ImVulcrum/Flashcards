@@ -4,7 +4,15 @@ import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.res.ColorStateList
+import android.graphics.Color
+import android.graphics.Paint
+import android.graphics.drawable.GradientDrawable
+import android.graphics.drawable.LayerDrawable
+import android.graphics.drawable.ShapeDrawable
+import android.graphics.drawable.shapes.RectShape
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import android.widget.Button
 import android.widget.TextView
@@ -12,17 +20,20 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.example.flashcards.utils.MyUtils
+import com.google.android.material.button.MaterialButton
 
 class TrainingActivity: AppCompatActivity() {
     private lateinit var backButton: FloatingActionButton
     private lateinit var flashcardButton: Button
     private lateinit var collectionTitle: TextView
     private lateinit var collectionIndex: TextView
+    private lateinit var scheduledModeInfo: TextView
     private lateinit var frontToBackButton: Button
     private lateinit var backToFrontButton: Button
     private lateinit var addCardButton: FloatingActionButton
     private lateinit var editCardButton: FloatingActionButton
-    private lateinit var shuffleButton: FloatingActionButton
+    private lateinit var shuffleButton: MaterialButton
+    private lateinit var autoShuffleButton: MaterialButton
     private lateinit var flashcardCounter: TextView
     private lateinit var flashcardId: TextView
     private lateinit var muteAudioButton: FloatingActionButton
@@ -37,6 +48,7 @@ class TrainingActivity: AppCompatActivity() {
 
     private var cardOrder = listOf<String>()
     private var cardIndex: Int = 0
+    private var autoShuffle: Boolean = false
 
     @Deprecated("Deprecated in Java")
     @SuppressLint("MissingSuperCall")
@@ -46,7 +58,6 @@ class TrainingActivity: AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        // Unregister the receiver to avoid memory leaks
         unregisterReceiver(screenReceiver)
     }
 
@@ -59,11 +70,13 @@ class TrainingActivity: AppCompatActivity() {
         flashcardButton = findViewById(R.id.b_flashcard)
         collectionTitle = findViewById(R.id.collection_title)
         collectionIndex = findViewById(R.id.collection_index_name)
+        scheduledModeInfo = findViewById(R.id.scheduled_mode_info)
         frontToBackButton = findViewById(R.id.front_to_back)
         backToFrontButton = findViewById(R.id.back_to_front)
         addCardButton = findViewById(R.id.b_add_card_flashcards)
         editCardButton = findViewById(R.id.b_edit_flashcards)
         shuffleButton = findViewById(R.id.b_shuffle_flashcards)
+        autoShuffleButton = findViewById(R.id.b_auto_shuffle)
         flashcardCounter = findViewById(R.id.flashcard_counter)
         flashcardId = findViewById(R.id.flashcard_id)
         muteAudioButton = findViewById(R.id.b_mute_flashcards)
@@ -71,11 +84,16 @@ class TrainingActivity: AppCompatActivity() {
         collectionSettingButton = findViewById(R.id.b_settings_flashcards)
         showAllCardsButton = findViewById(R.id.b_show_flashcards)
 
+        //visual
+        shuffleButton.setStrokeColor(ColorStateList.valueOf(ContextCompat.getColor(this, R.color.background)))
+        autoShuffleButton.setStrokeColor(ColorStateList.valueOf(ContextCompat.getColor(this, R.color.background)))
+
         // Register the screen off receiver
         screenReceiver = MyUtils.ScreenReceiver()
         val filter = IntentFilter(Intent.ACTION_SCREEN_OFF)
         registerReceiver(screenReceiver, filter)
 
+        //define vars
         val sharedPref = getSharedPreferences("pref", MODE_PRIVATE)
         val editor = sharedPref.edit()
 
@@ -89,7 +107,7 @@ class TrainingActivity: AppCompatActivity() {
         var flashcardShowsQuestion = false
         var audioMuted = sharedPref.getBoolean("audio_muted", false)
 
-        val currentTabIndex = sharedPref.getString("currentTabIndex", "ERROR")
+        val currentTabIndex = sharedPref.getString("currentTabIndex", "ERROR")!!
         tabPath = getExternalFilesDir(null).toString() + "/" + currentTabIndex
         flashcardPath = "$tabPath/Cards"
         val collectionsPath = "$tabPath/Collections"
@@ -107,12 +125,14 @@ class TrainingActivity: AppCompatActivity() {
 
             nameOfCurrentCollection = scheduledCollections[scheduledCollectionIndex]
             scheduledMode = true
+
+            scheduledModeInfo.text = "scheduled mode"
         }
 
         var collectionPath = "$collectionsPath/$nameOfCurrentCollection"
         var propertiesPath = "$collectionPath/Properties.txt"
 
-        setupNewCollection(propertiesPath, collectionPath, nativeToForeignActive, foreignToNativeActive, nameOfCurrentCollection, queuedMode)
+        setupNewCollection(propertiesPath, collectionPath, nativeToForeignActive, foreignToNativeActive, nameOfCurrentCollection, queuedMode, currentTabIndex)
 
         if (MyUtils.readLineFromFile(propertiesPath, 4) != "" && !queuedMode) {
             cardIndex = MyUtils.readLineFromFile(propertiesPath, 4)!!.toInt()
@@ -129,10 +149,12 @@ class TrainingActivity: AppCompatActivity() {
 
         flashcardButton.setOnClickListener{
             if (flashcardShowsQuestion) {
-                val (tempFlashcardShowQuestion, tempShowSwitchDialog) = showAnswer(audioMuted = audioMuted, scheduledMode = scheduledMode, propertiesPath = propertiesPath)
-                flashcardShowsQuestion = tempFlashcardShowQuestion
-                showSwitchDialog = tempShowSwitchDialog
+                flashcardShowsQuestion = false
+
+                showSwitchDialog = showAnswer(audioMuted = audioMuted, scheduledMode = scheduledMode, propertiesPath = propertiesPath, collectionPath = collectionPath, nativeToForeignActive = nativeToForeignActive, foreignToNativeActive = foreignToNativeActive)
             } else{
+                flashcardShowsQuestion = true
+
                 if (showSwitchDialog) {
                     showSwitchDialog = false
 
@@ -148,16 +170,16 @@ class TrainingActivity: AppCompatActivity() {
                             collectionPath = "$collectionsPath/$nameOfCurrentCollection"
                             propertiesPath = "$collectionPath/Properties.txt"
 
-                            setupNewCollection(propertiesPath, collectionPath, nativeToForeignActive, foreignToNativeActive, nameOfCurrentCollection, queuedMode)
+                            setupNewCollection(propertiesPath, collectionPath, nativeToForeignActive, foreignToNativeActive, nameOfCurrentCollection, queuedMode, currentTabIndex)
 
                             editor.putInt("scheduledCollectionIndex", scheduledCollectionIndex)
                             editor.apply()
                         } else {
-                            flashcardShowsQuestion = showQuestion(audioMuted = audioMuted)
+                            showQuestion(audioMuted = audioMuted)
                         }
                     }
                 } else {
-                    flashcardShowsQuestion = showQuestion(audioMuted = audioMuted)
+                    showQuestion(audioMuted = audioMuted)
                 }
             }
         }
@@ -297,19 +319,54 @@ class TrainingActivity: AppCompatActivity() {
         }
 
         shuffleButton.setOnClickListener {
+            //visuals
+            shuffleButton.setTextColor(ContextCompat.getColor(this, R.color.strong_highlight))
+            shuffleButton.setStrokeColor(ColorStateList.valueOf(ContextCompat.getColor(this, R.color.strong_highlight)))
+            Handler(Looper.getMainLooper()).postDelayed({
+                shuffleButton.setTextColor(ContextCompat.getColor(this, R.color.white))
+                shuffleButton.setStrokeColor(ColorStateList.valueOf(ContextCompat.getColor(this, R.color.background)))
+            }, 400)
+
+            //logic
             MyUtils.stopAudio()
             MyUtils.showConfirmationDialog(this,"Shuffle Cards", "Are you sure you want to shuffle?") {userChoice ->
                 if (userChoice) {
                     cardOrder = shuffleCards(collectionPath, nativeToForeignActive, foreignToNativeActive)
                     cardIndex = 0
                     MyUtils.writeTextFile(propertiesPath, 4, "0")
-                    flashcardButton.text = "Start"
                     flashcardShowsQuestion = false
+
+                    flashcardButton.text = "Start"
                     flashcardButton.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.primary))
                     editCardButton.isEnabled = false
                     editCardButton.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.button_color))
                 }
             }
+        }
+
+        autoShuffleButton.setOnClickListener {
+            autoShuffleButton.setTextColor(ContextCompat.getColor(this, R.color.strong_highlight))
+            Handler(Looper.getMainLooper()).postDelayed({
+                autoShuffleButton.setTextColor(ContextCompat.getColor(this, R.color.white))
+            }, 200)
+            if (autoShuffle) {
+                autoShuffleButton.setStrokeColor(ColorStateList.valueOf(ContextCompat.getColor(this, R.color.background)))
+                shuffleButton.isEnabled = true
+                shuffleButton.setTextColor(ContextCompat.getColor(this, R.color.white))
+
+                if (scheduledMode) {
+                    scheduledModeInfo.text = "scheduled mode"
+                }
+            } else {
+                autoShuffleButton.setStrokeColor(ColorStateList.valueOf(ContextCompat.getColor(this, R.color.white)))
+                shuffleButton.isEnabled = false
+                shuffleButton.setTextColor(ContextCompat.getColor(this, R.color.button_color))
+
+                if (scheduledMode) {
+                    scheduledModeInfo.text = "scheduled mode deactivated"
+                }
+            }
+            autoShuffle = !autoShuffle
         }
 
         collectionSettingButton.setOnClickListener {
@@ -327,7 +384,7 @@ class TrainingActivity: AppCompatActivity() {
         }
     }
 
-    private fun showQuestion(audioMuted: Boolean):Boolean {
+    private fun showQuestion(audioMuted: Boolean) {
 
         flashcardButton.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.primary))
         if (!editCardButton.isEnabled) {
@@ -353,11 +410,9 @@ class TrainingActivity: AppCompatActivity() {
 
         flashcardButton.text = MyUtils.readLineFromFile(flashcardPath + "/" + cardOrder[cardIndex].substring(2) + "/Content.txt", line)
         flashcardId.text = cardOrder[cardIndex].substring(2)
-
-        return true
     }
 
-    private fun showAnswer(audioMuted:Boolean, scheduledMode:Boolean, propertiesPath: String):Pair<Boolean, Boolean> {
+    private fun showAnswer(audioMuted:Boolean, scheduledMode:Boolean, propertiesPath: String, collectionPath: String, nativeToForeignActive: Boolean, foreignToNativeActive: Boolean): Boolean {
         var showSwitchDialog = false
 
         flashcardButton.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.highlight))
@@ -377,8 +432,11 @@ class TrainingActivity: AppCompatActivity() {
         flashcardButton.text = MyUtils.readLineFromFile(flashcardPath + "/" + cardOrder[cardIndex].substring(2) + "/Content.txt", line)
         flashcardId.text = cardOrder[cardIndex].substring(2)
 
-        if (cardIndex+1 == cardOrder.size) {
-            if (scheduledMode == true) {
+        if (cardIndex+1 == cardOrder.size) { //reseting the card index to zero when the user skipped through the whole orderline
+            if (autoShuffle) {
+                cardOrder = shuffleCards(collectionPath, nativeToForeignActive, foreignToNativeActive)
+                MyUtils.writeTextFile(propertiesPath, 4, "0")
+            } else if (scheduledMode == true) {
                 showSwitchDialog = true
             }
             cardIndex = 0
@@ -387,11 +445,11 @@ class TrainingActivity: AppCompatActivity() {
         }
 
         MyUtils.writeTextFile(propertiesPath, 4, cardIndex.toString())
-        return Pair(false, showSwitchDialog)
+        return showSwitchDialog
     }
 
     @SuppressLint("SetTextI18n")
-    private fun setupNewCollection(propertiesPath: String, collectionPath: String, nativeToForeignActive: Boolean, foreignToNativeActive: Boolean, nameOfCurrentCollection: String, queuedMode:Boolean) {
+    private fun setupNewCollection(propertiesPath: String, collectionPath: String, nativeToForeignActive: Boolean, foreignToNativeActive: Boolean, nameOfCurrentCollection: String, queuedMode:Boolean, currentTabIndex:String) {
         //read card order from file if exists, otherwise shuffle
         getOrderLine(propertiesPath, collectionPath, nativeToForeignActive, foreignToNativeActive)
 
@@ -413,11 +471,9 @@ class TrainingActivity: AppCompatActivity() {
 
 
         collectionTitle.text = MyUtils.readLineFromFile(propertiesPath, 0)
-        if (queuedMode) {
-            collectionIndex.text = "Q: $nameOfCurrentCollection"
-        }   else {
-            collectionIndex.text = nameOfCurrentCollection
-        }
+
+        collectionIndex.text = "$nameOfCurrentCollection from $currentTabIndex"
+
         frontToBackButton.text = MyUtils.readLineFromFile(propertiesPath, 1) + " - " + MyUtils.readLineFromFile(propertiesPath, 2)
         backToFrontButton.text = MyUtils.readLineFromFile(propertiesPath, 2) + " - " + MyUtils.readLineFromFile(propertiesPath, 1)
     }

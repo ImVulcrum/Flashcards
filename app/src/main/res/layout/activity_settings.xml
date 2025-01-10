@@ -142,12 +142,23 @@
             tools:ignore="TouchTargetSizeCheck" />
 
         <CheckBox
+            android:id="@+id/order_collections_asc"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="40dp"
+            android:text="order collections ascendingly"
+            android:textAppearance="@style/SpaceGroteskVerySmall"
+            android:textColor="@color/white"
+            app:buttonTint="@color/strong_highlight" />
+
+        <CheckBox
             android:id="@+id/use_date_as_collection_index"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
-            android:layout_marginTop="80dp"
-            android:text="Use date as collection index"
+            android:layout_marginTop="35dp"
+            android:text="Use date as collection index   "
             android:textAppearance="@style/SpaceGroteskVerySmall"
             android:textColor="@color/white"
             app:buttonTint="@color/strong_highlight" />
@@ -156,7 +167,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
-            android:layout_marginTop="10dp"
+            android:layout_marginTop="0dp"
             android:orientation="horizontal">
 
             <TextView
@@ -193,7 +204,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
-            android:layout_marginTop="60dp"
+            android:layout_marginTop="40dp"
             android:orientation="horizontal">
 
             <TextView

@@ -86,8 +86,8 @@ class FlashcardListActivity : AppCompatActivity() {
         val listOfCardsInCorrectFormat = mutableListOf<MyDisplayingUtils.Flashcard>()
 
         for (card in cards) {
-            val frontSide:String = MyUtils.readLineFromFile(flashcardPath + "/" + card + "/Content.txt", 0).toString()
-            val backSide:String = MyUtils.readLineFromFile(flashcardPath + "/" + card + "/Content.txt", 1).toString()
+            val frontSide:String = MyUtils.readLineFromFile(flashcardPath + "/" + card + "/Content.txt", 0).toString().replace("$", " ")
+            val backSide:String = MyUtils.readLineFromFile(flashcardPath + "/" + card + "/Content.txt", 1).toString().replace("$", " ")
             listOfCardsInCorrectFormat.add(MyDisplayingUtils.Flashcard(frontSide, backSide, card, false))
         }
 

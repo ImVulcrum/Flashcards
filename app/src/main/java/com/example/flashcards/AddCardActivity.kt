@@ -7,6 +7,9 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.media.MediaRecorder
 import android.os.Bundle
+import android.text.Editable
+import android.text.InputFilter
+import android.text.TextWatcher
 import android.util.AttributeSet
 import android.util.Log
 import android.view.MotionEvent
@@ -126,6 +129,10 @@ class AddCardActivity<IOException> : AppCompatActivity() {
 
         cardCount.text = "${MyUtils.getCardCountForCollection(collectionPath)} Card(s)"
 
+        //logic for textboxes to allow multiline text but dont go beyond 8 lines
+        setupMultilineTextbox(frontsideTextbox, 8)
+        setupMultilineTextbox(backsideTextbox, 8)
+
         //prepare the page for adding a new card
         if (calledFromAddCard) {
             actionBar.removeView(deleteButton)
@@ -146,16 +153,16 @@ class AddCardActivity<IOException> : AppCompatActivity() {
             closeButton.isClickable = false
             header.text = "Edit Card"
 
-            val c:String? = b?.getString("cardName")
-            cardName = c ?:""
+            val cc:String? = b?.getString("cardName")
+            cardName = cc ?:""
 
             //set card id text
             cardId.text = nameOfCurrentCollection + " (" + '"' + MyUtils.readLineFromFile(collectionPath + "/Properties.txt", 0) +'"'+ ")" + " - Card_#" + cardName.substring(5)
 
             pathOfTheCurrentFlashcard = "$flashcardPath/$cardName"
 
-            frontsideTextbox.setText(MyUtils.readLineFromFile(pathOfTheCurrentFlashcard + "/Content.txt", 0))
-            backsideTextbox.setText(MyUtils.readLineFromFile(pathOfTheCurrentFlashcard + "/Content.txt", 1))
+            frontsideTextbox.setText(MyUtils.readLineFromFile(pathOfTheCurrentFlashcard + "/Content.txt", 0)!!.replace("$","\n"))
+            backsideTextbox.setText(MyUtils.readLineFromFile(pathOfTheCurrentFlashcard + "/Content.txt", 1)!!.replace("$","\n"))
 
             if (!MyUtils.fileExists(pathOfTheCurrentFlashcard + "/native.mp3")) {
                 frontPlayButton.backgroundTintList = (ContextCompat.getColorStateList(this@AddCardActivity, R.color.button_color))
@@ -225,6 +232,7 @@ class AddCardActivity<IOException> : AppCompatActivity() {
 
         confirmCardButton.setOnClickListener { //visble when adding a new card AND editing an old one
             if (confirmCard(creatingNewCard = calledFromAddCard,collectionPath= collectionPath, flashcardName = cardName, nativeLanguagePrompt = frontsideTextbox.text.toString(), foreignLanguagePrompt = backsideTextbox.text.toString()))   {
+                Log.e("output", backsideTextbox.text.toString())
                 if (calledFromList) {
                     intent = Intent(this, FlashcardListActivity::class.java)
                     val bu = Bundle()
@@ -322,6 +330,28 @@ class AddCardActivity<IOException> : AppCompatActivity() {
         }
     }
 
+    private fun setupMultilineTextbox(textBox:EditText, maxLines:Int) {
+        textBox.filters = arrayOf(InputFilter { source, start, end, dest, dstart, dend ->
+            val newText = dest.subSequence(0, dstart).toString() +
+                    source.subSequence(start, end).toString() +
+                    dest.subSequence(dend, dest.length).toString()
+
+            if (newText.lines().size > maxLines) {
+                ""
+            } else {
+                null
+            }
+        })
+        textBox.setOnKeyListener { _, keyCode, event ->
+            if (keyCode == android.view.KeyEvent.KEYCODE_ENTER && event.action == android.view.KeyEvent.ACTION_DOWN) {
+                if (textBox.lineCount >= maxLines) {
+                    return@setOnKeyListener true
+                }
+            }
+            false
+        }
+    }
+
     @SuppressLint("SetTextI18n")
     private fun createCard(flashcardPath: String, showMessage:Boolean =false, collectionName:String, collectionPath:String, tabPath:String):String{
         val tabSettingsPath = tabPath + "/Settings.txt"
@@ -344,8 +374,8 @@ class AddCardActivity<IOException> : AppCompatActivity() {
         if (nativeLanguagePrompt.isNullOrEmpty() || foreignLanguagePrompt.isNullOrEmpty()) {
             return false
         } else {
-            MyUtils.writeTextFile(pathOfTheCurrentFlashcard + "/Content.txt", 0, nativeLanguagePrompt)
-            MyUtils.writeTextFile(pathOfTheCurrentFlashcard + "/Content.txt", 1, foreignLanguagePrompt)
+            MyUtils.writeTextFile(pathOfTheCurrentFlashcard + "/Content.txt", 0, nativeLanguagePrompt.replace("\n", "$"))
+            MyUtils.writeTextFile(pathOfTheCurrentFlashcard + "/Content.txt", 1, foreignLanguagePrompt.replace("\n", "$"))
 
             //only when it is a new card it should be added to the orderline and the flashcards file and the collection reference should be added to the card
             if (creatingNewCard) {

@@ -14,6 +14,7 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
+import android.view.View
 import android.widget.Button
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
@@ -336,7 +337,7 @@ class TrainingActivity: AppCompatActivity() {
                     MyUtils.writeTextFile(propertiesPath, 4, "0")
                     flashcardShowsQuestion = false
 
-                    flashcardButton.text = "Start"
+                    setFlashcardText("Start")
                     flashcardButton.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.primary))
                     editCardButton.isEnabled = false
                     editCardButton.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.button_color))
@@ -408,7 +409,7 @@ class TrainingActivity: AppCompatActivity() {
             MyUtils.playAudio(flashcardPath + "/" + cardOrder[cardIndex].substring(2) + audioFile)
         }
 
-        flashcardButton.text = MyUtils.readLineFromFile(flashcardPath + "/" + cardOrder[cardIndex].substring(2) + "/Content.txt", line)
+        setFlashcardText(MyUtils.readLineFromFile(flashcardPath + "/" + cardOrder[cardIndex].substring(2) + "/Content.txt", line)!!)
         flashcardId.text = cardOrder[cardIndex].substring(2)
     }
 
@@ -429,7 +430,7 @@ class TrainingActivity: AppCompatActivity() {
             MyUtils.playAudio(flashcardPath + "/" + cardOrder[cardIndex].substring(2) + audioFile)
         }
 
-        flashcardButton.text = MyUtils.readLineFromFile(flashcardPath + "/" + cardOrder[cardIndex].substring(2) + "/Content.txt", line)
+        setFlashcardText(MyUtils.readLineFromFile(flashcardPath + "/" + cardOrder[cardIndex].substring(2) + "/Content.txt", line)!!)
         flashcardId.text = cardOrder[cardIndex].substring(2)
 
         if (cardIndex+1 == cardOrder.size) { //reseting the card index to zero when the user skipped through the whole orderline
@@ -448,6 +449,16 @@ class TrainingActivity: AppCompatActivity() {
         return showSwitchDialog
     }
 
+    private fun setFlashcardText(textString:String) {
+        val modifiedTextString = textString.replace("$","\n")
+        if (textString == modifiedTextString) {
+            flashcardButton.setTextAlignment(View.TEXT_ALIGNMENT_CENTER)
+        }   else {
+            flashcardButton.setTextAlignment(View.TEXT_ALIGNMENT_VIEW_START)
+        }
+        flashcardButton.text = modifiedTextString
+    }
+
     @SuppressLint("SetTextI18n")
     private fun setupNewCollection(propertiesPath: String, collectionPath: String, nativeToForeignActive: Boolean, foreignToNativeActive: Boolean, nameOfCurrentCollection: String, queuedMode:Boolean, currentTabIndex:String) {
         //read card order from file if exists, otherwise shuffle
@@ -460,7 +471,7 @@ class TrainingActivity: AppCompatActivity() {
         flashcardCounter.text = cardOrder.size.toString() + " Cards"
 
         flashcardButton.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.primary))
-        flashcardButton.text = "Start"
+        setFlashcardText("Start")
 
         if (cardOrder.isEmpty()) {
             flashcardButton.isEnabled = false

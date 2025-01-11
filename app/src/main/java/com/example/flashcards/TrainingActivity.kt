@@ -154,8 +154,6 @@ class TrainingActivity: AppCompatActivity() {
 
                 showSwitchDialog = showAnswer(audioMuted = audioMuted, scheduledMode = scheduledMode, propertiesPath = propertiesPath, collectionPath = collectionPath, nativeToForeignActive = nativeToForeignActive, foreignToNativeActive = foreignToNativeActive)
             } else{
-                flashcardShowsQuestion = true
-
                 if (showSwitchDialog) {
                     showSwitchDialog = false
 
@@ -176,10 +174,12 @@ class TrainingActivity: AppCompatActivity() {
                             editor.putInt("scheduledCollectionIndex", scheduledCollectionIndex)
                             editor.apply()
                         } else {
+                            flashcardShowsQuestion = true
                             showQuestion(audioMuted = audioMuted)
                         }
                     }
                 } else {
+                    flashcardShowsQuestion = true
                     showQuestion(audioMuted = audioMuted)
                 }
             }

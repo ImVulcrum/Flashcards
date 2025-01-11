@@ -17,6 +17,7 @@ class SettingsActivity : AppCompatActivity() {
 
     private lateinit var backButton: FloatingActionButton
     private lateinit var tabNameEditText: EditText
+    private lateinit var tabIndex: TextView
     private lateinit var setCollectionIndex: EditText
     private lateinit var collectionIndexText: TextView
     private lateinit var setFlashcardIndex: EditText
@@ -39,6 +40,7 @@ class SettingsActivity : AppCompatActivity() {
 
         backButton = findViewById(R.id.settings_back_button)
         tabNameEditText = findViewById(R.id.tab_name)
+        tabIndex = findViewById(R.id.tab_index)
         setCollectionIndex = findViewById(R.id.collection_index)
         collectionIndexText = findViewById(R.id.collection_index_helper_text)
         setFlashcardIndex = findViewById(R.id.flashcard_index)
@@ -52,6 +54,8 @@ class SettingsActivity : AppCompatActivity() {
         val currentTabIndex = sharedPref.getString("currentTabIndex", "ERROR")
         val tabPath = getExternalFilesDir(null).toString() + "/" + currentTabIndex
         tabSettingsPath = "$tabPath/Settings.txt"
+
+        tabIndex.text = currentTabIndex
 
         val tabName = MyUtils.readLineFromFile(tabSettingsPath, 0)
         val nativeLanguage = MyUtils.readLineFromFile(tabSettingsPath, 1)

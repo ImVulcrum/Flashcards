@@ -110,20 +110,6 @@ object MyUtils {
         }
     }
 
-    fun getCardCountForCollection(collectionPath: String): Int {
-        val flashcardsString = readLineFromFile("$collectionPath/Flashcards.txt", 0)
-        if (flashcardsString == "-") {
-            return 0
-        }   else {
-            val flashcardsList = flashcardsString?.split(" ")
-            if (flashcardsList != null) {
-                return flashcardsList.size
-            } else {
-                return 0
-            }
-        }
-    }
-
     fun deleteFolder(context: Context, folderLocation:String, toastMessage: String) {
         val folderToDelete = File(folderLocation)
 
@@ -434,18 +420,42 @@ object MyUtils {
         return folderNames
     }
 
-    fun getCardFolderNames(context: Context, collectionPath:String): List<String> {
-        val cardString = readLineFromFile(collectionPath + "/Flashcards.txt", 0)
+    fun getCardCountForCollection(path: String, countForRepetitionCollection:Boolean = false): Int {
+        val flashcardsString:String
+        if (countForRepetitionCollection) {
+            flashcardsString = readLineFromFile(path, 4)!!
+        } else {
+            flashcardsString = readLineFromFile("$path/Flashcards.txt", 0)!!
+        }
+        if (flashcardsString == "-") {
+            return 0
+        }   else {
+            val flashcardsList = flashcardsString.split(" ")
+            return flashcardsList.size
+        }
+    }
+
+    fun getCardFolderNames(path:String, getForRepetitionCollection:Boolean = false): List<String> {
+        val cardString:String
+        if (getForRepetitionCollection) {
+            cardString = readLineFromFile(path, 4)!!
+        }   else {
+            cardString = readLineFromFile(path + "/Flashcards.txt", 0)!!
+        }
         var cardNames = listOf<String>()
 
-        if (cardString != null) {
-            if (cardString != "-") {
-                cardNames = cardString.split(" ")
-            }
-        }   else {
-            createShortToast(context,"No cards in this collection")
+        if (cardString != "-") {
+            cardNames = cardString.split(" ")
         }
-        return cardNames
+        if (getForRepetitionCollection) {
+            val finalCardNames = mutableListOf<String>()
+            for (card in cardNames) {
+                finalCardNames.add(card.substring(2))
+            }
+            return finalCardNames
+        }   else {
+            return cardNames
+        }
     }
 
     fun getCurrentDate(): String {
@@ -492,7 +502,7 @@ object MyUtils {
     }
 
     fun deleteCollection(context: Context, folderOfCollection:String, flashcardPath:String) {
-        val cards = getCardFolderNames(context, folderOfCollection)
+        val cards = getCardFolderNames(folderOfCollection)
 
         for (card in cards) {
             Log.e("ew", flashcardPath + "/" + card)

@@ -7,6 +7,7 @@ import android.os.Bundle
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.flashcards.utils.MyDisplayingUtils
@@ -31,7 +32,7 @@ class FlashcardListActivity : AppCompatActivity() {
     private var currentCard:String = ""
     private var buttonsCurrentlySelected = mutableListOf<MyDisplayingUtils.Flashcard>()
 
-    private var queuedMode = false
+    private var mode = "n"
     private var scheduledCollectionsString = ""
 
     @Deprecated("Deprecated in Java")
@@ -65,13 +66,25 @@ class FlashcardListActivity : AppCompatActivity() {
         val i:String? = b?.getString("collectionId")
         nameOfCurrentCollection = i ?:""
 
-        val f:Boolean? = b?.getBoolean("queuedMode")
-        queuedMode = f ?:false
+        val f:String? = b?.getString("mode")
+        mode = f ?:"n"
         val c:String? = b?.getString("scheduledCollections")
         scheduledCollectionsString = c ?:""
 
+        val sharedPref = getSharedPreferences("pref", MODE_PRIVATE)
+        val currentTabIndex = sharedPref.getString("currentTabIndex", "ERROR")
+        val tabPath = getExternalFilesDir(null).toString() + "/" + currentTabIndex
+
         //set title and index hint
-        collectionNameHeader.text = MyUtils.readLineFromFile(collectionPath + "/Properties.txt", 0)
+        if (mode != "r") {
+            collectionNameHeader.text = MyUtils.readLineFromFile(collectionPath + "/Properties.txt", 0)
+        } else {
+            collectionNameHeader.text = nameOfCurrentCollection
+            buttonMoveCard.isEnabled = false
+            buttonMoveCard.isVisible = false
+            buttonAddCard.isEnabled = false
+            buttonAddCard.isVisible = false
+        }
         collectionIndexHeader.text = nameOfCurrentCollection
 
         //deactivate the edit and move buttons cuz nothing can be selected yet
@@ -79,10 +92,19 @@ class FlashcardListActivity : AppCompatActivity() {
         deactivateMoveButton()
 
         //set the card count
-        cardCount.text = "${MyUtils.getCardCountForCollection(collectionPath)} Card(s)"
+        if (mode != "r") {
+            cardCount.text = "${MyUtils.getCardCountForCollection(collectionPath)} Card(s)"
+        } else {
+            cardCount.text = "${MyUtils.getCardCountForCollection(tabPath + "/Repetition_Properties.txt", true)} Card(s)"
+        }
 
         //scan for flashcards and add them to the list view
-        val cards = MyUtils.getCardFolderNames(this, collectionPath)
+        var cards:List<String> = emptyList()
+        if (mode != "r") {
+            cards = MyUtils.getCardFolderNames(collectionPath)
+        }   else {
+            cards = MyUtils.getCardFolderNames(tabPath + "/Repetition_Properties.txt", true)
+        }
         val listOfCardsInCorrectFormat = mutableListOf<MyDisplayingUtils.Flashcard>()
 
         for (card in cards) {
@@ -144,7 +166,7 @@ class FlashcardListActivity : AppCompatActivity() {
             n.putBoolean("calledFromAddCard", false)
             n.putString("cardName", currentCard)
             n.putBoolean("calledFromList", true)
-            n.putBoolean("queuedMode", queuedMode)
+            n.putString("mode", mode)
             n.putString("scheduledCollections", scheduledCollectionsString)
             intent.putExtras(n)
             startActivity(intent)
@@ -158,7 +180,7 @@ class FlashcardListActivity : AppCompatActivity() {
             bun.putString("collectionId", nameOfCurrentCollection)
             bun.putBoolean("calledFromAddCard", true)
             bun.putBoolean("calledFromList", true)
-            bun.putBoolean("queuedMode", queuedMode)
+            bun.putString("mode", mode)
             bun.putString("scheduledCollections", scheduledCollectionsString)
             intent.putExtras(bun)
             startActivity(intent)
@@ -174,7 +196,7 @@ class FlashcardListActivity : AppCompatActivity() {
         intent = Intent(this, TrainingActivity::class.java)
         val b = Bundle()
         b.putString("collectionId", nameOfCurrentCollection)
-        b.putBoolean("queuedMode", queuedMode)
+        b.putString("mode", mode)
         b.putString("scheduledCollections", scheduledCollectionsString)
         intent.putExtras(b)
         startActivity(intent)

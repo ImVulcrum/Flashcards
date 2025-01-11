@@ -22,7 +22,7 @@ class CollectionSettingsActivity : AppCompatActivity() {
 
     lateinit var collectionPath: String
 
-    private var queuedMode = false
+    private var mode = "n"
     private var scheduledCollectionsString = ""
 
     @Deprecated("Deprecated in Java")
@@ -47,8 +47,8 @@ class CollectionSettingsActivity : AppCompatActivity() {
         collectionPath = v ?: ""
         val i: String? = b?.getString("collectionId")
 
-        val f:Boolean? = b?.getBoolean("queuedMode")
-        queuedMode = f ?:false
+        val f:String? = b?.getString("mode")
+        mode = f ?:"n"
         val c:String? = b?.getString("scheduledCollections")
         scheduledCollectionsString = c ?:""
 
@@ -94,7 +94,7 @@ class CollectionSettingsActivity : AppCompatActivity() {
             intent = Intent(this, TrainingActivity::class.java)
             val b = Bundle()
             b.putString("collectionId", nameOfCurrentCollection)
-            b.putBoolean("queuedMode", queuedMode)
+            b.putString("mode", mode)
             b.putString("scheduledCollections", scheduledCollectionsString)
             intent.putExtras(b)
             startActivity(intent)

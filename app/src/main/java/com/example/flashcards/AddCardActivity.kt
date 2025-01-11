@@ -61,11 +61,9 @@ class AddCardActivity<IOException> : AppCompatActivity() {
     var pathOfTheCurrentFlashcard:String = ""
 
     @Deprecated("Deprecated in Java")
-    @SuppressLint("MissingSuperCall")
     override fun onBackPressed() {
     }
-
-    @SuppressLint("SetTextI18n")
+    
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_add_card)
@@ -110,8 +108,8 @@ class AddCardActivity<IOException> : AppCompatActivity() {
         val g:Boolean? = b?.getBoolean("calledFromList")
         val calledFromList:Boolean = g ?:false
 
-        val f:Boolean? = b?.getBoolean("queuedMode")
-        val queuedMode = f ?:false
+        val f:String? = b?.getString("mode")
+        val mode = f ?:"n"
         val c:String? = b?.getString("scheduledCollections")
         val scheduledCollectionsString = c ?:""
 
@@ -127,7 +125,11 @@ class AddCardActivity<IOException> : AppCompatActivity() {
         frontSideText.text = MyUtils.readLineFromFile(propertiesPath, 1)
         backSideText.text = MyUtils.readLineFromFile(propertiesPath, 2)
 
-        cardCount.text = "${MyUtils.getCardCountForCollection(collectionPath)} Card(s)"
+        if (mode != "r") {
+            cardCount.text = "${MyUtils.getCardCountForCollection(collectionPath)} Card(s)"
+        } else {
+            cardCount.text = "${MyUtils.getCardCountForCollection(tabPath + "/Repetition_Properties.txt", true)} Card(s)"
+        }
 
         //logic for textboxes to allow multiline text but dont go beyond 8 lines
         setupMultilineTextbox(frontsideTextbox, 8)
@@ -182,7 +184,7 @@ class AddCardActivity<IOException> : AppCompatActivity() {
                 bu.putString("collectionPath", collectionPath)
                 bu.putString("collectionId", nameOfCurrentCollection)
 
-                bu.putBoolean("queuedMode", queuedMode)
+                bu.putString("mode", mode)
                 bu.putString("scheduledCollections", scheduledCollectionsString)
                 intent.putExtras(bu)
                 startActivity(intent)
@@ -191,7 +193,7 @@ class AddCardActivity<IOException> : AppCompatActivity() {
                 intent = Intent(this, TrainingActivity::class.java)
                 val bun = Bundle()
                 bun.putString("collectionId", nameOfCurrentCollection)
-                bun.putBoolean("queuedMode", queuedMode)
+                bun.putString("mode", mode)
                 bun.putString("scheduledCollections", scheduledCollectionsString)
                 intent.putExtras(bun)
                 startActivity(intent)
@@ -213,7 +215,7 @@ class AddCardActivity<IOException> : AppCompatActivity() {
                 bu.putString("collectionPath", collectionPath)
                 bu.putString("collectionId", nameOfCurrentCollection)
 
-                bu.putBoolean("queuedMode", queuedMode)
+                bu.putString("mode", mode)
                 bu.putString("scheduledCollections", scheduledCollectionsString)
                 intent.putExtras(bu)
                 startActivity(intent)
@@ -222,7 +224,7 @@ class AddCardActivity<IOException> : AppCompatActivity() {
                 intent = Intent(this, TrainingActivity::class.java)
                 val bun = Bundle()
                 bun.putString("collectionId", nameOfCurrentCollection)
-                bun.putBoolean("queuedMode", queuedMode)
+                bun.putString("mode", mode)
                 bun.putString("scheduledCollections", scheduledCollectionsString)
                 intent.putExtras(bun)
                 startActivity(intent)
@@ -240,7 +242,7 @@ class AddCardActivity<IOException> : AppCompatActivity() {
                     bu.putString("collectionPath", collectionPath)
                     bu.putString("collectionId", nameOfCurrentCollection)
 
-                    bu.putBoolean("queuedMode", queuedMode)
+                    bu.putString("mode", mode)
                     bu.putString("scheduledCollections", scheduledCollectionsString)
                     intent.putExtras(bu)
                     startActivity(intent)
@@ -249,7 +251,7 @@ class AddCardActivity<IOException> : AppCompatActivity() {
                     intent = Intent(this, TrainingActivity::class.java)
                     val bun = Bundle()
                     bun.putString("collectionId", nameOfCurrentCollection)
-                    bun.putBoolean("queuedMode", queuedMode)
+                    bun.putString("mode", mode)
                     bun.putString("scheduledCollections", scheduledCollectionsString)
                     intent.putExtras(bun)
                     startActivity(intent)

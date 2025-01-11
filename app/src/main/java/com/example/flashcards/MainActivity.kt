@@ -13,6 +13,7 @@ import android.widget.CheckBox
 import android.widget.LinearLayout
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.flashcards.databinding.ActivityMainBinding
@@ -24,11 +25,12 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
-    private lateinit var settingsButton: FloatingActionButton
+    private lateinit var tabSettingsButton: FloatingActionButton
     private lateinit var buttonAdd: FloatingActionButton
     private lateinit var showArchivedCollections: CheckBox
     private lateinit var buttonPlayScheduled: FloatingActionButton
     private lateinit var tabLayout: com.google.android.material.tabs.TabLayout
+    private lateinit var repetitionCollection: Button
 
     private lateinit var collectionAdapter: MyDisplayingUtils.CollectionAdapter
     private lateinit var collectionRecyclerView: RecyclerView
@@ -46,11 +48,12 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        settingsButton = findViewById(R.id.b_settings)
+        tabSettingsButton = findViewById(R.id.b_tab_settings)
         buttonAdd = findViewById(R.id.button_add)
         showArchivedCollections = findViewById(R.id.show_archived_collections)
         buttonPlayScheduled = findViewById(R.id.b_play_scheduled)
         tabLayout = findViewById(R.id.tabLayout)
+        repetitionCollection = findViewById(R.id.b_repetition)
 
         collectionRecyclerView = findViewById(R.id.collection_recycler_view)
         listOfCollectionsInCorrectFormat = mutableListOf<MyDisplayingUtils.Collection>()
@@ -59,7 +62,6 @@ class MainActivity : AppCompatActivity() {
 
         val appPath = getExternalFilesDir(null).toString()
         val tabs = MyUtils.getFoldersInDirectory(appPath)
-
 
         if (tabs.isNotEmpty()) {
             val sharedPref = getSharedPreferences("pref", MODE_PRIVATE)
@@ -81,6 +83,10 @@ class MainActivity : AppCompatActivity() {
             }
             collectionPath = tabPath + "/Collections"
 
+            if (MyUtils.getFoldersInDirectory(tabPath + "/Cards").isEmpty()) {
+                repetitionCollection.isEnabled = false
+            }
+
             init()
         }   else {
             deactivateAllButtons()
@@ -90,18 +96,28 @@ class MainActivity : AppCompatActivity() {
             addCollection()
         }
 
+        repetitionCollection.setOnClickListener {
+            intent = Intent(this@MainActivity, TrainingActivity::class.java)
+            val b = Bundle()
+            b.putString("collectionId", "-")
+            b.putString("mode", "r")
+            intent.putExtras(b)
+            startActivity(intent)
+            finish()
+        }
+
         buttonPlayScheduled.setOnClickListener {
             intent = Intent(this@MainActivity, TrainingActivity::class.java)
             val b = Bundle()
             b.putString("collectionId", "-")
-            b.putBoolean("queuedMode", true)
+            b.putString("mode", "q")
             b.putString("scheduledCollections", scheduledCollections.joinToString(" "))
             intent.putExtras(b)
             startActivity(intent)
             finish()
         }
 
-        settingsButton.setOnClickListener {
+        tabSettingsButton.setOnClickListener {
             intent = Intent(this, SettingsActivity::class.java)
             startActivity(intent)
         }
@@ -143,14 +159,10 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun addToCollectionList(addArchivedCollections: Boolean) {
-//        var i = 0
         for (collectionId in sortedCollections) {
-//            i = i + 1
-//            if (i < 5) {
                 if (MyUtils.readLineFromFile(collectionPath + "/" + collectionId + "/Properties.txt", 5) == addArchivedCollections.toString()) {
                     listOfCollectionsInCorrectFormat.add(MyDisplayingUtils.Collection(collectionId, MyUtils.readLineFromFile(collectionPath + "/$collectionId/Properties.txt", 0)!!, false, addArchivedCollections))
                 }
-//            }
         }
     }
 
@@ -191,6 +203,7 @@ class MainActivity : AppCompatActivity() {
         intent = Intent(this@MainActivity, TrainingActivity::class.java)
         val b = Bundle()
         b.putString("collectionId", collection.collectionId)
+        b.putString("mode", "n")
         intent.putExtras(b)
         startActivity(intent)
         finish()
@@ -234,32 +247,36 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun deactivateSchedulePlayButton () {
-        buttonPlayScheduled.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.button_color))
+        buttonPlayScheduled.imageTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.button_color))
         buttonPlayScheduled.isEnabled = false
     }
 
     private fun activateSchedulePlayButton () {
-        buttonPlayScheduled.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.primary))
+        buttonPlayScheduled.imageTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.white))
         buttonPlayScheduled.isEnabled = true
     }
 
     private fun deactivateAllButtons() {
         deactivateSchedulePlayButton()
-        settingsButton.isEnabled = false
-        settingsButton.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.button_color))
-        buttonAdd.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.button_color))
+        tabSettingsButton.isVisible = false
+        tabSettingsButton.isEnabled = false
+        buttonAdd.imageTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.button_color))
         buttonAdd.isEnabled = false
         showArchivedCollections.isEnabled = false
         showArchivedCollections.setBackgroundColor(ContextCompat.getColor(this, R.color.button_color))
+        repetitionCollection.isVisible = false
+        repetitionCollection.isActivated = false
     }
 
     private fun activateAllButtons() {
-        settingsButton.isEnabled = true
-        settingsButton.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.highlight))
+        tabSettingsButton.isEnabled = true
+        tabSettingsButton.imageTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.white))
         buttonAdd.isEnabled = true
-        buttonAdd.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.primary))
+        buttonAdd.imageTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.white))
         showArchivedCollections.isEnabled = true
         showArchivedCollections.setBackgroundColor(ContextCompat.getColor(this, R.color.primary))
+        repetitionCollection.isVisible = true
+        repetitionCollection.isActivated = true
     }
 
     private fun setupTabLayout(tabLayout: com.google.android.material.tabs.TabLayout, appPath: String, tabs: List<String>) {
@@ -291,34 +308,6 @@ class MainActivity : AppCompatActivity() {
         tab.text = tabName
         tabLayout.addTab(tab)
     }
-
-//    private fun addTabButton(tabLayout: com.google.android.material.tabs.TabLayout, tabName: String, appPath:String, tabs:List<String>) {
-//        val tab = tabLayout.newTab()
-//        tab.text = tabName
-//
-//        tabLayout.addTab(tab)
-//
-//        tabLayout.addOnTabSelectedListener(object : com.google.android.material.tabs.TabLayout.OnTabSelectedListener {
-//            override fun onTabSelected(tab: com.google.android.material.tabs.TabLayout.Tab?) {
-//                Log.e("f", "tab selected")
-//                val tabIndex = tab?.position ?: 0
-//
-//                tabPath = appPath + "/" + tabs[tabIndex]
-//                collectionPath = tabPath + "/Collections"
-//                init()
-//                setTabToSharedPref(tabs[tabIndex])
-//
-//                //clear queued collections
-//                resetQueues()
-//            }
-//
-//            override fun onTabUnselected(tab: com.google.android.material.tabs.TabLayout.Tab?) {
-//            }
-//
-//            override fun onTabReselected(tab: com.google.android.material.tabs.TabLayout.Tab?) {
-//            }
-//        })
-//    }
 
     private fun addCollection() {
         val tabSettingsPath = tabPath + "/Settings.txt"

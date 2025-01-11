@@ -19,6 +19,7 @@ import android.widget.Button
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.core.view.isVisible
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.example.flashcards.utils.MyUtils
 import com.google.android.material.button.MaterialButton
@@ -28,7 +29,7 @@ class TrainingActivity: AppCompatActivity() {
     private lateinit var flashcardButton: Button
     private lateinit var collectionTitle: TextView
     private lateinit var collectionIndex: TextView
-    private lateinit var scheduledModeInfo: TextView
+    private lateinit var modeInfo: TextView
     private lateinit var frontToBackButton: Button
     private lateinit var backToFrontButton: Button
     private lateinit var addCardButton: FloatingActionButton
@@ -41,6 +42,7 @@ class TrainingActivity: AppCompatActivity() {
     private lateinit var moveCardButton: FloatingActionButton
     private lateinit var collectionSettingButton: FloatingActionButton
     private lateinit var showAllCardsButton: FloatingActionButton
+    private lateinit var repetitionReshuffleButton: FloatingActionButton
 
     private lateinit var tabPath:String
     private lateinit var flashcardPath:String
@@ -71,7 +73,7 @@ class TrainingActivity: AppCompatActivity() {
         flashcardButton = findViewById(R.id.b_flashcard)
         collectionTitle = findViewById(R.id.collection_title)
         collectionIndex = findViewById(R.id.collection_index_name)
-        scheduledModeInfo = findViewById(R.id.scheduled_mode_info)
+        modeInfo = findViewById(R.id.mode_info)
         frontToBackButton = findViewById(R.id.front_to_back)
         backToFrontButton = findViewById(R.id.back_to_front)
         addCardButton = findViewById(R.id.b_add_card_flashcards)
@@ -84,6 +86,7 @@ class TrainingActivity: AppCompatActivity() {
         moveCardButton = findViewById(R.id.b_move_flashcards)
         collectionSettingButton = findViewById(R.id.b_settings_flashcards)
         showAllCardsButton = findViewById(R.id.b_show_flashcards)
+        repetitionReshuffleButton = findViewById(R.id.b_repetition_reshuffle)
 
         //visual
         shuffleButton.setStrokeColor(ColorStateList.valueOf(ContextCompat.getColor(this, R.color.background)))
@@ -98,9 +101,8 @@ class TrainingActivity: AppCompatActivity() {
         val sharedPref = getSharedPreferences("pref", MODE_PRIVATE)
         val editor = sharedPref.edit()
 
-        var nativeToForeignActive = true
-        var foreignToNativeActive = false
-        var scheduledMode = false
+        var frontToBackActive = true
+        var backToFrontActive = false
         var showSwitchDialog = false
         var scheduledCollections: List<String> = listOf("")
         var scheduledCollectionIndex = 0
@@ -112,31 +114,63 @@ class TrainingActivity: AppCompatActivity() {
         tabPath = getExternalFilesDir(null).toString() + "/" + currentTabIndex
         flashcardPath = "$tabPath/Cards"
         val collectionsPath = "$tabPath/Collections"
+        var propertiesPath = ""
+        var repetitionPropertiesPath = ""
+        var collectionPath = ""
 
         val b = intent.extras
         val v:String? = b?.getString("collectionId")
-        val queuedMode:Boolean = b?.getBoolean("queuedMode") ?: false
+        val mode:String = b?.getString("mode") ?: "n"
         var nameOfCurrentCollection = v ?:""
 
-        if (queuedMode) {
+        if (mode == "q") {
             scheduledCollectionsString = b?.getString("scheduledCollections").toString()
             scheduledCollections = scheduledCollectionsString.split(" ")
             val p:Int = sharedPref.getInt("scheduledCollectionIndex",0)
             scheduledCollectionIndex = p
 
             nameOfCurrentCollection = scheduledCollections[scheduledCollectionIndex]
-            scheduledMode = true
+            modeInfo.text = "scheduled mode"
+        }   else if (mode == "r") {
+            editCardButton.isEnabled = false
+            editCardButton.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.button_color))
 
-            scheduledModeInfo.text = "scheduled mode"
+            repetitionPropertiesPath = tabPath + "/Repetition_Properties.txt"
+            
+            if (MyUtils.readLineFromFile(repetitionPropertiesPath, 0) != MyUtils.getCurrentDate()) {
+                MyUtils.writeTextFile(repetitionPropertiesPath, 0, MyUtils.getCurrentDate())
+                cardOrder = getRepetitionQueue(collectionsPath, frontToBackActive, backToFrontActive, repetitionPropertiesPath)
+            }   else {
+                cardOrder = MyUtils.readLineFromFile(repetitionPropertiesPath, 4)?.split(" ") ?: emptyList()
+                if (cardOrder.isEmpty()) {
+                    cardOrder = getRepetitionQueue(collectionsPath, frontToBackActive, backToFrontActive, repetitionPropertiesPath)
+                }
+            }
+
+            collectionTitle.text = "Repetition"
+            collectionIndex.text = "Repetition Collection"
+            modeInfo.text = "repetition mode"
+            setCardCounter()
+            nameOfCurrentCollection = "Repetition"
+
+            moveCardButton.isEnabled = false
+            moveCardButton.isVisible = false
+            addCardButton.isEnabled = false
+            addCardButton.isVisible = false
         }
 
-        var collectionPath = "$collectionsPath/$nameOfCurrentCollection"
-        var propertiesPath = "$collectionPath/Properties.txt"
+        if (mode != "r") {
+            repetitionReshuffleButton.isEnabled = false
+            repetitionReshuffleButton.isVisible = false
 
-        setupNewCollection(propertiesPath, collectionPath, nativeToForeignActive, foreignToNativeActive, nameOfCurrentCollection, queuedMode, currentTabIndex)
+            collectionPath = "$collectionsPath/$nameOfCurrentCollection"
+            propertiesPath = "$collectionPath/Properties.txt"
 
-        if (MyUtils.readLineFromFile(propertiesPath, 4) != "" && !queuedMode) {
-            cardIndex = MyUtils.readLineFromFile(propertiesPath, 4)!!.toInt()
+            setupNewCollection(propertiesPath, collectionPath, frontToBackActive, backToFrontActive, nameOfCurrentCollection, currentTabIndex)
+
+            if (MyUtils.readLineFromFile(propertiesPath, 4) != "" && mode != "q") {
+                cardIndex = MyUtils.readLineFromFile(propertiesPath, 4)!!.toInt()
+            }
         }
 
         //setup mute button
@@ -152,7 +186,7 @@ class TrainingActivity: AppCompatActivity() {
             if (flashcardShowsQuestion) {
                 flashcardShowsQuestion = false
 
-                showSwitchDialog = showAnswer(audioMuted = audioMuted, scheduledMode = scheduledMode, propertiesPath = propertiesPath, collectionPath = collectionPath, nativeToForeignActive = nativeToForeignActive, foreignToNativeActive = foreignToNativeActive)
+                showSwitchDialog = showAnswer(audioMuted = audioMuted, mode = mode, propertiesPath = propertiesPath, collectionPath = collectionPath, frontToBackActive = frontToBackActive, backToFrontActive = backToFrontActive)
             } else{
                 if (showSwitchDialog) {
                     showSwitchDialog = false
@@ -169,7 +203,7 @@ class TrainingActivity: AppCompatActivity() {
                             collectionPath = "$collectionsPath/$nameOfCurrentCollection"
                             propertiesPath = "$collectionPath/Properties.txt"
 
-                            setupNewCollection(propertiesPath, collectionPath, nativeToForeignActive, foreignToNativeActive, nameOfCurrentCollection, queuedMode, currentTabIndex)
+                            setupNewCollection(propertiesPath, collectionPath, frontToBackActive, backToFrontActive, nameOfCurrentCollection, currentTabIndex)
 
                             editor.putInt("scheduledCollectionIndex", scheduledCollectionIndex)
                             editor.apply()
@@ -236,29 +270,29 @@ class TrainingActivity: AppCompatActivity() {
         }
 
         frontToBackButton.setOnClickListener {
-            if (nativeToForeignActive) { //deactivate button
-                nativeToForeignActive = false
+            if (frontToBackActive) { //deactivate button
+                frontToBackActive = false
                 frontToBackButton.setBackgroundColor(ContextCompat.getColor(this, R.color.button_color))
-                if (!foreignToNativeActive) {
-                    foreignToNativeActive = true
+                if (!backToFrontActive) {
+                    backToFrontActive = true
                     backToFrontButton.setBackgroundColor(ContextCompat.getColor(this, R.color.primary))
                 }
             }   else {
-                nativeToForeignActive = true
+                frontToBackActive = true
                 frontToBackButton.setBackgroundColor(ContextCompat.getColor(this, R.color.primary))
             }
         }
 
         backToFrontButton.setOnClickListener {
-            if (foreignToNativeActive) { //deactivate button
-                foreignToNativeActive = false
+            if (backToFrontActive) { //deactivate button
+                backToFrontActive = false
                 backToFrontButton.setBackgroundColor(ContextCompat.getColor(this, R.color.button_color))
-                if (!nativeToForeignActive) {
-                    nativeToForeignActive = true
+                if (!frontToBackActive) {
+                    frontToBackActive = true
                     frontToBackButton.setBackgroundColor(ContextCompat.getColor(this, R.color.primary))
                 }
             }   else {
-                foreignToNativeActive = true
+                backToFrontActive = true
                 backToFrontButton.setBackgroundColor(ContextCompat.getColor(this, R.color.primary))
             }
         }
@@ -280,8 +314,7 @@ class TrainingActivity: AppCompatActivity() {
             bu.putBoolean("calledFromAddCard", false)
             bu.putString("cardName", currentCard)
             bu.putBoolean("calledFromList", false)
-
-            bu.putBoolean("queuedMode", queuedMode)
+            bu.putString("mode", mode)
             bu.putString("scheduledCollections", scheduledCollectionsString)
             intent.putExtras(bu)
             startActivity(intent)
@@ -297,7 +330,7 @@ class TrainingActivity: AppCompatActivity() {
             bu.putBoolean("calledFromAddCard", true)
             bu.putBoolean("calledFromList", false)
 
-            bu.putBoolean("queuedMode", queuedMode)
+            bu.putString("mode", mode)
             bu.putString("scheduledCollections", scheduledCollectionsString)
             intent.putExtras(bu)
             startActivity(intent)
@@ -311,8 +344,7 @@ class TrainingActivity: AppCompatActivity() {
             bu.putString("flashcardPath", flashcardPath)
             bu.putString("collectionPath", collectionPath)
             bu.putString("collectionId", nameOfCurrentCollection)
-
-            bu.putBoolean("queuedMode", queuedMode)
+            bu.putString("mode", mode)
             bu.putString("scheduledCollections", scheduledCollectionsString)
             intent.putExtras(bu)
             startActivity(intent)
@@ -332,9 +364,14 @@ class TrainingActivity: AppCompatActivity() {
             MyUtils.stopAudio()
             MyUtils.showConfirmationDialog(this,"Shuffle Cards", "Are you sure you want to shuffle?") {userChoice ->
                 if (userChoice) {
-                    cardOrder = shuffleCards(collectionPath, nativeToForeignActive, foreignToNativeActive)
-                    cardIndex = 0
-                    MyUtils.writeTextFile(propertiesPath, 4, "0")
+                    if (mode != "r") {
+                        cardOrder = shuffleCards(collectionPath, frontToBackActive, backToFrontActive)
+                        cardIndex = 0
+                        MyUtils.writeTextFile(propertiesPath, 4, "0")
+                    }   else {
+                        cardOrder = shuffleRepetitionQueue(cardOrder, repetitionPropertiesPath)
+                    }
+
                     flashcardShowsQuestion = false
 
                     setFlashcardText("Start")
@@ -355,19 +392,33 @@ class TrainingActivity: AppCompatActivity() {
                 shuffleButton.isEnabled = true
                 shuffleButton.setTextColor(ContextCompat.getColor(this, R.color.white))
 
-                if (scheduledMode) {
-                    scheduledModeInfo.text = "scheduled mode"
+                if (mode == "q") {
+                    modeInfo.text = "scheduled mode"
                 }
             } else {
                 autoShuffleButton.setStrokeColor(ColorStateList.valueOf(ContextCompat.getColor(this, R.color.white)))
                 shuffleButton.isEnabled = false
                 shuffleButton.setTextColor(ContextCompat.getColor(this, R.color.button_color))
 
-                if (scheduledMode) {
-                    scheduledModeInfo.text = "scheduled mode deactivated"
+                if (mode == "q") {
+                    modeInfo.text = "scheduled mode deactivated"
                 }
             }
             autoShuffle = !autoShuffle
+        }
+
+        repetitionReshuffleButton.setOnClickListener {
+            MyUtils.showConfirmationDialog(this,"Get New Repetition Cards", "Are you sure you want to get new repetition cards?") {userChoice ->
+                if (userChoice) {
+                    cardOrder = getRepetitionQueue(collectionsPath, frontToBackActive, backToFrontActive, repetitionPropertiesPath)
+                    flashcardShowsQuestion = false
+
+                    setFlashcardText("Start")
+                    flashcardButton.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.primary))
+                    editCardButton.isEnabled = false
+                    editCardButton.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.button_color))
+                }
+            }
         }
 
         collectionSettingButton.setOnClickListener {
@@ -377,12 +428,43 @@ class TrainingActivity: AppCompatActivity() {
             bu.putString("collectionPath", collectionPath)
             bu.putString("collectionId", nameOfCurrentCollection)
 
-            bu.putBoolean("queuedMode", queuedMode)
+            bu.putString("mode", mode)
             bu.putString("scheduledCollections", scheduledCollectionsString)
             intent.putExtras(bu)
             startActivity(intent)
             finish()
         }
+    }
+
+    private fun getRepetitionQueue(collectionsPath: String, frontToBack: Boolean, backToFront: Boolean, repetitionPropertiesPath: String):List<String> {
+        val excludedCollectionsString = MyUtils.readLineFromFile(repetitionPropertiesPath, 1)
+        val numberOfCollections = MyUtils.readLineFromFile(repetitionPropertiesPath, 2)!!.toInt()
+        val numberOfCards = MyUtils.readLineFromFile(repetitionPropertiesPath, 3)!!.toInt()
+
+        val excludedCollections = excludedCollectionsString!!.split(" ")
+
+        val collectionIds = MyUtils.getFoldersInDirectory(collectionsPath, false).toMutableList()
+        collectionIds.removeAll(excludedCollections)
+
+        collectionIds.shuffle()
+
+        var usedCollections = collectionIds.take(numberOfCollections).toMutableList()
+
+        var usedCards = mutableListOf<String>()
+        for (collection in usedCollections) {
+            val cardsInCollection = prepareCards(collectionsPath + "/" + collection, frontToBack, backToFront)
+            val usedCardsInCollection = cardsInCollection.take(numberOfCards)
+            usedCards.addAll(usedCardsInCollection)
+        }
+        usedCards = shuffleRepetitionQueue(usedCards, repetitionPropertiesPath)
+        return usedCards.toList()
+    }
+
+    private fun shuffleRepetitionQueue(cards:List<String>, repetitionPropertiesPath:String):MutableList<String> {
+        val cardsm = cards.toMutableList()
+        cardsm.shuffle()
+        MyUtils.writeTextFile(repetitionPropertiesPath, 4, cardsm.joinToString(" "))
+        return cardsm
     }
 
     private fun showQuestion(audioMuted: Boolean) {
@@ -413,7 +495,7 @@ class TrainingActivity: AppCompatActivity() {
         flashcardId.text = cardOrder[cardIndex].substring(2)
     }
 
-    private fun showAnswer(audioMuted:Boolean, scheduledMode:Boolean, propertiesPath: String, collectionPath: String, nativeToForeignActive: Boolean, foreignToNativeActive: Boolean): Boolean {
+    private fun showAnswer(audioMuted:Boolean, mode:String, propertiesPath: String, collectionPath: String, frontToBackActive: Boolean, backToFrontActive: Boolean): Boolean {
         var showSwitchDialog = false
 
         flashcardButton.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.highlight))
@@ -435,9 +517,13 @@ class TrainingActivity: AppCompatActivity() {
 
         if (cardIndex+1 == cardOrder.size) { //reseting the card index to zero when the user skipped through the whole orderline
             if (autoShuffle) {
-                cardOrder = shuffleCards(collectionPath, nativeToForeignActive, foreignToNativeActive)
-                MyUtils.writeTextFile(propertiesPath, 4, "0")
-            } else if (scheduledMode == true) {
+                if (mode == "r") {
+
+                }   else {
+                    cardOrder = shuffleCards(collectionPath, frontToBackActive, backToFrontActive)
+                    MyUtils.writeTextFile(propertiesPath, 4, "0")
+                }
+            } else if (mode == "q") {
                 showSwitchDialog = true
             }
             cardIndex = 0
@@ -445,7 +531,9 @@ class TrainingActivity: AppCompatActivity() {
             cardIndex++
         }
 
-        MyUtils.writeTextFile(propertiesPath, 4, cardIndex.toString())
+        if (mode != "r") {
+            MyUtils.writeTextFile(propertiesPath, 4, cardIndex.toString())
+        }
         return showSwitchDialog
     }
 
@@ -459,16 +547,20 @@ class TrainingActivity: AppCompatActivity() {
         flashcardButton.text = modifiedTextString
     }
 
+    private fun setCardCounter() {
+        flashcardCounter.text = cardOrder.size.toString() + " Cards"
+    }
+
     @SuppressLint("SetTextI18n")
-    private fun setupNewCollection(propertiesPath: String, collectionPath: String, nativeToForeignActive: Boolean, foreignToNativeActive: Boolean, nameOfCurrentCollection: String, queuedMode:Boolean, currentTabIndex:String) {
+    private fun setupNewCollection(propertiesPath: String, collectionPath: String, frontToBackActive: Boolean, backToFrontActive: Boolean, nameOfCurrentCollection: String, currentTabIndex:String) {
         //read card order from file if exists, otherwise shuffle
-        getOrderLine(propertiesPath, collectionPath, nativeToForeignActive, foreignToNativeActive)
+        getOrderLine(propertiesPath, collectionPath, frontToBackActive, backToFrontActive)
 
         moveCardButton.isEnabled = false
         moveCardButton.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.button_color))
         editCardButton.isEnabled = false
         editCardButton.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.button_color))
-        flashcardCounter.text = cardOrder.size.toString() + " Cards"
+        setCardCounter()
 
         flashcardButton.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.primary))
         setFlashcardText("Start")
@@ -489,11 +581,11 @@ class TrainingActivity: AppCompatActivity() {
         backToFrontButton.text = MyUtils.readLineFromFile(propertiesPath, 2) + " - " + MyUtils.readLineFromFile(propertiesPath, 1)
     }
 
-    private fun getOrderLine(propertiesPath: String, collectionPath: String, nativeToForeignActive: Boolean, foreignToNativeActive: Boolean) {
+    private fun getOrderLine(propertiesPath: String, collectionPath: String, frontToBackActive: Boolean, backToFrontActive: Boolean) {
         //read card order from file if exists, otherwise shuffle
         val orderLine = MyUtils.readLineFromFile(propertiesPath, 3)
         if (orderLine == "-") {
-            cardOrder = shuffleCards(collectionPath, nativeToForeignActive, foreignToNativeActive)
+            cardOrder = shuffleCards(collectionPath, frontToBackActive, backToFrontActive)
             cardIndex = 0
         }   else {
             if (orderLine != null) {
@@ -524,30 +616,8 @@ class TrainingActivity: AppCompatActivity() {
         startActivity(intent)
     }
 
-    private fun shuffleCards(collectionPath: String, nativeToForeign: Boolean, foreignToNative: Boolean): List<String> {
-        val cards = MyUtils.getCardFolderNames(this, collectionPath)
-        Log.e("cards", cards.size.toString())
-        val prefixes = listOf("n_", "f_")
-        val shuffledCards = mutableListOf<String>()
-
-        if (nativeToForeign && !foreignToNative) {
-            val prefix = prefixes[0]
-            for (card in cards) {
-                shuffledCards.add("$prefix$card")
-            }
-        }  else if (foreignToNative && !nativeToForeign) {
-            val prefix = prefixes[1]
-            for (card in cards) {
-                shuffledCards.add("$prefix$card")
-            }
-        }   else {
-            for (card in cards) {
-                val prefix = prefixes.random()
-                shuffledCards.add("$prefix$card")
-            }
-        }
-
-        shuffledCards.shuffle()
+    private fun shuffleCards(collectionPath: String, frontToBack: Boolean, backToFront: Boolean): List<String> {
+        val shuffledCards = prepareCards(collectionPath, frontToBack, backToFront)
 
         if (shuffledCards.isNotEmpty()) {
             MyUtils.writeTextFile("$collectionPath/Properties.txt", 3, shuffledCards.joinToString(" "))
@@ -559,5 +629,30 @@ class TrainingActivity: AppCompatActivity() {
         MyUtils.writeTextFile("$collectionPath/Properties.txt", 4, "0")
 
         return shuffledCards
+    }
+    
+    private fun prepareCards(collectionPath:String, frontToBack:Boolean, backToFront: Boolean):MutableList<String> {
+        val cards = MyUtils.getCardFolderNames(collectionPath)
+        val prefixes = listOf("n_", "f_")
+        val cardlist = mutableListOf<String>()
+
+        if (frontToBack && !backToFront) {
+            val prefix = prefixes[0]
+            for (card in cards) {
+                cardlist.add("$prefix$card")
+            }
+        }  else if (backToFront && !frontToBack) {
+            val prefix = prefixes[1]
+            for (card in cards) {
+                cardlist.add("$prefix$card")
+            }
+        }   else {
+            for (card in cards) {
+                val prefix = prefixes.random()
+                cardlist.add("$prefix$card")
+            }
+        }
+        cardlist.shuffle()
+        return cardlist
     }
 }

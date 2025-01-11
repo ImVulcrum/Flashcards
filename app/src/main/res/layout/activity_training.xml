@@ -66,7 +66,7 @@
             android:text="Collection Index" />
 
         <TextView
-            android:id="@+id/scheduled_mode_info"
+            android:id="@+id/mode_info"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center_horizontal"
@@ -173,6 +173,20 @@
                 android:layout_marginStart="40dp"
                 android:clickable="true"
                 android:src="@drawable/move"
+                app:backgroundTint="@color/highlight"
+                app:elevation="0dp"
+                app:maxImageSize="45dp"
+                app:shapeAppearance="@style/Widget.Material3.CircularProgressIndicator.Small"
+                app:tint="@color/white"
+                tools:ignore="ContentDescription,SpeakableTextPresentCheck" />
+
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
+                android:id="@+id/b_repetition_reshuffle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="40dp"
+                android:clickable="true"
+                android:src="@drawable/shuffle"
                 app:backgroundTint="@color/highlight"
                 app:elevation="0dp"
                 app:maxImageSize="45dp"

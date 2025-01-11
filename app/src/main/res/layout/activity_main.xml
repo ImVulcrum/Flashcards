@@ -68,27 +68,52 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
             android:orientation="horizontal">
-
-            <View
-                android:layout_width="0dp"
-                android:layout_height="0dp"
-                android:layout_weight="1" />
 
             <com.google.android.material.floatingactionbutton.FloatingActionButton
                 android:id="@+id/b_settings"
                 android:layout_width="40dp"
                 android:layout_height="40dp"
-                android:layout_gravity="center|end"
-                android:layout_marginEnd="8dp"
+                android:layout_gravity="center|start"
+                android:layout_marginStart="6dp"
                 android:clickable="true"
                 android:src="@drawable/settings"
-                app:backgroundTint="@color/highlight"
+                app:backgroundTint="@color/transparent"
                 app:elevation="0dp"
                 app:fabCustomSize="40dp"
                 app:maxImageSize="35dp"
                 app:tint="@color/white"
                 tools:ignore="ContentDescription,SpeakableTextPresentCheck" />
+
+            <Button
+                android:id="@+id/b_repetition"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="26dp"
+                android:layout_marginEnd="26dp"
+                android:layout_weight="1"
+                android:backgroundTint="@color/transparent"
+                android:text="Repetition Collection"
+                app:cornerRadius="8dp"
+                app:strokeColor="#FFFFFF"
+                app:strokeWidth="2dp" />
+
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
+                android:id="@+id/b_tab_settings"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_gravity="center|start"
+                android:layout_marginEnd="6dp"
+                android:clickable="true"
+                android:src="@drawable/three_points"
+                app:backgroundTint="@color/transparent"
+                app:elevation="0dp"
+                app:fabCustomSize="40dp"
+                app:maxImageSize="28dp"
+                app:tint="@color/white"
+                tools:ignore="ContentDescription,SpeakableTextPresentCheck" />
+
         </LinearLayout>
 
         <androidx.recyclerview.widget.RecyclerView
@@ -96,7 +121,7 @@
             android:layout_width="wrap_content"
             android:layout_height="@dimen/collection_display_area_height"
             android:layout_gravity="center_horizontal"
-            android:layout_marginTop="10dp"
+            android:layout_marginTop="15dp"
             android:fadeScrollbars="false"
             android:scrollbarThumbVertical="@color/highlight"
             android:scrollbars="vertical"
@@ -131,11 +156,11 @@
                 android:layout_marginStart="30dp"
                 android:clickable="true"
                 android:src="@drawable/merge"
-                app:backgroundTint="@color/button_color"
+                app:backgroundTint="@color/transparent"
                 app:elevation="0dp"
                 app:maxImageSize="45dp"
                 app:shapeAppearance="@style/Widget.Material3.CircularProgressIndicator.Small"
-                app:tint="@color/white"
+                app:tint="@color/button_color"
                 tools:ignore="ContentDescription,SpeakableTextPresentCheck" />
 
             <com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -145,7 +170,7 @@
                 android:layout_marginStart="15dp"
                 android:clickable="true"
                 android:src="@drawable/play"
-                app:backgroundTint="@color/primary"
+                app:backgroundTint="@color/transparent"
                 app:elevation="0dp"
                 app:maxImageSize="35dp"
                 app:shapeAppearance="@style/Widget.Material3.CircularProgressIndicator.Small"
@@ -159,7 +184,7 @@
                 android:layout_marginStart="15dp"
                 android:clickable="true"
                 android:src="@drawable/plus"
-                app:backgroundTint="@color/primary"
+                app:backgroundTint="@color/transparent"
                 app:elevation="0dp"
                 app:maxImageSize="40dp"
                 app:shapeAppearance="@style/Widget.Material3.CircularProgressIndicator.Small"

@@ -5,6 +5,7 @@
     <color name="primary">#003459</color>
     <color name="highlight">#007ea7</color>
     <color name="strong_highlight">#00a8e8</color>
+    <color name="weak_highlight">#01506A</color>
     <color name="delete_highlight">#FF4040</color>
     <color name="button_color">#787878</color>
     <color name="recording">#158c00</color>

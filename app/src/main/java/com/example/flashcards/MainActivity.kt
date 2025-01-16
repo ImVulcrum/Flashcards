@@ -160,11 +160,17 @@ class MainActivity : AppCompatActivity() {
 
     private fun addToCollectionList(addArchivedCollections: Boolean) {
         for (collectionId in sortedCollections) {
-                if (MyUtils.readLineFromFile(collectionPath + "/" + collectionId + "/Properties.txt", 5) == addArchivedCollections.toString()) {
-                    listOfCollectionsInCorrectFormat.add(MyDisplayingUtils.Collection(collectionId, MyUtils.readLineFromFile(collectionPath + "/$collectionId/Properties.txt", 0)!!, false, addArchivedCollections))
+            val propertiesPath = collectionPath + "/" + collectionId + "/Properties.txt"
+            if (MyUtils.readLineFromFile(propertiesPath, 5) == addArchivedCollections.toString()) {
+                if (MyUtils.readLineFromFile(propertiesPath, 3) == "" || MyUtils.readLineFromFile(propertiesPath, 3) == "-") {
+                    listOfCollectionsInCorrectFormat.add(MyDisplayingUtils.Collection(collectionId, MyUtils.readLineFromFile(collectionPath + "/$collectionId/Properties.txt", 0)!!, false, status = 1, isArchived = addArchivedCollections))
+                }   else {
+                    listOfCollectionsInCorrectFormat.add(MyDisplayingUtils.Collection(collectionId, MyUtils.readLineFromFile(collectionPath + "/$collectionId/Properties.txt", 0)!!, false, status = 0, isArchived = addArchivedCollections))
                 }
+            }
         }
     }
+
 
     private fun removeArchivedFromCollectionList() {
         val archivedCollections = mutableListOf<MyDisplayingUtils.Collection>()
@@ -343,7 +349,7 @@ class MainActivity : AppCompatActivity() {
             MyUtils.writeTextFile(folderPath + "/" + propertiesFileName, 3, "-")
             MyUtils.writeTextFile(folderPath + "/" + propertiesFileName, 5, "false")
 
-            listOfCollectionsInCorrectFormat.add(0, MyDisplayingUtils.Collection(indexOfCollection, indexOfCollection, false, false))
+            listOfCollectionsInCorrectFormat.add(0, MyDisplayingUtils.Collection(indexOfCollection, indexOfCollection, false, 1,false))
             updateCollectionView()
         }
     }

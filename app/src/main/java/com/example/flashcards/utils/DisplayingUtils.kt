@@ -53,7 +53,7 @@ object MyDisplayingUtils {
         override fun getItemCount(): Int = flashcards.size
     }
 
-    data class Collection(val collectionId: String, val collectionName: String, var isSelected: Boolean = false, var isArchived: Boolean = false)
+    data class Collection(val collectionId: String, val collectionName: String, var isSelected: Boolean = false, var status: Int = 0, var isArchived: Boolean = false)
 
     class CollectionAdapter(
         private val collections: List<Collection>,
@@ -85,28 +85,35 @@ object MyDisplayingUtils {
 
             holder.collectionButton.text = collection.collectionName
 
-            if (collection.isArchived) {
-                val context = holder.itemView.context
-                holder.collectionButton.setBackgroundColor(ContextCompat.getColor(context, R.color.archived))
-                holder.selectionButton.setBackgroundColor(ContextCompat.getColor(context, R.color.archived))
-            }   else {
+            if (collection.status == 0) { //default
                 val context = holder.itemView.context
                 holder.collectionButton.setBackgroundColor(ContextCompat.getColor(context, R.color.primary))
                 holder.selectionButton.setBackgroundColor(ContextCompat.getColor(context, R.color.primary))
+            }   else { //empty
+                val context = holder.itemView.context
+                holder.collectionButton.setBackgroundColor(ContextCompat.getColor(context, R.color.weak_highlight))
+                holder.selectionButton.setBackgroundColor(ContextCompat.getColor(context, R.color.weak_highlight))
             }
 
+            if (collection.isArchived == true) { //archived
+                val context = holder.itemView.context
+                holder.collectionButton.setBackgroundColor(ContextCompat.getColor(context, R.color.archived))
+                holder.selectionButton.setBackgroundColor(ContextCompat.getColor(context, R.color.archived))
+            }
 
             holder.selectionButton.setOnClickListener {
-                collection.isSelected = !collection.isSelected
-                notifyItemChanged(position) // Notify that this item has changed
-                onCollectionSelected(collection, position)
+                if (collection.status != 1) { //only if this collection is not empty
+                    collection.isSelected = !collection.isSelected
+                    notifyItemChanged(position)
+                    onCollectionSelected(collection, position)
+                }
             }
             holder.collectionButton.setOnClickListener {
-                notifyItemChanged(position) // Notify that this item has changed
+                notifyItemChanged(position)
                 onCollectionClicked(collection, position)
             }
             holder.deleteButton.setOnClickListener {
-                notifyItemChanged(position) // Notify that this item has changed
+                notifyItemChanged(position)
                 onCollectionDeleted(collection, position)
             }
         }

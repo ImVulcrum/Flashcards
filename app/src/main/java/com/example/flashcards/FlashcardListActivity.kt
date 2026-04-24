@@ -127,7 +127,7 @@ class FlashcardListActivity : AppCompatActivity() {
             val collectionsPath = collectionPath.removeSuffix("/$nameOfCurrentCollection")
 
             val collectionIds = MyUtils.getFoldersInDirectory(collectionsPath)
-            val sortedCollectionIds = MyUtils.sortCollectionStrings(collectionIds)
+            val sortedCollectionIds = MyUtils.sortChronological(collectionIds)
 
             val collectionTuple = mutableListOf<MyUtils.SpinnerItem>()
             for (collectionId in sortedCollectionIds) {

@@ -88,10 +88,6 @@ class TrainingActivity: AppCompatActivity() {
         showAllCardsButton = findViewById(R.id.b_show_flashcards)
         repetitionReshuffleButton = findViewById(R.id.b_repetition_reshuffle)
 
-        //visual
-        shuffleButton.setStrokeColor(ColorStateList.valueOf(ContextCompat.getColor(this, R.color.background)))
-        autoShuffleButton.setStrokeColor(ColorStateList.valueOf(ContextCompat.getColor(this, R.color.background)))
-
         // Register the screen off receiver
         screenReceiver = MyUtils.ScreenReceiver()
         val filter = IntentFilter(Intent.ACTION_SCREEN_OFF)
@@ -133,7 +129,7 @@ class TrainingActivity: AppCompatActivity() {
             modeInfo.text = "scheduled mode"
         }   else if (mode == "r") {
             editCardButton.isEnabled = false
-            editCardButton.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.button_color))
+            editCardButton.imageTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.button_color))
 
             repetitionPropertiesPath = tabPath + "/Repetition_Properties.txt"
             
@@ -141,7 +137,7 @@ class TrainingActivity: AppCompatActivity() {
                 MyUtils.writeTextFile(repetitionPropertiesPath, 0, MyUtils.getCurrentDate())
                 cardOrder = getRepetitionQueue(collectionsPath, frontToBackActive, backToFrontActive, repetitionPropertiesPath)
             }   else {
-                cardOrder = MyUtils.readLineFromFile(repetitionPropertiesPath, 4)?.split(" ") ?: emptyList()
+                cardOrder = MyUtils.readLineFromFile(repetitionPropertiesPath, 6)?.split(" ") ?: emptyList()
                 if (cardOrder.isEmpty()) {
                     cardOrder = getRepetitionQueue(collectionsPath, frontToBackActive, backToFrontActive, repetitionPropertiesPath)
                 }
@@ -181,6 +177,15 @@ class TrainingActivity: AppCompatActivity() {
         }
 
         backToFrontButton.setBackgroundColor(ContextCompat.getColor(this, R.color.button_color))
+
+        //check for font size
+        flashcardButton.setTextAppearance(R.style.SpaceGroteskMain)
+        val useSmallFontSizeString = MyUtils.readLineFromFile(collectionPath + "/Properties.txt", 6)!!
+        Log.e("test", useSmallFontSizeString)
+        if (useSmallFontSizeString == "true") {
+            Log.e("test", "hohohoho")
+            flashcardButton.setTextAppearance(R.style.SpaceGroteskSmall)
+        }
 
         flashcardButton.setOnClickListener{
             if (flashcardShowsQuestion) {
@@ -241,7 +246,7 @@ class TrainingActivity: AppCompatActivity() {
             val cardString = flashcardButton.text.toString()
 
             val collectionIds = MyUtils.getFoldersInDirectory(collectionsPath)
-            val sortedCollectionIds = MyUtils.sortCollectionStrings(collectionIds)
+            val sortedCollectionIds = MyUtils.sortChronological(collectionIds)
 
             val collectionTuple = mutableListOf<MyUtils.SpinnerItem>()
             for (collectionId in sortedCollectionIds) {
@@ -357,7 +362,7 @@ class TrainingActivity: AppCompatActivity() {
             shuffleButton.setStrokeColor(ColorStateList.valueOf(ContextCompat.getColor(this, R.color.strong_highlight)))
             Handler(Looper.getMainLooper()).postDelayed({
                 shuffleButton.setTextColor(ContextCompat.getColor(this, R.color.white))
-                shuffleButton.setStrokeColor(ColorStateList.valueOf(ContextCompat.getColor(this, R.color.background)))
+                shuffleButton.setStrokeColor(ColorStateList.valueOf(ContextCompat.getColor(this, R.color.white)))
             }, 400)
 
             //logic
@@ -377,7 +382,7 @@ class TrainingActivity: AppCompatActivity() {
                     setFlashcardText("Start")
                     flashcardButton.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.primary))
                     editCardButton.isEnabled = false
-                    editCardButton.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.button_color))
+                    editCardButton.imageTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.button_color))
                 }
             }
         }
@@ -388,17 +393,17 @@ class TrainingActivity: AppCompatActivity() {
                 autoShuffleButton.setTextColor(ContextCompat.getColor(this, R.color.white))
             }, 200)
             if (autoShuffle) {
-                autoShuffleButton.setStrokeColor(ColorStateList.valueOf(ContextCompat.getColor(this, R.color.background)))
+                autoShuffleButton.setStrokeColor(ColorStateList.valueOf(ContextCompat.getColor(this, R.color.white)))
                 shuffleButton.isEnabled = true
-                shuffleButton.setTextColor(ContextCompat.getColor(this, R.color.white))
+                shuffleButton.setStrokeColor(ColorStateList.valueOf(ContextCompat.getColor(this, R.color.white)))
 
                 if (mode == "q") {
                     modeInfo.text = "scheduled mode"
                 }
             } else {
-                autoShuffleButton.setStrokeColor(ColorStateList.valueOf(ContextCompat.getColor(this, R.color.white)))
+                autoShuffleButton.setStrokeColor(ColorStateList.valueOf(ContextCompat.getColor(this, R.color.highlight)))
                 shuffleButton.isEnabled = false
-                shuffleButton.setTextColor(ContextCompat.getColor(this, R.color.button_color))
+                shuffleButton.setStrokeColor(ColorStateList.valueOf(ContextCompat.getColor(this, R.color.button_color)))
 
                 if (mode == "q") {
                     modeInfo.text = "scheduled mode deactivated"
@@ -416,35 +421,57 @@ class TrainingActivity: AppCompatActivity() {
                     setFlashcardText("Start")
                     flashcardButton.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.primary))
                     editCardButton.isEnabled = false
-                    editCardButton.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.button_color))
+                    editCardButton.imageTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.button_color))
                 }
             }
         }
 
         collectionSettingButton.setOnClickListener {
             MyUtils.stopAudio()
-            intent = Intent(this, CollectionSettingsActivity::class.java)
-            val bu = Bundle()
-            bu.putString("collectionPath", collectionPath)
-            bu.putString("collectionId", nameOfCurrentCollection)
 
-            bu.putString("mode", mode)
-            bu.putString("scheduledCollections", scheduledCollectionsString)
-            intent.putExtras(bu)
-            startActivity(intent)
-            finish()
+            if (mode == "r") {
+
+            } else {
+                intent = Intent(this, CollectionSettingsActivity::class.java)
+                val bu = Bundle()
+                bu.putString("collectionPath", collectionPath)
+                bu.putString("collectionId", nameOfCurrentCollection)
+
+                bu.putString("mode", mode)
+                bu.putString("scheduledCollections", scheduledCollectionsString)
+                intent.putExtras(bu)
+                startActivity(intent)
+                finish()
+            }
         }
     }
 
     private fun getRepetitionQueue(collectionsPath: String, frontToBack: Boolean, backToFront: Boolean, repetitionPropertiesPath: String):List<String> {
         val excludedCollectionsString = MyUtils.readLineFromFile(repetitionPropertiesPath, 1)
-        val numberOfCollections = MyUtils.readLineFromFile(repetitionPropertiesPath, 2)!!.toInt()
-        val numberOfCards = MyUtils.readLineFromFile(repetitionPropertiesPath, 3)!!.toInt()
+        val excludeArchivedCollectionsString = MyUtils.readLineFromFile(repetitionPropertiesPath, 2)
+        val numberOfCollections = MyUtils.readLineFromFile(repetitionPropertiesPath, 3)!!.toInt()
+        val numberOfCards = MyUtils.readLineFromFile(repetitionPropertiesPath, 4)!!.toInt()
+
+        var excludeArchivedCollections = false
+        if (excludeArchivedCollectionsString == "true") {
+            excludeArchivedCollections = true
+        }
 
         val excludedCollections = excludedCollectionsString!!.split(" ")
 
         val collectionIds = MyUtils.getFoldersInDirectory(collectionsPath, false).toMutableList()
         collectionIds.removeAll(excludedCollections)
+
+        if (excludeArchivedCollections) {
+            val archivedCollectionIds = mutableListOf<String>()
+            for (collectionId in collectionIds) {
+                val propertiesPath = collectionsPath + "/" + collectionId + "/Properties.txt"
+                if (MyUtils.readLineFromFile(propertiesPath, 5) == "true") {
+                    archivedCollectionIds.add(collectionId)
+                }
+            }
+            collectionIds.removeAll(archivedCollectionIds)
+        }
 
         collectionIds.shuffle()
 
@@ -456,6 +483,8 @@ class TrainingActivity: AppCompatActivity() {
             val usedCardsInCollection = cardsInCollection.take(numberOfCards)
             usedCards.addAll(usedCardsInCollection)
         }
+        MyUtils.writeTextFile(repetitionPropertiesPath, 5, usedCollections.joinToString(" "))
+
         usedCards = shuffleRepetitionQueue(usedCards, repetitionPropertiesPath)
         return usedCards.toList()
     }
@@ -463,7 +492,7 @@ class TrainingActivity: AppCompatActivity() {
     private fun shuffleRepetitionQueue(cards:List<String>, repetitionPropertiesPath:String):MutableList<String> {
         val cardsm = cards.toMutableList()
         cardsm.shuffle()
-        MyUtils.writeTextFile(repetitionPropertiesPath, 4, cardsm.joinToString(" "))
+        MyUtils.writeTextFile(repetitionPropertiesPath, 6, cardsm.joinToString(" "))
         return cardsm
     }
 
@@ -472,11 +501,11 @@ class TrainingActivity: AppCompatActivity() {
         flashcardButton.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.primary))
         if (!editCardButton.isEnabled) {
             editCardButton.isEnabled = true
-            editCardButton.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.highlight))
+            editCardButton.imageTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.white))
         }
         if (!moveCardButton.isEnabled) {
             moveCardButton.isEnabled = true
-            moveCardButton.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.highlight))
+            moveCardButton.imageTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.white))
         }
 
         var line = 1
@@ -557,9 +586,9 @@ class TrainingActivity: AppCompatActivity() {
         getOrderLine(propertiesPath, collectionPath, frontToBackActive, backToFrontActive)
 
         moveCardButton.isEnabled = false
-        moveCardButton.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.button_color))
+        moveCardButton.imageTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.button_color))
         editCardButton.isEnabled = false
-        editCardButton.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.button_color))
+        editCardButton.imageTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.button_color))
         setCardCounter()
 
         flashcardButton.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.primary))
@@ -568,8 +597,11 @@ class TrainingActivity: AppCompatActivity() {
         if (cardOrder.isEmpty()) {
             flashcardButton.isEnabled = false
             flashcardButton.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.button_color))
+            //visual
+            shuffleButton.setStrokeColor(ColorStateList.valueOf(ContextCompat.getColor(this, R.color.button_color)))
+            autoShuffleButton.setStrokeColor(ColorStateList.valueOf(ContextCompat.getColor(this, R.color.button_color)))
             shuffleButton.isEnabled = false
-            shuffleButton.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.button_color))
+            autoShuffleButton.isEnabled = false
         }
 
 

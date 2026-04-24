@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
+import android.widget.CheckBox
 import android.widget.EditText
 import androidx.appcompat.app.AppCompatActivity
 import com.example.flashcards.utils.MyUtils
@@ -17,6 +18,7 @@ class CollectionSettingsActivity : AppCompatActivity() {
     private lateinit var foreignLanguageName: EditText
     private lateinit var collectionName: EditText
     private lateinit var archiveButton: Button
+    private lateinit var useSmallFontSizeCheckbox: CheckBox
 
     private lateinit var nameOfCurrentCollection:String
 
@@ -41,6 +43,7 @@ class CollectionSettingsActivity : AppCompatActivity() {
         foreignLanguageName = findViewById(R.id.enter_foreign_language_name)
         collectionName = findViewById(R.id.enter_collection_name)
         archiveButton = findViewById(R.id.archive_collection)
+        useSmallFontSizeCheckbox = findViewById(R.id.use_small_font_size)
 
         val b = intent.extras
         val v: String? = b?.getString("collectionPath")
@@ -57,6 +60,13 @@ class CollectionSettingsActivity : AppCompatActivity() {
         collectionName.setText(MyUtils.readLineFromFile(collectionPath + "/Properties.txt", 0))
         nativeLanguageName.setText(MyUtils.readLineFromFile(collectionPath + "/Properties.txt", 1))
         foreignLanguageName.setText(MyUtils.readLineFromFile(collectionPath + "/Properties.txt", 2))
+
+        //check for font size
+        useSmallFontSizeCheckbox.isChecked = false
+        val useSmallFontSizeString = MyUtils.readLineFromFile(collectionPath + "/Properties.txt", 6)
+        if (useSmallFontSizeString == "true") {
+            useSmallFontSizeCheckbox.isChecked = true
+        }
 
         if (MyUtils.readLineFromFile(collectionPath + "/Properties.txt", 5) == "true") {
             archiveButton.text = "unarchive collection"
@@ -90,6 +100,7 @@ class CollectionSettingsActivity : AppCompatActivity() {
             MyUtils.writeTextFile(collectionPath + "/Properties.txt", 0, collectionName.text.toString())
             MyUtils.writeTextFile(collectionPath + "/Properties.txt", 1, nativeLanguageName.text.toString())
             MyUtils.writeTextFile(collectionPath + "/Properties.txt", 2, foreignLanguageName.text.toString())
+            MyUtils.writeTextFile(collectionPath + "/Properties.txt", 6, useSmallFontSizeCheckbox.isChecked.toString())
 
             intent = Intent(this, TrainingActivity::class.java)
             val b = Bundle()

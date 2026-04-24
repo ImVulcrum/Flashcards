@@ -145,7 +145,7 @@ object MyUtils {
         return file.readLines().size
     }
 
-    fun sortCollectionStrings(inputList: List<String>): List<String> {
+    fun sortChronological(inputList: List<String>): List<String> {
         val dateRegex = Regex("""\d{2}\.\d{2}\.\d{4}""")
         val dateFormat = SimpleDateFormat("dd.MM.yyyy", Locale.getDefault())
 
@@ -165,6 +165,39 @@ object MyUtils {
             }
         }.map { it.first } // Extract the original strings
     }
+
+    fun sortAscendingly(inputList: List<String>): List<String> {
+        return inputList.sortedWith(naturalComparator)
+    }
+
+    private val naturalComparator = Comparator<String> { a, b ->
+        val regex = Regex("\\d+|\\D+")
+        val aParts = regex.findAll(a).map { it.value }.toList()
+        val bParts = regex.findAll(b).map { it.value }.toList()
+
+        val maxLength = maxOf(aParts.size, bParts.size)
+        for (i in 0 until maxLength) {
+            val aPart = aParts.getOrNull(i)
+            val bPart = bParts.getOrNull(i)
+
+            if (aPart == null) return@Comparator -1
+            if (bPart == null) return@Comparator 1
+
+            val aNum = aPart.toIntOrNull()
+            val bNum = bPart.toIntOrNull()
+
+            val cmp = when {
+                aNum != null && bNum != null -> aNum.compareTo(bNum)
+                else -> aPart.compareTo(bPart)
+            }
+
+            if (cmp != 0) return@Comparator cmp
+        }
+
+        return@Comparator 0
+    }
+
+
 
 
     @SuppressLint("InflateParams")
@@ -423,7 +456,7 @@ object MyUtils {
     fun getCardCountForCollection(path: String, countForRepetitionCollection:Boolean = false): Int {
         val flashcardsString:String
         if (countForRepetitionCollection) {
-            flashcardsString = readLineFromFile(path, 4)!!
+            flashcardsString = readLineFromFile(path, 6)!!
         } else {
             flashcardsString = readLineFromFile("$path/Flashcards.txt", 0)!!
         }
@@ -438,7 +471,7 @@ object MyUtils {
     fun getCardFolderNames(path:String, getForRepetitionCollection:Boolean = false): List<String> {
         val cardString:String
         if (getForRepetitionCollection) {
-            cardString = readLineFromFile(path, 4)!!
+            cardString = readLineFromFile(path, 6)!!
         }   else {
             cardString = readLineFromFile(path + "/Flashcards.txt", 0)!!
         }

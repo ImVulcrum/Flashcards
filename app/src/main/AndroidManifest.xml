@@ -17,6 +17,10 @@
         android:theme="@style/Base.Theme.Flashcards"
         tools:targetApi="31">
         <activity
+            android:name=".RepetitionSettingsActivity"
+            android:exported="false"
+            android:label="@string/title_activity_repetition_settings" />
+        <activity
             android:name=".AddCardActivity"
             android:exported="false" />
         <activity

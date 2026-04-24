@@ -30,9 +30,9 @@
                 android:layout_marginStart="8dp"
                 android:clickable="true"
                 android:src="@drawable/back"
-                app:tint="@color/white"
-                app:backgroundTint="@color/highlight"
+                app:backgroundTint="@color/transparent"
                 app:fabCustomSize="40dp"
+                app:tint="@color/white"
                 tools:ignore="ContentDescription,SpeakableTextPresentCheck" />
 
             <View
@@ -87,8 +87,9 @@
 
         <View
             android:id="@+id/divider2"
-            android:layout_width="match_parent"
+            android:layout_width="340dp"
             android:layout_height="1dp"
+            android:layout_gravity="center_horizontal"
             android:layout_marginTop="5dp"
             android:background="?android:attr/listDivider"
             android:backgroundTint="#FFFFFF"
@@ -103,7 +104,7 @@
             android:ems="12"
             android:hint="enter default native language"
             android:inputType="text"
-            android:maxLength="10"
+            android:maxLength="11"
             android:singleLine="true"
             android:textColor="@color/white"
             tools:ignore="TouchTargetSizeCheck" />
@@ -120,8 +121,9 @@
 
         <View
             android:id="@+id/divider3"
-            android:layout_width="match_parent"
+            android:layout_width="340dp"
             android:layout_height="1dp"
+            android:layout_gravity="center_horizontal"
             android:layout_marginTop="5dp"
             android:background="?android:attr/listDivider"
             android:backgroundTint="#FFFFFF"
@@ -136,18 +138,80 @@
             android:ems="12"
             android:hint="enter default foreign language"
             android:inputType="text"
-            android:maxLength="10"
+            android:maxLength="11"
             android:singleLine="true"
             android:textColor="@color/white"
             tools:ignore="TouchTargetSizeCheck" />
 
-        <CheckBox
-            android:id="@+id/order_collections_asc"
+        <View
+            android:id="@+id/divider4"
+            android:layout_width="340dp"
+            android:layout_height="1dp"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="40dp"
+            android:background="?android:attr/listDivider"
+            android:backgroundTint="#FFFFFF"
+            android:backgroundTintMode="add" />
+
+        <TextView
+            android:id="@+id/textViewOrder"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:gravity="center_horizontal"
+            android:text="specify collection ordering"
+            android:textAppearance="@style/SpaceGroteskVerySmall"
+            android:textColor="@color/white" />
+
+        <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
-            android:layout_marginTop="40dp"
-            android:text="order collections ascendingly"
+            android:layout_marginTop="4dp"
+            android:gravity="center"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/order_ascendingly"
+                android:layout_width="150dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="ascendingly"
+                android:backgroundTint="@color/transparent"
+                app:cornerRadius="12dp"
+                app:strokeColor="@color/white"
+                app:strokeWidth="1dp" />
+
+            <Button
+                android:id="@+id/order_chronological"
+                android:layout_width="150dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:layout_weight="1"
+                android:text="chronological"
+                android:backgroundTint="@color/transparent"
+                app:cornerRadius="12dp"
+                app:strokeColor="@color/white"
+                app:strokeWidth="1dp" />
+        </LinearLayout>
+
+        <View
+            android:id="@+id/divider5"
+            android:layout_width="340dp"
+            android:layout_height="1dp"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="10dp"
+            android:background="?android:attr/listDivider"
+            android:backgroundTint="#FFFFFF"
+            android:backgroundTintMode="add" />
+
+        <CheckBox
+            android:id="@+id/use_small_font_size"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="35dp"
+            android:text="use smaller flashcard font size (default)   "
             android:textAppearance="@style/SpaceGroteskVerySmall"
             android:textColor="@color/white"
             app:buttonTint="@color/strong_highlight" />
@@ -157,8 +221,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
-            android:layout_marginTop="35dp"
-            android:text="Use date as collection index   "
+            android:layout_marginTop="5dp"
+            android:text="use date as collection index   "
             android:textAppearance="@style/SpaceGroteskVerySmall"
             android:textColor="@color/white"
             app:buttonTint="@color/strong_highlight" />
@@ -167,7 +231,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
-            android:layout_marginTop="0dp"
+            android:layout_marginTop="-10dp"
             android:orientation="horizontal">
 
             <TextView
@@ -204,7 +268,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
-            android:layout_marginTop="40dp"
+            android:layout_marginTop="10dp"
             android:orientation="horizontal">
 
             <TextView
@@ -243,7 +307,7 @@
             android:layout_width="150dp"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
-            android:layout_marginTop="60dp"
+            android:layout_marginTop="50dp"
             android:backgroundTint="@color/primary"
             android:text="delete tab"
             app:cornerRadius="10dp" />

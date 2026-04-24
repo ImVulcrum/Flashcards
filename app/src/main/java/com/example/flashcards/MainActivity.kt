@@ -136,9 +136,11 @@ class MainActivity : AppCompatActivity() {
     private fun init(){
         //scan for collections
         if (MyUtils.readLineFromFile(tabPath + "/Settings.txt",6).toBoolean() == false) {
-            sortedCollections = MyUtils.sortCollectionStrings(MyUtils.getFoldersInDirectory(collectionPath, false))
+            sortedCollections = MyUtils.sortChronological(MyUtils.getFoldersInDirectory(collectionPath, false))
+            Log.e("sorted", sortedCollections.toString())
         }   else {
-            sortedCollections = MyUtils.getFoldersInDirectory(collectionPath, true)
+            sortedCollections = MyUtils.sortAscendingly(MyUtils.getFoldersInDirectory(collectionPath, false))
+            Log.e("unsorted", sortedCollections.toString())
         }
 
         listOfCollectionsInCorrectFormat.clear()
@@ -162,7 +164,7 @@ class MainActivity : AppCompatActivity() {
         for (collectionId in sortedCollections) {
             val propertiesPath = collectionPath + "/" + collectionId + "/Properties.txt"
             if (MyUtils.readLineFromFile(propertiesPath, 5) == addArchivedCollections.toString()) {
-                if (MyUtils.readLineFromFile(propertiesPath, 3) == "" || MyUtils.readLineFromFile(propertiesPath, 3) == "-") {
+                if (MyUtils.readLineFromFile(propertiesPath, 3) == "" || MyUtils.readLineFromFile(propertiesPath, 3) == "-") { //check if collection is empty
                     listOfCollectionsInCorrectFormat.add(MyDisplayingUtils.Collection(collectionId, MyUtils.readLineFromFile(collectionPath + "/$collectionId/Properties.txt", 0)!!, false, status = 1, isArchived = addArchivedCollections))
                 }   else {
                     listOfCollectionsInCorrectFormat.add(MyDisplayingUtils.Collection(collectionId, MyUtils.readLineFromFile(collectionPath + "/$collectionId/Properties.txt", 0)!!, false, status = 0, isArchived = addArchivedCollections))
@@ -170,7 +172,6 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
-
 
     private fun removeArchivedFromCollectionList() {
         val archivedCollections = mutableListOf<MyDisplayingUtils.Collection>()
@@ -348,6 +349,8 @@ class MainActivity : AppCompatActivity() {
             MyUtils.writeTextFile(folderPath + "/" + propertiesFileName, 2, foreignLanguage)
             MyUtils.writeTextFile(folderPath + "/" + propertiesFileName, 3, "-")
             MyUtils.writeTextFile(folderPath + "/" + propertiesFileName, 5, "false")
+            MyUtils.writeTextFile(folderPath + "/" + propertiesFileName, 6, MyUtils.readLineFromFile(tabSettingsPath, 7)!!)
+
 
             listOfCollectionsInCorrectFormat.add(0, MyDisplayingUtils.Collection(indexOfCollection, indexOfCollection, false, 1,false))
             updateCollectionView()

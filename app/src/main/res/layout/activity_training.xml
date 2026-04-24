@@ -31,7 +31,7 @@
                 android:layout_marginStart="8dp"
                 android:clickable="true"
                 android:src="@drawable/back"
-                app:backgroundTint="@color/highlight"
+                app:backgroundTint="@color/transparent"
                 app:fabCustomSize="40dp"
                 app:tint="@color/white"
                 tools:ignore="ContentDescription,SpeakableTextPresentCheck" />
@@ -86,7 +86,7 @@
                 android:layout_marginStart="10dp"
                 android:clickable="true"
                 android:src="@drawable/list"
-                app:backgroundTint="@color/highlight"
+                app:backgroundTint="@color/transparent"
                 app:elevation="0dp"
                 app:maxImageSize="45dp"
                 app:shapeAppearance="@style/Widget.Material3.CircularProgressIndicator.Small"
@@ -106,7 +106,7 @@
                 android:layout_marginEnd="10dp"
                 android:clickable="true"
                 android:src="@drawable/settings"
-                app:backgroundTint="@color/highlight"
+                app:backgroundTint="@color/transparent"
                 app:elevation="0dp"
                 app:maxImageSize="55dp"
                 app:shapeAppearance="@style/Widget.Material3.CircularProgressIndicator.Small"
@@ -139,7 +139,7 @@
             android:layout_height="@dimen/flashcard_height"
             android:layout_marginTop="4dp"
             android:text="Start"
-            android:textAppearance="@style/SpaceGroteskMain"
+            android:textAppearance="@style/SpaceGroteskSmall"
             android:textColor="@color/white"
             app:backgroundTint="@color/primary"
             app:cornerRadius="10dp"
@@ -159,7 +159,7 @@
                 android:layout_height="wrap_content"
                 android:clickable="true"
                 android:src="@drawable/unmuted"
-                app:backgroundTint="@color/highlight"
+                app:backgroundTint="@color/transparent"
                 app:elevation="0dp"
                 app:maxImageSize="40dp"
                 app:shapeAppearance="@style/Widget.Material3.CircularProgressIndicator.Small"
@@ -173,7 +173,7 @@
                 android:layout_marginStart="40dp"
                 android:clickable="true"
                 android:src="@drawable/move"
-                app:backgroundTint="@color/highlight"
+                app:backgroundTint="@color/transparent"
                 app:elevation="0dp"
                 app:maxImageSize="45dp"
                 app:shapeAppearance="@style/Widget.Material3.CircularProgressIndicator.Small"
@@ -187,7 +187,7 @@
                 android:layout_marginStart="40dp"
                 android:clickable="true"
                 android:src="@drawable/shuffle"
-                app:backgroundTint="@color/highlight"
+                app:backgroundTint="@color/transparent"
                 app:elevation="0dp"
                 app:maxImageSize="45dp"
                 app:shapeAppearance="@style/Widget.Material3.CircularProgressIndicator.Small"
@@ -201,7 +201,7 @@
                 android:layout_marginStart="40dp"
                 android:clickable="true"
                 android:src="@drawable/edit"
-                app:backgroundTint="@color/highlight"
+                app:backgroundTint="@color/transparent"
                 app:elevation="0dp"
                 app:maxImageSize="35dp"
                 app:shapeAppearance="@style/Widget.Material3.CircularProgressIndicator.Small"
@@ -215,7 +215,7 @@
                 android:layout_marginStart="40dp"
                 android:clickable="true"
                 android:src="@drawable/plus"
-                app:backgroundTint="@color/highlight"
+                app:backgroundTint="@color/transparent"
                 app:elevation="0dp"
                 app:maxImageSize="40dp"
                 app:shapeAppearance="@style/Widget.Material3.CircularProgressIndicator.Small"
@@ -224,10 +224,19 @@
 
         </LinearLayout>
 
+        <View
+            android:id="@+id/divider3"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginTop="10dp"
+            android:background="?android:attr/listDivider"
+            android:backgroundTint="@color/white"
+            android:backgroundTintMode="add" />
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="30dp"
+            android:layout_marginTop="10dp"
             android:gravity="center"
             android:orientation="horizontal">
 
@@ -240,7 +249,8 @@
                 android:backgroundTint="@color/transparent"
                 android:minWidth="150dp"
                 android:text="shuffle"
-                app:cornerRadius="0dp"
+                app:cornerRadius="12dp"
+                app:strokeColor="@color/white"
                 app:strokeWidth="1dp" />
 
             <Button
@@ -253,19 +263,10 @@
                 android:backgroundTint="@color/transparent"
                 android:minWidth="150dp"
                 android:text="auto shuffle"
-                app:cornerRadius="0dp"
+                app:cornerRadius="12dp"
                 app:strokeColor="#FFFFFF"
                 app:strokeWidth="1dp" />
         </LinearLayout>
-
-        <View
-            android:id="@+id/divider3"
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:layout_marginTop="4dp"
-            android:background="?android:attr/listDivider"
-            android:backgroundTint="@color/white"
-            android:backgroundTintMode="add" />
 
         <TextView
             android:id="@+id/textView2"
@@ -281,7 +282,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
-            android:gravity="center_horizontal"
+            android:gravity="center"
             android:orientation="horizontal">
 
             <Button
@@ -291,7 +292,7 @@
                 android:layout_weight="1"
                 android:text="German - Spanish"
                 app:backgroundTint="@color/primary"
-                app:cornerRadius="0dp" />
+                app:cornerRadius="12dp" />
 
             <Button
                 android:id="@+id/back_to_front"
@@ -301,7 +302,7 @@
                 android:layout_weight="1"
                 android:text="Spanish - German"
                 app:backgroundTint="@color/primary"
-                app:cornerRadius="0dp" />
+                app:cornerRadius="12dp" />
         </LinearLayout>
 
     </LinearLayout>

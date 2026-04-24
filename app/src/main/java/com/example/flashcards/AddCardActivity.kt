@@ -58,6 +58,9 @@ class AddCardActivity<IOException> : AppCompatActivity() {
     private var recordFile: File? = null
     private var isRecording = false
 
+    private val maxLinesSmallFont = 8
+    private val maxLinesBigFont = 12
+
     var pathOfTheCurrentFlashcard:String = ""
 
     @Deprecated("Deprecated in Java")
@@ -121,19 +124,27 @@ class AddCardActivity<IOException> : AppCompatActivity() {
         val tabPath = getExternalFilesDir(null).toString() + "/" + currentTabIndex
         val flashcardPath = tabPath + "/Cards"
 
-        //set the language labels
-        frontSideText.text = MyUtils.readLineFromFile(propertiesPath, 1)
-        backSideText.text = MyUtils.readLineFromFile(propertiesPath, 2)
+        var maxLines = maxLinesBigFont
+        if (MyUtils.readLineFromFile(propertiesPath, 6) == "" || MyUtils.readLineFromFile(propertiesPath, 6) == "false") {
+            maxLines = maxLinesSmallFont
+        }
 
         if (mode != "r") {
+            //set the language labels
+            frontSideText.text = MyUtils.readLineFromFile(propertiesPath, 1)
+            backSideText.text = MyUtils.readLineFromFile(propertiesPath, 2)
+
             cardCount.text = "${MyUtils.getCardCountForCollection(collectionPath)} Card(s)"
         } else {
+            frontSideText.text = "Front"
+            backSideText.text = "Back"
+
             cardCount.text = "${MyUtils.getCardCountForCollection(tabPath + "/Repetition_Properties.txt", true)} Card(s)"
         }
 
         //logic for textboxes to allow multiline text but dont go beyond 8 lines
-        setupMultilineTextbox(frontsideTextbox, 8)
-        setupMultilineTextbox(backsideTextbox, 8)
+        setupMultilineTextbox(frontsideTextbox, maxLines)
+        setupMultilineTextbox(backsideTextbox, maxLines)
 
         //prepare the page for adding a new card
         if (calledFromAddCard) {
@@ -159,7 +170,11 @@ class AddCardActivity<IOException> : AppCompatActivity() {
             cardName = cc ?:""
 
             //set card id text
-            cardId.text = nameOfCurrentCollection + " (" + '"' + MyUtils.readLineFromFile(collectionPath + "/Properties.txt", 0) +'"'+ ")" + " - Card_#" + cardName.substring(5)
+            if (mode != "r") {
+                cardId.text = nameOfCurrentCollection + " (" + '"' + MyUtils.readLineFromFile(collectionPath + "/Properties.txt", 0) +'"'+ ")" + " - Card_#" + cardName.substring(5)
+            }   else {
+                cardId.text = nameOfCurrentCollection + " - Card_#" + cardName.substring(5)
+            }
 
             pathOfTheCurrentFlashcard = "$flashcardPath/$cardName"
 

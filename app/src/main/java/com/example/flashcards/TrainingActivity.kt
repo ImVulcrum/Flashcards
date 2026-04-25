@@ -133,7 +133,7 @@ class TrainingActivity: AppCompatActivity() {
 
             repetitionPropertiesPath = tabPath + "/Repetition_Properties.txt"
             
-            if (MyUtils.readLineFromFile(repetitionPropertiesPath, 0) != MyUtils.getCurrentDate()) {
+            if (MyUtils.readLineFromFile(repetitionPropertiesPath, 7) == "true" && MyUtils.readLineFromFile(repetitionPropertiesPath, 0) != MyUtils.getCurrentDate()) {
                 MyUtils.writeTextFile(repetitionPropertiesPath, 0, MyUtils.getCurrentDate())
                 cardOrder = getRepetitionQueue(collectionsPath, frontToBackActive, backToFrontActive, repetitionPropertiesPath)
             }   else {
@@ -144,7 +144,7 @@ class TrainingActivity: AppCompatActivity() {
             }
 
             collectionTitle.text = "Repetition"
-            collectionIndex.text = "Repetition Collection"
+            collectionIndex.text = "Tab: " + MyUtils.readLineFromFile(tabPath + "/Settings.txt", 0)
             modeInfo.text = "repetition mode"
             setCardCounter()
             nameOfCurrentCollection = "Repetition"
@@ -430,7 +430,14 @@ class TrainingActivity: AppCompatActivity() {
             MyUtils.stopAudio()
 
             if (mode == "r") {
+                intent = Intent(this, RepetitionSettingsActivity::class.java)
+                val bu = Bundle()
+                bu.putString("tabPath", tabPath)
+                bu.putString("repetitionSettingsPath", repetitionPropertiesPath)
 
+                intent.putExtras(bu)
+                startActivity(intent)
+                finish()
             } else {
                 intent = Intent(this, CollectionSettingsActivity::class.java)
                 val bu = Bundle()
@@ -603,7 +610,6 @@ class TrainingActivity: AppCompatActivity() {
             shuffleButton.isEnabled = false
             autoShuffleButton.isEnabled = false
         }
-
 
         collectionTitle.text = MyUtils.readLineFromFile(propertiesPath, 0)
 

@@ -24,7 +24,7 @@
             android:orientation="horizontal">
 
             <com.google.android.material.floatingactionbutton.FloatingActionButton
-                android:id="@+id/settings_back_button"
+                android:id="@+id/repetition_back_button"
                 android:layout_width="40dp"
                 android:layout_height="40dp"
                 android:layout_gravity="center|end"
@@ -46,8 +46,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="start"
-                android:layout_marginEnd="20dp"
-                android:text="Collection Settings"
+                android:layout_marginEnd="60dp"
+                android:text="Repetition Settings"
                 android:textAppearance="@style/SpaceGroteskBig"
                 android:textColor="#FFFFFF" />
 
@@ -63,122 +63,104 @@
             android:backgroundTintMode="add" />
 
         <TextView
-            android:id="@+id/foreign_language"
+            android:id="@+id/tab_name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
+            android:text="Tab #1" />
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="50dp"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/collections_considered_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="collections considered"
+                android:textAppearance="@style/SpaceGroteskSmall"
+                android:textColor="@color/white" />
+
+            <EditText
+                android:id="@+id/collections_considered"
+                android:layout_width="40dp"
+                android:layout_height="wrap_content"
+                android:ems="10"
+                android:gravity="center_horizontal"
+                android:inputType="number"
+                android:text="0"
+                android:textColor="@color/white" />
+        </LinearLayout>
+
+        <View
+            android:id="@+id/collections_considered_underscore"
+            android:layout_width="270dp"
+            android:layout_height="1dp"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="-9dp"
+            android:background="?android:attr/listDivider"
+            android:backgroundTint="@color/white"
+            android:backgroundTintMode="add" />
+
+        <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:layout_marginTop="20dp"
-            android:text="Collection Name"
-            android:textAppearance="@style/SpaceGroteskSmall"
-            android:textColor="@color/white" />
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/flashcards_considered_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="  flashcards considered"
+                android:textAppearance="@style/SpaceGroteskSmall"
+                android:textColor="@color/white" />
+
+            <EditText
+                android:id="@+id/flashcards_considered"
+                android:layout_width="40dp"
+                android:layout_height="wrap_content"
+                android:ems="10"
+                android:gravity="center_horizontal"
+                android:inputType="number"
+                android:text="0"
+                android:textColor="@color/white" />
+        </LinearLayout>
 
         <View
-            android:id="@+id/divider1"
-            android:layout_width="match_parent"
+            android:id="@+id/flashcards_considered_underscore"
+            android:layout_width="270dp"
             android:layout_height="1dp"
-            android:layout_marginTop="5dp"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="-9dp"
             android:background="?android:attr/listDivider"
-            android:backgroundTint="#FFFFFF"
+            android:backgroundTint="@color/white"
             android:backgroundTintMode="add" />
-
-        <EditText
-            android:id="@+id/enter_collection_name"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginTop="5dp"
-            android:ems="12"
-            android:hint="enter collection name"
-            android:inputType="text"
-            android:maxLength="15"
-            android:singleLine="true"
-            android:textColor="@color/white"
-            tools:ignore="TouchTargetSizeCheck" />
-
-        <TextView
-            android:id="@+id/textView2"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginTop="30dp"
-            android:text="Front Side Name"
-            android:textAppearance="@style/SpaceGroteskSmall"
-            android:textColor="@color/white" />
-
-        <View
-            android:id="@+id/divider2"
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:layout_marginTop="5dp"
-            android:background="?android:attr/listDivider"
-            android:backgroundTint="#FFFFFF"
-            android:backgroundTintMode="add" />
-
-        <EditText
-            android:id="@+id/enter_native_language_name"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginTop="5dp"
-            android:ems="12"
-            android:hint="enter front side name"
-            android:inputType="text"
-            android:maxLength="11"
-            android:singleLine="true"
-            android:textColor="@color/white"
-            tools:ignore="TouchTargetSizeCheck" />
-
-        <TextView
-            android:id="@+id/textView3"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginTop="30dp"
-            android:text="Back Side Name"
-            android:textAppearance="@style/SpaceGroteskSmall"
-            android:textColor="@color/white" />
-
-        <View
-            android:id="@+id/divider3"
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:layout_marginTop="5dp"
-            android:background="?android:attr/listDivider"
-            android:backgroundTint="#FFFFFF"
-            android:backgroundTintMode="add" />
-
-        <EditText
-            android:id="@+id/enter_foreign_language_name"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginTop="5dp"
-            android:ems="12"
-            android:hint="enter back side name"
-            android:inputType="text"
-            android:maxLength="11"
-            android:singleLine="true"
-            android:textColor="@color/white"
-            tools:ignore="TouchTargetSizeCheck" />
-
-        <Button
-            android:id="@+id/archive_collection"
-            android:layout_width="200dp"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginTop="60dp"
-            android:backgroundTint="@color/primary"
-            android:text="archive collection"
-            app:cornerRadius="10dp" />
-
 
         <CheckBox
-            android:id="@+id/use_small_font_size"
+            android:id="@+id/exclude_archived_collections"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:layout_marginTop="35dp"
-            android:text="use smaller flashcard font size   "
+            android:text="exclude archived collections   "
+            android:textAppearance="@style/SpaceGroteskVerySmall"
+            android:textColor="@color/white"
+            app:buttonTint="@color/strong_highlight" />
+
+        <CheckBox
+            android:id="@+id/auto_update"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="0dp"
+            android:text="auto update every day               "
             android:textAppearance="@style/SpaceGroteskVerySmall"
             android:textColor="@color/white"
             app:buttonTint="@color/strong_highlight" />

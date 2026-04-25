@@ -24,7 +24,7 @@ class RepetitionSettingsActivity: AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_settings)
+        setContentView(R.layout.activity_repetition_settings)
         }
 
     private fun saveSettings() {
